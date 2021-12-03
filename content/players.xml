@@ -1,0 +1,8 @@
+<players root="gfx/characters/costumes/" 
+         portraitroot="gfx/ui/stage/" 
+         nameimageroot="gfx/ui/boss/">
+	<player name="Eevee" skin="character_eevee.png" hp="4"
+		nameimage="PlayerName_Eevee.png" 
+		portrait="PlayerPortrait_Eevee.png" skinColor="-1" costumeSuffix="eevee"
+		birthright="Eevee learned Tail Whip!" />
+</players>

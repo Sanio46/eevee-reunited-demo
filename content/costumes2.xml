@@ -1,0 +1,16 @@
+<costumes anm2root="gfx/characters/">
+	<costume anm2path="costume_eevee.anm2" hasSkinAlt="true" type="none" />
+	<costume anm2path="costume_eevee_brimstone.anm2" priority="23" skinColor="1" overwriteColor="true" type="none" />
+	<costume anm2path="costume_eevee_brimstone2.anm2" priority="24" skinColor="1" overwriteColor="true" type="none" />
+	<costume anm2path="costume_eevee_whoreofbabylon.anm2" priority="1" skinColor="1" overwriteColor="true" type="none" />
+	<costume anm2path="costume_eevee_azazel.anm2" priority="23" skinColor="1" overwriteColor="true" type="none" />
+	<costume anm2path="costume_eevee_libra.anm2" hasSkinAlt="true" type="none" />
+	<costume anm2path="costume_eevee_balloftar.anm2" skinColor="1" overwriteColor="true" type="none"/>
+	<costume anm2path="costume_eevee_delirious.anm2" skinColor="0" overwriteColor="true" type="none" />
+	<costume anm2path="costume_eevee_berserk.anm2" priority="2" hasSkinAlt="true" type="none" />
+	<costume anm2path="costume_eevee_uranus.anm2" priority="1" skinColor="0" overwriteColor="true" type="none" />
+	<costume anm2path="costume_eevee_terra.anm2" priority="1" skinColor="5" overwriteColor="true" type="none" />
+	<costume anm2path="costume_eevee_toothandnail.anm2" priority="51" skinColor="5" overwriteColor="true" type="none" />
+	<costume anm2path="costume_eevee_lostcurse.anm2" priority="99" skinColor="0" overwriteColor="true" type="none" />
+	<costume anm2path="costume_eevee_pog.anm2" hasSkinAlt="true" priority="100" type="none"/>
+</costumes>

@@ -1,0 +1,24 @@
+<sounds root="sfx/">
+	<sound name="Eevee Hurt">
+		<sample weight="1" path="player/eevee_hurt_1.wav" />
+		<sample weight="1" path="player/eevee_hurt_2.wav" />
+		<sample weight="1" path="player/eevee_hurt_3.wav" />
+	</sound>
+	<sound name="Eevee Death">
+		<sample weight="1" path="player/eevee_death.wav" />
+	</sound>
+	<sound name="Eevee Roar">
+		<sample weight="1" path="player/eevee_roar.wav" />
+	</sound>
+	<sound name="Eevee Scream Low">
+		<sample weight="1" path="player/eevee_scream_low_1.wav" />
+		<sample weight="1" path="player/eevee_scream_low_2.wav" />
+	</sound>
+	<sound name="Eevee Scream Med">
+		<sample weight="1" path="player/eevee_scream_med.wav" />
+	</sound>
+	<sound name="Eevee Scream High">
+		<sample weight="1" path="player/eevee_scream_high_1.wav" />
+		<sample weight="1" path="player/eevee_scream_high_2.wav" />
+	</sound>
+</sounds>

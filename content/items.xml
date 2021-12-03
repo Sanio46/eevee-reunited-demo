@@ -1,0 +1,3 @@
+<items gfxroot="gfx/items/" version="1">
+	<active cache="" name="Tail Whip" description="Aggressive tail wagging" gfx="birthright_tailwhip.png" chargetype="timed" maxcharges="240" hidden="true" />
+</items>

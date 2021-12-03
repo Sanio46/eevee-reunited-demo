@@ -1,0 +1,14 @@
+<entities anm2root="gfx/" version="5">
+	<entity anm2path="effect_custom_brimstoneswirl.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="0" collisionRadius="0" friction="1"
+		id="1000" name="Custom Brimstone Swirl" numGridCollisionPoints="0" shadowSize="0.1" stageHP="0" variant="6631">
+    </entity>
+	<entity anm2path="effect_custom_techdot.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="0" collisionRadius="0" friction="1" id="1000" name="Custom Tech Dot" numGridCollisionPoints="0" shadowSize="6" stageHP="0" variant="6632">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+	<entity anm2path="effect_eevee_ghost.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="0" collisionRadius="0" friction="0" id="1000" name="Eevee Ghost" numGridCollisionPoints="0" shadowSize="0" stageHP="0" variant="1333">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+	<entity anm2path="effect_tailwhip.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="0" collisionRadius="0" friction="0" 
+		id="1000" name="Tail Whip" numGridCollisionPoints="0" shadowSize="0" stageHP="0" variant="1532">
+	</entity>
+</entities>
