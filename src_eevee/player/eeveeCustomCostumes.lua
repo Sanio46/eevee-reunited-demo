@@ -905,7 +905,7 @@ function costumeProtector:ResetCostumeOnItem(itemID, rng, player, useFlags, acti
 	local data = player:GetData()
 	local playerUsedItem = activeItemCostumes[itemID] == true
 
-	if data.CCP.HasCostumeInitialized and playerUsedItem then
+	if data.CCP and data.CCP.HasCostumeInitialized and playerUsedItem then
 		if playerItemCostumeWhitelist[playerType]
 		and (playerItemCostumeWhitelist[playerType][itemID] == false
 		or itemID == CollectibleType.COLLECTIBLE_LEMEGETON)

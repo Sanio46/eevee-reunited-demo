@@ -104,6 +104,7 @@ local TearFlagsToDelay = {
 	TearFlags.TEAR_SPIRAL, --Ring Worm
 	TearFlags.TEAR_BIG_SPIRAL, --Ouroborus Worm
 	TearFlags.TEAR_HYDROBOUNCE, --Flat Stone
+	TearFlags.TEAR_BOUNCE, --Rubber Cement
 }
 
 function swiftSynergies:DelayTearFlags(weapon, player)
