@@ -6,9 +6,9 @@ if not REPENTANCE then
 	return
 end
 
-EEVEEMOD = require("src_eevee.eeveeEnums")
-EEVEEMOD.API = require("src_eevee.eeveeApi")
---Current Version = 1.4.1
+EEVEEMOD = include("src_eevee.eeveeEnums")
+EEVEEMOD.API = include("src_eevee.eeveeApi")
+--Current Version = 1.5
 
 local EeveeLuas = {
 	{"attacks", {
@@ -124,7 +124,7 @@ for i, luas in ipairs(EeveeLuas) do
 	local basepath = luas[1]
 	for j, luapath in ipairs(luas[2]) do
 		local fullPath = "src_eevee."..basepath.."."..luapath
-		EEVEEMOD.Src[basepath][luapath] = os and require(fullPath) or include(fullPath)
+		EEVEEMOD.Src[basepath][luapath] = include(fullPath)
 	end
 end
 
