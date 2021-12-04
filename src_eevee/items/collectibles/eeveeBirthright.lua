@@ -13,10 +13,16 @@ end
 function eeveeBirthright:OnUse(itemID, itemRNG, player, flags, slot, vardata)
 	if itemID == EEVEEMOD.CollectibleType.TAIL_WHIP then
 		local tailWhip = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.TAIL_WHIP, 0, player.Position, Vector.Zero, player)
+		local sprite = tailWhip:GetSprite()
+		local tailWhipPath = "gfx/effects/tail_whip"..EEVEEMOD.API.SkinColor(player, true)..".png"
 		tailWhip:GetData().HitBoxRotation = 0
 		tailWhip.Parent = player
 		tailWhip:ToEffect():FollowParent(player)
-		tailWhip:GetSprite().Rotation = 180
+		for i = 0, 2 do
+			sprite:ReplaceSpritesheet(i, tailWhipPath)
+		end
+		sprite.Rotation = 180
+		sprite:LoadGraphics()
 		EEVEEMOD.sfx:Play(SoundEffect.SOUND_SWORD_SPIN, 1, 0, false, 1)
 	end
 end

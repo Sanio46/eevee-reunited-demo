@@ -17,13 +17,13 @@ function EEVEEMOD.API.PlayerCanControl(player)
 	end		
 end
 
-function EEVEEMOD.API.DetectNearestEnemy(entity, range)
+function EEVEEMOD.API.DetectNearestEnemy(ent, range)
 	local closestEnemy = nil --placeholder variable we'll put the closest enemy in
    local closestDistance = nil --placeholder variable we'll put the distance in
-	for _, npc in pairs (Isaac.FindInRadius(entity.Position, range, EntityPartition.ENEMY)) do --if there are enemies, dumbass.
+	for _, npc in pairs (Isaac.FindInRadius(ent.Position, range, EntityPartition.ENEMY)) do --if there are enemies, dumbass.
 		if npc:IsActiveEnemy() and npc:IsVulnerableEnemy() then --if its an active enemy
 	
-			local npcDistance = npc.Position:Distance(entity.Position) --calculate the distance of this npc from the starting position of the entity
+			local npcDistance = npc.Position:Distance(ent.Position) --calculate the distance of this npc from the starting position of the ent
 			
 			if not closestEnemy or npcDistance < closestDistance then --if we never stored any variables OR if this npc is closer than the closest one we stored last
 				closestEnemy = npc --store this npc in the variable
@@ -128,9 +128,9 @@ local enemySpawnCounterTrack = 0
 local enemySpawnCounterMax = 0
 local enemySpawnCounterMaxSet = false
 
-function EEVEEMOD.API.RoomClearTriggered()
-	local player = Isaac.GetPlayer()
+function EEVEEMOD.API.RoomClearTriggered(player)
 	local room = EEVEEMOD.game:GetRoom()
+	local triggerRoomClear = false
 	
 	if not EEVEEMOD.game:IsGreedMode() then
 		local roomType = room:GetType()
@@ -143,14 +143,10 @@ function EEVEEMOD.API.RoomClearTriggered()
 					enemySpawnCounter = 0
 				end
 			end
-
-			local isNewWave = false
 			
-			for _, entity in pairs(Isaac.FindInRadius(player.Position, 1500, EntityPartition.ENEMY)) do
-
-				if entity:IsActiveEnemy(false) and entity:IsVulnerableEnemy() then
-				
-					if entity.FrameCount == 2 then
+			for _, ent in pairs(Isaac.FindInRadius(player.Position, 1500, EntityPartition.ENEMY)) do
+				if ent:IsActiveEnemy(false) and ent:IsVulnerableEnemy() then
+					if ent.FrameCount == 2 then
 						enemySpawnCounter = enemySpawnCounter + 1
 						enemySpawnCounterClearCountdown = 10
 					end
@@ -169,19 +165,12 @@ function EEVEEMOD.API.RoomClearTriggered()
 						if enemySpawnCounter == enemySpawnCounterMax and enemySpawnCounterMaxSet then
 							enemySpawnCounterMax = enemySpawnCounterMax + 1
 							enemySpawnCounterClearCountdown = 10
-							isNewWave = true
+							triggerRoomClear = true
 						end
 					end
-					
 				end
-				
 			end
-			
-			if isNewWave then
-				return true
-			else
-				return false
-			end
+
 		--BOSS RUSH
 		elseif roomType == RoomType.ROOM_BOSSRUSH and room:IsAmbushActive() then
 			if enemySpawnCounterClearCountdown > 0 then
@@ -190,15 +179,11 @@ function EEVEEMOD.API.RoomClearTriggered()
 					enemySpawnCounter = 0
 				end
 			end
-
-			local isNewWave = false
 			
-			for _, entity in pairs(Isaac.FindInRadius(player.Position, 1500, EntityPartition.ENEMY)) do
-
-				if not entity:IsActiveEnemy() and entity:IsVulnerableEnemy() and entity:IsBoss() then --do stuff to bosses
-				
-					if entity.FrameCount == 2 then
-						local npc = entity:ToNPC()
+			for _, ent in pairs(Isaac.FindInRadius(player.Position, 1500, EntityPartition.ENEMY)) do
+				if ent:IsBoss() then
+					if ent.FrameCount == 2 then
+						local npc = ent:ToNPC()
 						if not npc.ParentNPC then --so we dont do stuff for each segment of segmented bosses
 							enemySpawnCounter = enemySpawnCounter + 1
 							enemySpawnCounterClearCountdown = 10
@@ -208,37 +193,27 @@ function EEVEEMOD.API.RoomClearTriggered()
 					if enemySpawnCounter == 2 then
 						enemySpawnCounter = enemySpawnCounter + 1
 						enemySpawnCounterClearCountdown = 10
-						isNewWave = true
+						triggerRoomClear = true
 					end
-					
 				end
-				
 			end
-			
-			if isNewWave then
-				return true
-			else
-				return false
-			end
+
 		else --NORMAL ROOMS
 			if room:IsClear() and wasRoomCleared == false then
-				wasRoomCleared = room:IsClear()
-				return true
-			else
-				wasRoomCleared = room:IsClear()
-				return false
+				triggerRoomClear = true
 			end
+			wasRoomCleared = room:IsClear()
 		end
 	else
 		--GREED MODE
 		local greedWave = EEVEEMOD.game:GetLevel().GreedModeWave
 		if greedWaveCheck ~= greedWave and greedWave ~= 0 then
 			greedWaveCheck = greedWave
-			return true
-		else
-			return false
+			triggerRoomClear = true
 		end
 	end
+	
+	return triggerRoomClear
 end
 
 function EEVEEMOD.API.PlayerAnimationPlaying(player)
@@ -255,8 +230,14 @@ function EEVEEMOD.API.PlayerAnimationPlaying(player)
 	end
 end
 
-function EEVEEMOD.API.GiveRGB(entity)
-	entity.Color = Color(EEVEEMOD.RGB.R/255,EEVEEMOD.RGB.G/255,EEVEEMOD.RGB.B/255,entity.Color.A,0,0,0)
+function EEVEEMOD.API.GiveRGB(ent)
+	ent.Color = Color(EEVEEMOD.RGB.R/255,EEVEEMOD.RGB.G/255,EEVEEMOD.RGB.B/255,ent.Color.A,0,0,0)
+end
+
+function EEVEEMOD.API.SkinColor(player, useBody)
+	local skinColor = player:GetHeadColor() or useBody and player:GetBodyColor()
+
+	return EEVEEMOD.SkinColorToString[skinColor]
 end
 
 -------------------
