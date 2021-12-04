@@ -638,7 +638,13 @@ end
 
 function swiftAttack:SwiftAttackTimers(player)
 	local dataPlayer = player:GetData()
-	if EEVEEMOD.API.PlayerCanControl(player) and dataPlayer.Swift then
+	local renderMode = EEVEEMOD.game:GetRoom():GetRenderMode()
+
+	if EEVEEMOD.API.PlayerCanControl(player)
+	and dataPlayer.Swift
+	and renderMode == RenderMode.RENDER_NORMAL
+	or renderMode == RenderMode.RENDER_WATER_ABOVE then
+		
 		SwiftShotDelayTimer()
 		SwiftDurationHandle(player)
 		SwiftRateOfRotation(player)
