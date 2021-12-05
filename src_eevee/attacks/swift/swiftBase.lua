@@ -41,7 +41,7 @@ end
 
 function swiftBase:TryFireToEnemy(player, weapon, fireDir)
 	local newFireDir = fireDir
-	local radius = 240
+	local radius = player.TearRange / 2
 	local closestEnemy = EEVEEMOD.API.DetectNearestEnemy(weapon, radius)
 	local dirToEnemy = nil
 	local angleLimit = 45
