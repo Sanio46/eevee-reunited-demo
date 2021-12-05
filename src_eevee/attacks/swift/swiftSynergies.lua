@@ -145,14 +145,24 @@ function swiftSynergies:MultiShotCount(player)
 			count = count + (1 * player:GetCollectibleNum(CollectibleType.COLLECTIBLE_20_20))
 		end
 	end
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_20_20) then
-		count = count + (1 * player:GetCollectibleNum(CollectibleType.COLLECTIBLE_20_20))
-	end
+	
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_INNER_EYE) then
 		count = count + (2 * player:GetCollectibleNum(CollectibleType.COLLECTIBLE_INNER_EYE))
 	end
+	if player:GetEffects():HasNullEffect(NullItemID.ID_REVERSE_HANGED_MAN) then
+		count = count + 2
+	end
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_MUTANT_SPIDER) then
 		count = count + (3 * player:GetCollectibleNum(CollectibleType.COLLECTIBLE_MUTANT_SPIDER))
+	end
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_20_20) then
+		count = count + (1 * player:GetCollectibleNum(CollectibleType.COLLECTIBLE_20_20))
+		if player:HasCollectible(CollectibleType.COLLECTIBLE_COLLECTIBLE_INNER_EYE)
+		or player:HasCollectible(CollectibleType.COLLECTIBLE_MUTANT_SPIDER)
+		or player:GetEffects():HasNullEffect(NullItemID.ID_REVERSE_HANGED_MAN)
+		then
+			count = count - 1
+		end
 	end
 	local wizCount = 0
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_THE_WIZ) then
