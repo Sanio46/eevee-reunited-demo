@@ -288,9 +288,7 @@ function swiftSynergies:AntiGravityDuration(player, weapon)
 				weapon.Height = dataWeapon.Swift.AntiGravHeight 
 			end
 		else
-			if weapon.Velocity.X == 0 and weapon.Velocity.Y == 0 then
-				weapon.Velocity = dataWeapon.Swift.AntiGravDir
-			end
+			weapon.Velocity = swiftBase:TryFireToEnemy(player, weapon, dataWeapon.Swift.AntiGravDir)
 			dataWeapon.Swift.AntiGravDir = nil
 			dataWeapon.Swift.AntiGravTimer = nil
 		end

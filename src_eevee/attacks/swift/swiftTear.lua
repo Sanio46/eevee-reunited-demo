@@ -50,7 +50,7 @@ end
 
 function swiftTear:SpawnSwiftTears(player, degreeOfTearSpawns, offset)
 	local dataPlayer = player:GetData()
-	local anglePos = Vector.FromAngle((degreeOfTearSpawns * dataPlayer.Swift.NumWeaponsSpawned)):Resized(swiftBase:SwiftTearDistanceFromPlayer(player)):Rotated(offset)
+	local anglePos = swiftBase:SpawnPos(player, degreeOfTearSpawns, offset)
 	local tear = player:FireTear(player.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero):ToTear()
 	
 	AssignSwiftTearData(player, tear, anglePos)
@@ -60,9 +60,7 @@ function swiftTear:SpawnSwiftTears(player, degreeOfTearSpawns, offset)
 	if dataPlayer.Swift.MultiShots > 0 then
 	local multiOffset = EEVEEMOD.RandomNum(360)
 		for i = 1, dataPlayer.Swift.MultiShots do
-			local degrees = 360/dataPlayer.Swift.MultiShots
-			local orbit = swiftBase:MultiSwiftTearDistanceFromTear(player)
-			local anglePos = Vector.FromAngle(((degrees * i) * dataPlayer.Swift.NumWeaponsSpawned)):Resized(orbit):Rotated(multiOffset)
+			local anglePos = swiftBase:SpawnPosMulti(player, degreeOfTearSpawns, offset, multiOffset, i)
 			local tearMulti = player:FireTear(tear.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero):ToTear()
 			local dataMultiTear = tearMulti:GetData()
 			

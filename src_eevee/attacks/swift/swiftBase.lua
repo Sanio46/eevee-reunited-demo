@@ -1,14 +1,30 @@
 local swiftBase = {}
 
+function swiftBase:SpawnPos(player, degreeOfTearSpawns, offset)
+	local dataPlayer = player:GetData()
+	local anglePos = Vector.FromAngle((degreeOfTearSpawns * dataPlayer.Swift.NumWeaponsSpawned)):Resized(swiftBase:SwiftTearDistanceFromPlayer(player)):Rotated(offset)
+
+	return anglePos
+end
+
+function swiftBase:SpawnPosMulti(player, degreeOfTearSpawns, offset, multiOffset, i)
+	local dataPlayer = player:GetData()
+	local degrees = 360/dataPlayer.Swift.MultiShots
+	local orbit = swiftBase:MultiSwiftTearDistanceFromTear(player)
+	local anglePos = Vector.FromAngle(((degrees * i) * dataPlayer.Swift.NumWeaponsSpawned)):Resized(orbit):Rotated(multiOffset)
+	return anglePos
+end
+
 function swiftBase:SwiftFireDelay(player)
 	local nextTearTime = player.MaxFireDelay
+	local dataPlayer = player:GetData()
 	if player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
 	or player:HasWeaponType(WeaponType.WEAPON_TECH_X)
 	or player:HasWeaponType(WeaponType.WEAPON_KNIFE) then
 		nextTearTime = nextTearTime * 1.5
 	end
-	if player.MaxFireDelay <= 0.5
-	or player:GetData().Swift.KidneyTimer then
+	if (not dataPlayer.Swift.Constant and player.MaxFireDelay <= 0.5)
+	or (player:GetData().Swift.KidneyTimer and dataPlayer.Swift.AttackDuration ~= 0) then
 		nextTearTime = 0.5
 	end
 	return nextTearTime
@@ -21,6 +37,23 @@ function swiftBase:SwiftShotVelocity(direction, player, useMovement)
 	else
 		return newDirection
 	end
+end
+
+function swiftBase:TryFireToEnemy(player, weapon, fireDir)
+	local newFireDir = fireDir
+	local radius = 240
+	local closestEnemy = EEVEEMOD.API.DetectNearestEnemy(weapon, radius)
+	local dirToEnemy = nil
+	local angleLimit = 45
+	
+	if closestEnemy ~= nil then
+		dirToEnemy = (closestEnemy.Position - weapon.Position):Normalized()
+	end
+
+	if dirToEnemy ~= nil and math.abs(math.abs(dirToEnemy:GetAngleDegrees()) - math.abs(fireDir:GetAngleDegrees())) <= angleLimit then
+		newFireDir = swiftBase:SwiftShotVelocity(dirToEnemy, player, true)
+	end
+	return newFireDir
 end
 
 function swiftBase:SwiftShotDelay(weapon, player)

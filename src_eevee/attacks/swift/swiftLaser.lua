@@ -50,7 +50,7 @@ end
 
 function swiftLaser:SpawnSwiftLasers(player, degreeOfLaserSpawns, offset)
 	local dataPlayer = player:GetData()
-	local anglePos = Vector.FromAngle((degreeOfLaserSpawns * dataPlayer.Swift.NumWeaponsSpawned)):Resized(swiftBase:SwiftTearDistanceFromPlayer(player)):Rotated(offset)
+	local anglePos = swiftBase:SpawnPos(player, degreeOfTearSpawns, offset)
 	local laserVariant = nil
 	if SwiftLaserType(player) == "brim"
 	or (SwiftLaserType(player) == "techX" and player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE)) then
@@ -67,9 +67,7 @@ function swiftLaser:SpawnSwiftLasers(player, degreeOfLaserSpawns, offset)
 		if dataPlayer.Swift.MultiShots > 0 then
 		local multiOffset = EEVEEMOD.RandomNum(360)
 			for i = 1, dataPlayer.Swift.MultiShots do
-				local degrees = 360/dataPlayer.Swift.MultiShots
-				local orbit = swiftBase:MultiSwiftTearDistanceFromTear(player)
-				local anglePos = Vector.FromAngle(((degrees * i) * dataPlayer.Swift.NumWeaponsSpawned)):Resized(orbit):Rotated(multiOffset)
+				local anglePos = swiftBase:SpawnPosMulti(player, degreeOfTearSpawns, offset, multiOffset, i)
 				local effectMulti = Isaac.Spawn(EntityType.ENTITY_EFFECT, laserVariant, 0, effect.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, player):ToEffect()
 				local dataMultiEffect = effectMulti:GetData()
 				

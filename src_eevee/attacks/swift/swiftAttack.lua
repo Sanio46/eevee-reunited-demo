@@ -15,9 +15,9 @@ local function CalculateSwiftStats(player)
 	local dataPlayer = player:GetData()
 	local count = 5
 	local degreeOfWeaponSpawns = 360/count
-	local offset = math.random(0, 360)
+	local offset = EEVEEMOD.API.GetIsaacShootingDirection(player):Rotated(-1 * degreeOfWeaponSpawns):GetAngleDegrees()
 	local duration = swiftBase:SwiftFireDelay(player) * count
-	
+
 	dataPlayer.Swift.AttackDuration = duration
 	dataPlayer.Swift.AttackDurationSet = duration
 	if not dataPlayer.Swift.RateOfOrbitRotation then
@@ -182,7 +182,7 @@ function swiftAttack:SwiftMainFireWeapon(weapon, player)
 	if not dataWeapon.Swift.ConstantOrbit then
 		if weapon.Type ~= EntityType.ENTITY_EFFECT then
 			if not player:HasCollectible(CollectibleType.COLLECTIBLE_ANTI_GRAVITY) then
-				weapon.Velocity = fireDirection
+				weapon.Velocity = swiftBase:TryFireToEnemy(player, weapon, fireDirection)
 			else
 				weapon.Velocity = Vector.Zero
 				dataWeapon.Swift.AntiGravTimer = 90
@@ -441,7 +441,8 @@ function swiftAttack:SwiftInit(player)
 
 		if not swiftSynergies:WeaponShouldOverrideSwift(player) then
 		
-			if EEVEEMOD.API.PlayerCanControl(player) then
+			if EEVEEMOD.API.PlayerCanControl(player)
+			and EEVEEMOD.API.IsPlayerWalking(player) then
 			
 				if player:GetFireDirection() ~= Direction.NO_DIRECTION
 				and not dataPlayer.Swift.AttackCooldown
@@ -584,25 +585,21 @@ end
 
 local function SwiftRateOfRotation(player)
 	local dataPlayer = player:GetData()
-	
+	local holdStarFrames = 3
+
 	if dataPlayer.Swift
 	and dataPlayer.Swift.RateOfOrbitRotation
 	and dataPlayer.Swift.AttackDuration
-	and not dataPlayer.Swift.AttackCooldown then
-		if dataPlayer.Swift.Constant or player:HasCollectible(CollectibleType.COLLECTIBLE_TINY_PLANET) then
-			local rate = dataPlayer.Swift.RateOfOrbitRotation + 5 * player.ShotSpeed
-			if rate > 360 then rate = rate - 360 end
-			dataPlayer.Swift.RateOfOrbitRotation = rate
-		else
-			if dataPlayer.Swift.AttackDuration > 0 then
-				local rate = dataPlayer.Swift.RateOfOrbitRotation + math.floor(dataPlayer.Swift.AttackDuration / 4)
-				if dataPlayer.Swift.AttackDuration > 50 then
-					rate = dataPlayer.Swift.RateOfOrbitRotation + 12.5
-				end
-				if rate > 360 then rate = rate - 360 end
-				dataPlayer.Swift.RateOfOrbitRotation = rate
-			end
+	and not dataPlayer.Swift.AttackCooldown
+	then
+		local rate = dataPlayer.Swift.RateOfOrbitRotation
+		if dataPlayer.Swift.Constant then
+			rate = rate + (5 * player.ShotSpeed)
+		elseif dataPlayer.Swift.AttackDuration <= dataPlayer.Swift.AttackDurationSet - holdStarFrames then
+			rate = rate + (8 * (player.ShotSpeed * (dataPlayer.Swift.AttackDuration / dataPlayer.Swift.AttackDurationSet)))
 		end
+		if rate > 360 then rate = rate - 360 end
+		dataPlayer.Swift.RateOfOrbitRotation = rate
 	end
 end
 
@@ -614,6 +611,7 @@ local function SwiftCooldownTimer(player)
 		else
 			dataPlayer.Swift.AttackCooldown = nil
 			dataPlayer.Swift.AttackInit = false
+			dataPlayer.Swift.RateOfOrbitRotation = 0
 		end
 	end
 end

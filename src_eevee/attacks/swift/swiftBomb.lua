@@ -34,7 +34,7 @@ end
 
 function swiftBomb:SpawnSwiftBombs(player, degreeOfBombSpawns, offset)
 	local dataPlayer = player:GetData()
-	local anglePos = Vector.FromAngle((degreeOfBombSpawns * dataPlayer.Swift.NumWeaponsSpawned)):Resized(swiftBase:SwiftTearDistanceFromPlayer(player)):Rotated(offset)
+	local anglePos = swiftBase:SpawnPos(player, degreeOfTearSpawns, offset)
 	local bomb = player:FireBomb(player.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero)
 	
 	AssignSwiftBombData(player, bomb, anglePos)
@@ -43,9 +43,7 @@ function swiftBomb:SpawnSwiftBombs(player, degreeOfBombSpawns, offset)
 	if dataPlayer.Swift and dataPlayer.Swift.MultiShots > 0 then
 	local multiOffset = EEVEEMOD.RandomNum(360)
 		for i = 1, dataPlayer.Swift.MultiShots do
-			local degrees = 360/dataPlayer.Swift.MultiShots
-			local orbit = swiftBase:MultiSwiftTearDistanceFromTear(player)
-			local anglePos = Vector.FromAngle(((degrees * i) * dataPlayer.Swift.NumWeaponsSpawned)):Resized(orbit):Rotated(multiOffset)
+			local anglePos = swiftBase:SpawnPosMulti(player, degreeOfTearSpawns, offset, multiOffset, i)
 			local bombMulti = player:FireBomb(bomb.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero)
 			local dataMultiBomb = bombMulti:GetData()
 			
