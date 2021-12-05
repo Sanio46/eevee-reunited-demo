@@ -1,6 +1,6 @@
 local useItem = {}
 
-local costumeProtector = EEVEEMOD.Src["player"]["eeveeCustomCostumes"]
+local ccp = EEVEEMOD.Src["player"]["characterCostumeProtector"]
 local eeveeBirthright = EEVEEMOD.Src["items"]["collectibles.eeveeBirthright"]
 local eeveeBasics = EEVEEMOD.Src["player"]["eeveeBasics"]
 
@@ -8,7 +8,7 @@ function useItem:main(itemID, itemRNG, player, flags, slot, vardata)
 	local useItemFunctions = {
 		eeveeBasics:OnEsauJr(itemID, itemRNG, player, flags, slot, vardata),
 		eeveeBasics:OnLarynxOrBerserk(itemID, itemRNG, player, flags, slot, vardata),
-		costumeProtector:ResetCostumeOnItem(itemID, itemRNG, player, flags, slot, vardata),
+		ccp:ResetCostumeOnItem(itemID, itemRNG, player, flags, slot, vardata),
 		eeveeBirthright:OnUse(itemID, itemRNG, player, flags, slot, vardata)
 	}
 	

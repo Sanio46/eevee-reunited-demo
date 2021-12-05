@@ -1,11 +1,11 @@
 local playerInit = {}
 
-local costumeProtector = EEVEEMOD.Src["player"]["eeveeCustomCostumes"]
+local ccp = EEVEEMOD.Src["player"]["characterCostumeProtector"]
 local eeveeBasics = EEVEEMOD.Src["player"]["eeveeBasics"]
 
 function playerInit:main(player)
 	eeveeBasics:OnPlayerInit(player)
-	costumeProtector:OnPlayerInit(player)
+	ccp:OnPlayerInit(player)
 end
 
 return playerInit

@@ -1,6 +1,6 @@
 local postPeffectUpdate = {}
 
-local costumeProtector = EEVEEMOD.Src["player"]["eeveeCustomCostumes"]
+local ccp = EEVEEMOD.Src["player"]["characterCostumeProtector"]
 local customMrDolly = EEVEEMOD.Src["modsupport"]["customMrDolly"]
 local eeveeBirthright = EEVEEMOD.Src["items"]["collectibles.eeveeBirthright"]
 local eeveeBasics = EEVEEMOD.Src["player"]["eeveeBasics"]
@@ -11,7 +11,7 @@ function postPeffectUpdate:main(player)
 	local playerType = player:GetPlayerType()
 	local dataPlayer = player:GetData()
 	
-	costumeProtector:OnPeffectUpdate(player)
+	ccp:OnPeffectUpdate(player)
 	customMrDolly:ReplaceDollyCostume(player)
 	eeveeBirthright:GivePocketActive(player)
 	eeveeBasics:GiveEsauJrEeveeData(player)

@@ -1,7 +1,10 @@
-local costumeProtector = {}
+local ccp = {}
 
 --TODO: Once finished with all the costumes, make a system for the ear/fluff/head costumes.
 --Tie a costume to an item/effect, and because it can't be detected, create a custom priority list.
+
+local baseCostumePath = "gfx/characters/costume_"
+local baseCostumeSuffixPath = "gfx/characters/costumes_"
 
 local playerToProtect = {
 	[EEVEEMOD.PlayerType.EEVEE] = true,
@@ -10,7 +13,7 @@ local playerCostume = {
 	[EEVEEMOD.PlayerType.EEVEE] = "gfx/characters/costume_eevee"
 }
 local playerSpritesheet = {
-	[EEVEEMOD.PlayerType.EEVEE] = "gfx/characters/costumes/character_eevee.png",
+	[EEVEEMOD.PlayerType.EEVEE] = "gfx/characters/costumes/character_eevee",
 }
 local playerItemCostumeWhitelist = {}
 local playerNullItemCostumeWhitelist = {}
@@ -503,6 +506,11 @@ local activeItemCostumes = {
 	[CollectibleType.COLLECTIBLE_BERSERK] = true,
 	[CollectibleType.COLLECTIBLE_LEMEGETON] = true
 }
+local pillCostumes = {
+	[PillEffect.PILLEFFECT_I_FOUND_PILLS] = NullItemID.ID_I_FOUND_PILLS,
+	[PillEffect.PILLEFFECT_PUBERTY] = NullItemID.ID_PUBERTY,
+	[PillEffect.PILLEFFECT_WIZARD] = NullItemID.ID_WIZARD,
+}
 local playerFormToNullItemID = {
 	[PlayerForm.PLAYERFORM_GUPPY] = NullItemID.ID_GUPPY,
 	[PlayerForm.PLAYERFORM_LORD_OF_THE_FLIES] = NullItemID.ID_LORD_OF_THE_FLIES,
@@ -518,7 +526,6 @@ local playerFormToNullItemID = {
 	[PlayerForm.PLAYERFORM_ADULTHOOD] = NullItemID.ID_ADULTHOOD,
 	[PlayerForm.PLAYERFORM_SPIDERBABY] = NullItemID.ID_SPIDERBABY,
 }
-local baseCostumePath = "gfx/characters/costume_"
 local supportedNullCostumes = {
 	[Isaac.GetCostumeIdByPath(baseCostumePath.."eevee.anm2")] = true,
 	[Isaac.GetCostumeIdByPath(baseCostumePath.."eevee_azazel.anm2")] = true,
@@ -541,7 +548,7 @@ local supportedNullCostumes = {
 --  LOCALS  --
 --------------
 
-function costumeProtector:AddCustomNullCostume(player, nullID, costumePath)
+function ccp:AddCustomNullCostume(player, nullID, costumePath)
 	if nullID ~= nil and nullID ~= -1 then
 		player:AddNullCostume(nullID)
 	else
@@ -549,7 +556,7 @@ function costumeProtector:AddCustomNullCostume(player, nullID, costumePath)
 	end
 end
 
-function costumeProtector:CanRemoveCollectibleCostume(player, itemID)
+function ccp:CanRemoveCollectibleCostume(player, itemID)
 	if (player:HasCollectible(itemID) or player:GetEffects():HasCollectibleEffect(itemID)) 
 	and not activeItemCostumes[itemID]
 	then
@@ -567,7 +574,7 @@ local function RemoveBlacklistedCostumes(player)
 	if playerItemCostumeWhitelist[playerType] then
 		for itemID, _ in pairs(playerItemCostumeWhitelist[playerType]) do
 			local itemCostume = Isaac.GetItemConfig():GetCollectible(itemID)
-			if costumeProtector:CanRemoveCollectibleCostume(player, itemID)
+			if ccp:CanRemoveCollectibleCostume(player, itemID)
 			and playerItemCostumeWhitelist[playerType][itemID] == false then
 				player:RemoveCostume(itemCostume, false)
 			end
@@ -583,7 +590,7 @@ local function RemoveBlacklistedCostumes(player)
 			player:RemoveCostume(itemCostume)
 		end
 		if playerEffects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_D4) then
-			costumeProtector:ReAddBaseCosutme(player)
+			ccp:ReAddBaseCosutme(player)
 		end
 	end
 	
@@ -635,7 +642,6 @@ local ItemToCostume = {
 	[CollectibleType.COLLECTIBLE_TOOTH_AND_NAIL] = "toothandnail", --52
 }
 
---For all unique hairstyles, some containing bodies to override the item costume's existing one.
 local function AddItemSpecificCostumes(player)
 	local playerType = player:GetPlayerType()
 	local playerEffects = player:GetEffects()
@@ -643,8 +649,8 @@ local function AddItemSpecificCostumes(player)
 	for itemID, costumePath in pairs(ItemToCostume) do
 		
 		local itemCostume = Isaac.GetCostumeIdByPath(basePath..ItemToCostume[itemID]..".anm2")
-		if costumeProtector:CanRemoveCollectibleCostume(player, itemID) then
-			costumeProtector:AddCustomNullCostume(player, itemCostume, basePath..ItemToCostume[itemID]..".anm2")
+		if ccp:CanRemoveCollectibleCostume(player, itemID) then
+			ccp:AddCustomNullCostume(player, itemCostume, basePath..ItemToCostume[itemID]..".anm2")
 		else
 			player:TryRemoveNullCostume(itemCostume)
 		end
@@ -655,7 +661,7 @@ local function AddItemSpecificCostumes(player)
 	local azyCustomCostume = Isaac.GetCostumeIdByPath(azyPath)
 	local azyTrinketCostume = Isaac.GetItemConfig():GetTrinket(TrinketType.TRINKET_AZAZELS_STUMP)
 	if playerEffects:HasTrinketEffect(TrinketType.TRINKET_AZAZELS_STUMP) then
-		costumeProtector:AddCustomNullCostume(player, azyCustomCostume, azyPath)
+		ccp:AddCustomNullCostume(player, azyCustomCostume, azyPath)
 		player:AddCostume(azyTrinketCostume, false)
 	else
 		player:TryRemoveNullCostume(azyCustomCostume)
@@ -666,7 +672,7 @@ local function AddItemSpecificCostumes(player)
 	local deliPath = basePath.."delirious.anm2"
 	local deliCustomCostume = Isaac.GetCostumeIdByPath(deliPath)
 	if playerEffects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_DELIRIOUS) then
-		costumeProtector:AddCustomNullCostume(player, deliCustomCostume, deliPath)
+		ccp:AddCustomNullCostume(player, deliCustomCostume, deliPath)
 	else
 		player:TryRemoveNullCostume(deliCustomCostume)
 	end
@@ -675,7 +681,7 @@ local function AddItemSpecificCostumes(player)
 	local berserkPath = basePath.."berserk.anm2"
 	local berserkCustomCostume = Isaac.GetCostumeIdByPath(berserkPath)
 	if playerEffects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_BERSERK) then
-		costumeProtector:AddCustomNullCostume(player, berserkCustomCostume, berserkPath)
+		ccp:AddCustomNullCostume(player, berserkCustomCostume, berserkPath)
 	else
 		player:TryRemoveNullCostume(berserkCustomCostume)
 	end
@@ -684,7 +690,7 @@ local function AddItemSpecificCostumes(player)
 	local brim2Path = basePath.."brimstone2.anm2"
 	local brim2CustomCostume = Isaac.GetCostumeIdByPath(brim2Path)
 	if player:GetCollectibleNum(CollectibleType.COLLECTIBLE_BRIMSTONE) >= 2 then
-		costumeProtector:AddCustomNullCostume(player, brim2CustomCostume, brim2Path)
+		ccp:AddCustomNullCostume(player, brim2CustomCostume, brim2Path)
 	else
 		player:TryRemoveNullCostume(brim2CustomCostume)
 	end
@@ -693,7 +699,7 @@ local function AddItemSpecificCostumes(player)
 	local cursePath = basePath.."lostcurse.anm2"
 	local curseCustomCostume = Isaac.GetCostumeIdByPath(cursePath)
 	if playerEffects:HasNullEffect(NullItemID.ID_LOST_CURSE) then
-		costumeProtector:AddCustomNullCostume(player, curseCustomCostume, cursePath)
+		ccp:AddCustomNullCostume(player, curseCustomCostume, cursePath)
 	else
 		player:TryRemoveNullCostume(curseCustomCostume)
 	end
@@ -715,19 +721,6 @@ local function RemoveModdedCostumes(player)
 			player:RemoveCostume(itemConfigID)
 		end
 	end
-end
-
-local function ResetPlayerSpritesheet(player)
-	local playerType = player:GetPlayerType()
-	local sprite = player:GetSprite()
-	local spritesheetPath = playerSpritesheet[playerType]
-	
-	sprite:ReplaceSpritesheet(12, spritesheetPath)
-	sprite:ReplaceSpritesheet(4, spritesheetPath)
-	sprite:ReplaceSpritesheet(2, spritesheetPath)
-	sprite:ReplaceSpritesheet(1, spritesheetPath)
-	
-	sprite:LoadGraphics()
 end
 
 local function InitiateItemWhitelist(playerType)
@@ -755,7 +748,20 @@ end
 --  MAIN STUFF  --
 ------------------
 
-function costumeProtector:ReAddBaseCosutme(player)
+function ccp:UpdatePlayerSpritesheet(player, spritesheetPath)
+	local playerType = player:GetPlayerType()
+	local sprite = player:GetSprite()
+	local spritesheetPath = spritesheetPath or playerSpritesheet[playerType]..EEVEEMOD.API.SkinColor(player)..".png"
+
+	sprite:ReplaceSpritesheet(12, spritesheetPath)
+	sprite:ReplaceSpritesheet(4, spritesheetPath)
+	sprite:ReplaceSpritesheet(2, spritesheetPath)
+	sprite:ReplaceSpritesheet(1, spritesheetPath)
+	
+	sprite:LoadGraphics()
+end
+
+function ccp:ReAddBaseCosutme(player)
 	local playerType = player:GetPlayerType()
 	
 	if playerToProtect[playerType] == true
@@ -764,7 +770,7 @@ function costumeProtector:ReAddBaseCosutme(player)
 	end
 end
 
-function costumeProtector:MainResetPlayerCostumes(player)
+function ccp:MainResetPlayerCostumes(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 	
@@ -778,7 +784,7 @@ function costumeProtector:MainResetPlayerCostumes(player)
 	end
 end
 
-function costumeProtector:ResetPlayerCostumes(player)
+function ccp:ResetPlayerCostumes(player)
 	local data = player:GetData()
 	local playerEffects = player:GetEffects()
 	
@@ -798,7 +804,7 @@ function costumeProtector:ResetPlayerCostumes(player)
 		if playerItemCostumeWhitelist[playerType] then
 			for itemID, _ in pairs(playerItemCostumeWhitelist[playerType]) do
 				local itemCostume = Isaac.GetItemConfig():GetCollectible(itemID)
-				if costumeProtector:CanRemoveCollectibleCostume(player, itemID)
+				if ccp:CanRemoveCollectibleCostume(player, itemID)
 				and playerItemCostumeWhitelist[playerType][itemID] == false then
 					player:AddCostume(itemCostume, false)
 				end
@@ -835,7 +841,7 @@ function costumeProtector:ResetPlayerCostumes(player)
 	end
 end
 
-function costumeProtector:InitPlayerCostume(player)
+function ccp:InitPlayerCostume(player)
   local data = player:GetData()
   local playerType = player:GetPlayerType()
 	
@@ -846,7 +852,7 @@ function costumeProtector:InitPlayerCostume(player)
 		if not data.CCP.HasCostumeInitialized then
 
 			InitiateWhitelists()
-			costumeProtector:MainResetPlayerCostumes(player)
+			ccp:MainResetPlayerCostumes(player)
 			data.CCP.NumCollectibles = player:GetCollectibleCount()
 			data.CCP.NumTemporaryEffects = player:GetEffects():GetEffectsList().Size
 			data.CCP.QueueCostumeRemove = {}
@@ -861,7 +867,7 @@ function costumeProtector:InitPlayerCostume(player)
 	end
 end
 
-function costumeProtector:DeinitPlayerCostume(player)
+function ccp:DeinitPlayerCostume(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 	
@@ -870,21 +876,21 @@ function costumeProtector:DeinitPlayerCostume(player)
 	and data.CCP.HasCostumeInitialized --Has the protection data
 	and not data.CCP.HasCostumeInitialized[playerType] --For those given protection outside of this mod
 	then
-		costumeProtector:ResetPlayerCostumes(player)
+		ccp:ResetPlayerCostumes(player)
 		data.CCP.NumCollectibles = nil
 		data.CCP.NumTemporaryEffects = nil
 		data.CCP.HasCostumeInitialized = nil
 	end
 end
 
-function costumeProtector:MiscCostumeResets(player)
+function ccp:MiscCostumeResets(player)
 	local data = player:GetData()
 	
 	if data.CCP.NumCollectibles
 	and data.CCP.NumCollectibles ~= player:GetCollectibleCount()
 	then
 		data.CCP.NumCollectibles = player:GetCollectibleCount()
-		costumeProtector:MainResetPlayerCostumes(player)
+		ccp:MainResetPlayerCostumes(player)
 	end
 	
 	if data.CCP.NumTemporaryEffects
@@ -892,7 +898,88 @@ function costumeProtector:MiscCostumeResets(player)
 	and not player:GetEffects():HasCollectibleEffect(CollectibleType.COLLECTIBLE_HEMOPTYSIS)
 	then
 		data.CCP.NumTemporaryEffects = player:GetEffects():GetEffectsList().Size
-		costumeProtector:MainResetPlayerCostumes(player)
+		ccp:MainResetPlayerCostumes(player)
+	end
+end
+
+-----------------------
+--  da spooky ghost  --
+-----------------------
+
+function ccp:CanAstralProjectionTrigger(player)
+	local playerEffects = player:GetEffects()
+	local data = player:GetData()
+	local room = EEVEEMOD.game:GetRoom()
+	
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_ASTRAL_PROJECTION) then
+		data.CCP.AP_CanTrigger = not room:IsClear()
+	end
+end
+
+function ccp:AstralProjectionUpdate(player)
+	local playerEffects = player:GetEffects()
+	local data = player:GetData()
+	local hasProjectionEffect = playerEffects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_ASTRAL_PROJECTION)
+	
+	if data.CCP.AP_CanTrigger then
+		if hasProjectionEffect then
+			if EEVEEMOD.API.RoomClearTriggered(player) and not data.CCP.LostCurse then
+				data.CCP.DelaySpritesheetChange = ""
+			end
+		end
+	else
+		if data.CCP.AP_Disabled then
+			data.CCP.AP_Disabled = nil
+		end
+	end
+end
+
+function ccp:AstralProjectionOnHit(ent, amount, flags, source, countdown)
+	local player = ent:ToPlayer()
+	local playerType = player:GetPlayerType()
+	local playerEffects = player:GetEffects()
+	local data = player:GetData()
+	local hasProjectionEffect = playerEffects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_ASTRAL_PROJECTION)
+
+	if playerToProtect[playerType] == true
+	and data.CCP
+	and data.CCP.AP_CanTrigger then
+		if not hasProjectionEffect and not data.CCP.AP_Disabled then
+			data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath..EEVEEMOD.PlayerTypeToString[playerType].."/character_012_thelost.png"
+			data.CCP.AP_Disabled = true
+		elseif hasProjectionEffect and data.CCP.AP_Disabled then
+			data.CCP.DelaySpritesheetChange = ""
+		end
+	end
+end
+
+function ccp:OnLostCurse(player)
+	local playerType = player:GetPlayerType()
+	local playerEffects = player:GetEffects()
+	local data = player:GetData()
+	local hasLostCurse = playerEffects:HasNullEffect(NullItemID.ID_LOST_CURSE)
+	
+	if hasLostCurse and not data.CCP.LostCurse then
+		data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath..EEVEEMOD.PlayerTypeToString[playerType].."/character_012_thelost.png"
+		data.CCP.LostCurse = true
+	elseif not hasLostCurse and data.CCP.LostCurse then
+		data.CCP.DelaySpritesheetChange = ""
+		data.CCP.LostCurse = nil
+	end
+end
+
+function ccp:OnSpiritShackles(player)
+	local playerType = player:GetPlayerType()
+	local playerEffects = player:GetEffects()
+	local data = player:GetData()
+	local isShacklesSoul = playerEffects:HasNullEffect(NullItemID.ID_SPIRIT_SHACKLES_SOUL)
+	
+	if isShacklesSoul and not data.CCP.ShacklesGhost then
+		data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath..EEVEEMOD.PlayerTypeToString[playerType].."/character_018_thesoul.png"
+		data.CCP.ShacklesGhost = true
+	elseif not isShacklesSoul and data.CCP.ShacklesGhost then
+		data.CCP.DelaySpritesheetChange = ""
+		data.CCP.ShacklesGhost = nil
 	end
 end
 
@@ -900,12 +987,15 @@ end
 --  RESETTING COSTUME ON SPECIFIC TRIGGERS  --
 ----------------------------------------------
 
-function costumeProtector:ResetCostumeOnItem(itemID, rng, player, useFlags, activeSlot, customVarData)
+function ccp:ResetCostumeOnItem(itemID, rng, player, useFlags, activeSlot, customVarData)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 	local playerUsedItem = activeItemCostumes[itemID] == true
 
-	if data.CCP and data.CCP.HasCostumeInitialized and playerUsedItem then
+	if playerToProtect[playerType]
+	and data.CCP
+	and data.CCP.HasCostumeInitialized
+	and playerUsedItem then
 		if playerItemCostumeWhitelist[playerType]
 		and (playerItemCostumeWhitelist[playerType][itemID] == false
 		or itemID == CollectibleType.COLLECTIBLE_LEMEGETON)
@@ -922,17 +1012,33 @@ function costumeProtector:ResetCostumeOnItem(itemID, rng, player, useFlags, acti
 	return false
 end
 
-function costumeProtector:ReapplyHairOnCoopRevive(player)
+function ccp:ResetCostumeOnPill(pillID, player)
+	local playerType = player:GetPlayerType()
+	local data = player:GetData()
+	local playerUsedPill = pillCostumes[pillID] ~= nil
+
+	if playerToProtect[playerType]
+	and data.CCP
+	and data.CCP.HasCostumeInitialized
+	and playerUsedPill
+	and playerNullItemCostumeWhitelist[playerType]
+	and playerNullItemCostumeWhitelist[playerType][pillCostumes[pillID]] == false
+	then
+		data.CCP.DelayPillCostumeRemove = pillID
+	end
+end
+
+function ccp:ReapplyHairOnCoopRevive(player)
 	local data = player:GetData()
 	if player:IsCoopGhost() and not data.CCP.WaitOnCoopRevive then
 		data.CCP.WaitOnCoopRevive = true
 	elseif not player:IsCoopGhost() and data.CCP.WaitOnCoopRevive then
-		costumeProtector:ReAddBaseCosutme(player)
+		ccp:ReAddBaseCosutme(player)
 		data.CCP.WaitOnCoopRevive = false
 	end
 end
 
-function costumeProtector:RestoreCostumeInMineshaft(player)
+function ccp:RestoreCostumeInMineshaft(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 	local room = EEVEEMOD.game:GetRoom()
@@ -950,13 +1056,8 @@ function costumeProtector:RestoreCostumeInMineshaft(player)
 			else
 				local screenpos = EEVEEMOD.game:GetRoom():WorldToScreenPosition(player.Position)
 				local pSprite = player:GetSprite()
-				local HeadDirToAnim = {
-					[0] = "HeadLeft",
-					[1] = "HeadUp",
-					[2] = "HeadRight",
-					[3] = "HeadDown"
-				}
-				data.MineshaftCostumeHair:Play(HeadDirToAnim[player:GetHeadDirection()], false)
+
+				data.MineshaftCostumeHair:SetFrame(pSprite:GetOverlayAnimation(), pSprite:GetOverlayFrame())
 				data.MineshaftCostumeHair.Color = player:GetSprite().Color
 				data.MineshaftCostumeBody:SetFrame(pSprite:GetAnimation(), pSprite:GetFrame())
 				data.MineshaftCostumeBody.Color = player:GetSprite().Color
@@ -977,7 +1078,7 @@ function costumeProtector:RestoreCostumeInMineshaft(player)
 	end
 end
 
-function costumeProtector:StopNewRoomCostumes(player)
+function ccp:StopNewRoomCostumes(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 	
@@ -986,15 +1087,14 @@ function costumeProtector:StopNewRoomCostumes(player)
 	end
 end
 
---Missing No. doesn't use D4's run-reroll effect for some dumb reason!
-function costumeProtector:ResetOnMissingNoNewFloor(player)
+function ccp:ResetOnMissingNoNewFloor(player)
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_MISSING_NO) then
-		costumeProtector:MainResetPlayerCostumes(player)
-		costumeProtector:ReAddBaseCosutme(player)
+		ccp:MainResetPlayerCostumes(player)
+		ccp:ReAddBaseCosutme(player)
 	end
 end
 
-function costumeProtector:ModelingClay(player)
+function ccp:ModelingClay(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 	local itemID = player:GetModelingClayEffect()
@@ -1010,20 +1110,34 @@ function costumeProtector:ModelingClay(player)
 	end
 end
 
---When any of the above functions trigger and add player data "CCP.DelayCostumeReset[playerType]", reset the costume here
---Its not reset inside the functions themselves as the costumes are added AFTER the callbacks are triggered
-function costumeProtector:DelayInCostumeReset(player)
+function ccp:DelayInCostumeReset(player)
+	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 
 	if data.CCP.DelayCostumeReset then
-		costumeProtector:MainResetPlayerCostumes(player)
+		ccp:MainResetPlayerCostumes(player)
 		data.CCP.DelayCostumeReset = nil
 	end
 	
 	if data.CCP.DelayRunReroll then
-		costumeProtector:MainResetPlayerCostumes(player)
-		costumeProtector:ReAddBaseCosutme(player)
+		ccp:MainResetPlayerCostumes(player)
+		ccp:ReAddBaseCosutme(player)
 		data.CCP.DelayRunReroll = nil
+	end
+	
+	if data.CCP.DelayPillCostumeRemove then
+		local pillEffect = data.CCP.DelayPillCostumeRemove
+
+		if pillEffect == PillEffect.PILLEFFECT_I_FOUND_PILLS then
+			player:TryRemoveNullCostume(NullItemID.ID_I_FOUND_PILLS)
+			player:TryRemoveNullCostume(NullItemID.ID_I_FOUND_HORSE_PILLS)
+		elseif pillEffect == PillEffect.PILLEFFECT_PUBERTY then
+			player:TryRemoveNullCostume(NullItemID.ID_PUBERTY)
+			player:TryRemoveNullCostume(NullItemID.ID_HORSE_PUBERTY)
+		elseif pillEffect == PillEffect.PILLEFFECT_WIZARD then
+			player:TryRemoveNullCostume(NullItemID.ID_WIZARD)
+		end
+		data.CCP.DelayPillCostumeRemove = nil
 	end
 	
 	if data.CCP.QueueCostumeRemove and data.CCP.QueueCostumeRemove[1] ~= nil then
@@ -1033,37 +1147,50 @@ function costumeProtector:DelayInCostumeReset(player)
 			table.remove(data.CCP.QueueCostumeRemove, 1)
 		end
 	end
+	
+	if data.CCP.DelaySpritesheetChange then
+		if data.CCP.DelaySpritesheetChange == "" then
+			ccp:UpdatePlayerSpritesheet(player)
+		else
+			ccp:UpdatePlayerSpritesheet(player, data.CCP.DelaySpritesheetChange)
+		end
+		data.CCP.DelaySpritesheetChange = nil
+	end
 end
 
 ----------------------------
 --  INITIATING CALLBACKS  --
 ----------------------------
 
-function costumeProtector:OnPlayerInit(player)
-	costumeProtector:InitPlayerCostume(player)
+function ccp:OnPlayerInit(player)
+	ccp:InitPlayerCostume(player)
 end
 
-function costumeProtector:OnPeffectUpdate(player)
+function ccp:OnPeffectUpdate(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 	
-	costumeProtector:DeinitPlayerCostume(player)
+	ccp:DeinitPlayerCostume(player)
 	
 	if playerToProtect[playerType] == true and data.CCP then
-		costumeProtector:MiscCostumeResets(player)
-		costumeProtector:DelayInCostumeReset(player)
-		costumeProtector:ReapplyHairOnCoopRevive(player)
-		costumeProtector:ModelingClay(player)
+		ccp:MiscCostumeResets(player)
+		ccp:DelayInCostumeReset(player)
+		ccp:ReapplyHairOnCoopRevive(player)
+		ccp:ModelingClay(player)
+		ccp:AstralProjectionUpdate(player)
+		ccp:OnLostCurse(player)
+		ccp:OnSpiritShackles(player)
 	end
 end
 
-function costumeProtector:OnNewRoom(player)
+function ccp:OnNewRoom(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 	local room = EEVEEMOD.game:GetRoom()
 
 	if playerToProtect[playerType] == true and data.CCP then
-		costumeProtector:StopNewRoomCostumes(player)
+		ccp:StopNewRoomCostumes(player)
+		ccp:CanAstralProjectionTrigger(player)
 		if player:HasTrinket(TrinketType.TRINKET_MODELING_CLAY) then
 			local data = player:GetData()
 			data.CCP.CheckForModelingClay = true
@@ -1071,15 +1198,15 @@ function costumeProtector:OnNewRoom(player)
 	end
 end
 	
-function costumeProtector:OnNewLevel(player)
+function ccp:OnNewLevel(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 
 	if playerToProtect[playerType] == true and data.CCP then
-		costumeProtector:ResetOnMissingNoNewFloor(player)
+		ccp:ResetOnMissingNoNewFloor(player)
 	end
 end
 
 InitiateWhitelists()
 
-return costumeProtector
+return ccp

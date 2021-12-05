@@ -41,7 +41,7 @@ local EeveeLuas = {
 	},
 	},
 	{"player", {
-		"eeveeCustomCostumes",
+		"characterCostumeProtector",
 		"eeveeBasics",
 		"eeveeGhost",
 		"eeveeStats",
@@ -58,13 +58,13 @@ local EeveeLuas = {
 		"familiarInit",
 		"evaluateCache",
 		"postPlayerInit",
+		"usePill",
 		"entityTakeDamage",
 		"postGameStarted",
 		"preGameExit",
 		"postNewLevel",
 		"postNewRoom",
 		"postPlayerRender",
-		--"prePlayerCollision",
 		"postPickupInit",
 		"postTearInit",
 		"postTearUpdate",
@@ -78,24 +78,12 @@ local EeveeLuas = {
 }
 
 EEVEEMOD.Src = {
-	["attacks"] = {
-		
-	},
-	["items"] = {
-		
-	},
-	["misc"] = {
-		
-	},
-	["modsupport"] = {
-		
-	},
-	["player"]	= {
-
-	},
-	["callbacks"] = {
-	
-	},
+	["attacks"] = {},
+	["items"] = {},
+	["misc"] = {},
+	["modsupport"] = {},
+	["player"]	= {},
+	["callbacks"] = {},
 }
 
 local json = require("json")
@@ -137,13 +125,13 @@ EeveeReunited:AddCallback(ModCallbacks.MC_USE_CARD, EEVEEMOD.Src["callbacks"]["u
 EeveeReunited:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, EEVEEMOD.Src["callbacks"]["familiarInit"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, EEVEEMOD.Src["callbacks"]["evaluateCache"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, EEVEEMOD.Src["callbacks"]["postPlayerInit"].main)
+EeveeReunited:AddCallback(ModCallbacks.MC_USE_PILL, EEVEEMOD.Src["callbacks"]["usePill"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, EEVEEMOD.Src["callbacks"]["entityTakeDamage"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, EEVEEMOD.Src["callbacks"]["postGameStarted"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, EEVEEMOD.Src["callbacks"]["preGameExit"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, EEVEEMOD.Src["callbacks"]["postNewLevel"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, EEVEEMOD.Src["callbacks"]["postNewRoom"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER, EEVEEMOD.Src["callbacks"]["postPlayerRender"].main)
---EeveeReunited:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, EEVEEMOD.Src["callbacks"]["prePlayerCollision"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, EEVEEMOD.Src["callbacks"]["postPickupInit"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_TEAR_INIT, EEVEEMOD.Src["callbacks"]["postTearInit"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, EEVEEMOD.Src["callbacks"]["postTearUpdate"].main)
