@@ -1061,11 +1061,7 @@ function ccp:RestoreCostumeInMineshaft(player)
 				data.MineshaftCostumeHair.Color = player:GetSprite().Color
 				data.MineshaftCostumeBody:SetFrame(pSprite:GetAnimation(), pSprite:GetFrame())
 				data.MineshaftCostumeBody.Color = player:GetSprite().Color
-				if pSprite:GetAnimation() == "WalkLeft"
-				or pSprite:GetAnimation() == "WalkUp"
-				or pSprite:GetAnimation() == "WalkRight"
-				or pSprite:GetAnimation() == "WalkDown"
-				then
+				if EEVEEMOD.API.IsPlayerWalking(player) then
 					data.MineshaftCostumeHair:Render(screenpos - EEVEEMOD.game.ScreenShakeOffset, Vector.Zero, Vector.Zero)
 					data.MineshaftCostumeBody:Render(screenpos - EEVEEMOD.game.ScreenShakeOffset, Vector.Zero, Vector.Zero)
 				end

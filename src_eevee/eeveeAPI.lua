@@ -10,11 +10,31 @@ function EEVEEMOD.API.SetCanShoot(player, canShoot)
 end
 
 function EEVEEMOD.API.PlayerCanControl(player)
-	if not EEVEEMOD.game:IsPaused() and not player:IsDead() and player.ControlsEnabled then
-		return true
-	else
-		return false
-	end		
+	local canControl = false
+	
+	if not EEVEEMOD.game:IsPaused()
+	and not player:IsDead()
+	and player.ControlsEnabled
+	then
+		canControl = true
+	end
+	
+	return canControl
+end
+
+function EEVEEMOD.API.IsPlayerWalking(player)
+	local isWalking = false
+	local pSprite = player:GetSprite()
+	
+	if pSprite:GetAnimation() == "WalkLeft"
+	or pSprite:GetAnimation() == "WalkUp"
+	or pSprite:GetAnimation() == "WalkRight"
+	or pSprite:GetAnimation() == "WalkDown"
+	then
+		isWalking = true
+	end
+	
+	return isWalking
 end
 
 function EEVEEMOD.API.DetectNearestEnemy(ent, range)
@@ -46,14 +66,6 @@ function EEVEEMOD.API.PlayerStandingStill(player)
 	end
 end
 
-local DirAngles = {
-	[-1] = 90,
-	[0] = 180,
-	[1] = -90,
-	[2] = 0,
-	[3] = 90,
-}
-
 local function FindMarkedTarget(player)
 	local targetPos = nil
 	for _, target in pairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, EffectVariant.TARGET, 0)) do
@@ -72,9 +84,11 @@ end
 function EEVEEMOD.API.GetIsaacShootingDirection(player)
 	local shootDir = player:GetShootingInput()
 	local data = player:GetData()
+	local HeadDirectionFire = Vector(-1, 0):Rotated(90 * player:GetHeadDirection())
+	local ShootDirectionFire = Vector(-1, 0):Rotated(90 * player:GetFireDirection())
 	
 	if not data.LastSavedShootDirection then
-		data.LastSavedShootDirection = Vector.FromAngle(DirAngles[player:GetHeadDirection()])
+		data.LastSavedShootDirection = HeadDirectionFire
 	end
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)
 	or player:HasCollectible(CollectibleType.COLLECTIBLE_EYE_OF_THE_OCCULT)
@@ -91,12 +105,12 @@ function EEVEEMOD.API.GetIsaacShootingDirection(player)
 			data.LastSavedShootDirection =  player:GetShootingInput()
 		end
 	elseif player:GetFireDirection() ~= -1 then
-		data.LastSavedShootDirection = Vector.FromAngle(DirAngles[player:GetFireDirection()])
+		data.LastSavedShootDirection = ShootDirectionFire
 	end
 	if data.LastSavedShootDirection ~= nil then
 		return data.LastSavedShootDirection
 	else --Failsafe
-		return Vector.FromAngle(DirAngles[player:GetHeadDirection()])
+		return HeadDirectionFire
 	end
 end
 
