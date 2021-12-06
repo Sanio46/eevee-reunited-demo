@@ -1,6 +1,9 @@
 local eeveeEncyclopedia = {}
 
+local EeveePortrait
+
 if Encyclopedia then
+	
 	local CharactersWiki = {
 		PlayerEevee = {
 			{ -- Start Data
@@ -162,21 +165,31 @@ if Encyclopedia then
 			},
 		},
 	}
+	
+	function eeveeEncyclopedia.Init(mod)
+		EeveePortrait = Encyclopedia.RegisterSprite(mod.path .. "content/gfx/characterportraits.anm2", "Eevee", 0)
+	end
+	
+	function eeveeEncyclopedia.AddEncyclopediaDescs()
+	
+		Encyclopedia.AddCharacter({
+			ModName = EEVEEMOD.Name,
+			Name = "Eevee",
+			ID = EEVEEMOD.PlayerType.EEVEE,
+			Sprite = EeveePortrait,
+			WikiDesc = CharactersWiki.PlayerEevee,
+		})
 
-	Encyclopedia.AddItem({
-		ModName = EEVEEMOD.Name,
-		ID = EEVEEMOD.CollectibleType.TAIL_WHIP,
-		Name = "Tail Whip",
-		Desc = "Aggressive tail wagging",
-		WikiDesc = ItemsWiki.TailWhip,
-	})
+		Encyclopedia.AddItem({
+			ModName = EEVEEMOD.Name,
+			ID = EEVEEMOD.CollectibleType.TAIL_WHIP,
+			Name = "Tail Whip",
+			Desc = "Aggressive tail wagging",
+			WikiDesc = ItemsWiki.TailWhip,
+		})
+		
+	end
 
-	Encyclopedia.AddCharacter({
-		ModName = EEVEEMOD.Name,
-		Name = "Eevee",
-		ID = EEVEEMOD.PlayerType.EEVEE,
-		WikiDesc = CharactersWiki.PlayerEevee,
-	})
 end
 
 return eeveeEncyclopedia

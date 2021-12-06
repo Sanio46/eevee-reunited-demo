@@ -118,6 +118,9 @@ for i, luas in ipairs(EeveeLuas) do
 	end
 end
 
+EEVEEMOD.Src["modsupport"]["encyclopedia"].Init(EeveeReunited)
+EEVEEMOD.Src["modsupport"]["encyclopedia"].AddEncyclopediaDescs()
+
 EeveeReunited:AddCallback(ModCallbacks.MC_NPC_UPDATE, EEVEEMOD.Src["callbacks"]["npcUpdate"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_UPDATE, EEVEEMOD.Src["callbacks"]["postUpdate"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_RENDER, EEVEEMOD.Src["callbacks"]["postRender"].main)
