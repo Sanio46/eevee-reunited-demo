@@ -1,9 +1,10 @@
 local swiftKnife = {}
 local swiftBase = EEVEEMOD.Src["attacks"]["swift.swiftBase"]
+local swiftSynergies = EEVEEMOD.Src["attacks"]["swift.swiftSynergies"]
 
 local knifeLifetime = 50
 
-local function AssignSwiftFakeKnifeData(player, tearKnife, anglePos)
+local function AssignSwiftFakeKnifeData(player, tearKnife, knife, anglePos)
 	local dataPlayer = player:GetData()
 	local dataTearKnife = tearKnife:GetData()
 	local tC = tearKnife:GetSprite().Color
@@ -12,6 +13,7 @@ local function AssignSwiftFakeKnifeData(player, tearKnife, anglePos)
 	swiftBase:AssignSwiftBasicData(tearKnife, player, anglePos)
 	tearKnife:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), -1, 1, false, false)
 	dataTearKnife.Swift.IsFakeKnife = true
+	tearKnife.Child = knife
 	dataTearKnife.HeightDuration = knifeLifetime
 	tearKnife.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
 	tearKnife.CollisionDamage = 0
@@ -43,12 +45,13 @@ local function AssignSwiftKnifeData(knife, tearKnife, invis)
 end
 
 function swiftKnife:FireSwiftKnife(knifeParent, player, direction)
-	local tearKnife = player:FireTear(knifeParent.Position, direction)
+	local tearKnife = player:FireTear(knifeParent.Position, direction, false, false, false, player, 1)
 	local knife = player:FireKnife(tearKnife)
 	local dataTearKnife = tearKnife:GetData()
 	
 	dataTearKnife.Swift = {}
 	dataTearKnife.Swift.IsFakeKnife = true
+	tearKnife.Child = knife
 	dataTearKnife.HeightDuration = knifeLifetime
 	dataTearKnife.Swift.ShotDir = EEVEEMOD.API.GetIsaacShootingDirection(player)
 	dataTearKnife.Swift.HoldTearHeight = tearKnife.Height
@@ -68,19 +71,20 @@ end
 
 function swiftKnife:SpawnSwiftKnives(player, degreeOfKnifeSpawns, offset)
 	local dataPlayer = player:GetData()
-	local anglePos = swiftBase:SpawnPos(player, degreeOfTearSpawns, offset)
-	local tearKnife = player:FireTear(player.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero)
+	local anglePos = swiftBase:SpawnPos(player, degreeOfKnifeSpawns, offset)
+	local tearKnife = player:FireTear(player.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, false, false, false, player, 1)
 	local knife = player:FireKnife(player)
 	
-	AssignSwiftFakeKnifeData(player, tearKnife, anglePos)
+	AssignSwiftFakeKnifeData(player, tearKnife, knife, anglePos)
 	AssignSwiftKnifeData(knife, tearKnife, true)
 	swiftBase:AddSwiftTrail(tearKnife)
 	
 	if dataPlayer.Swift.MultiShots > 0 then
 	local multiOffset = EEVEEMOD.RandomNum(360)
-		for i = 1, dataPlayer.Swift.MultiShots do
-			local anglePos = swiftBase:SpawnPosMulti(player, degreeOfTearSpawns, offset, multiOffset, i)
-			local tearKnifeMulti = player:FireTear(tearKnife.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero)
+		for i = 1, dataPlayer.Swift.MultiShots + swiftSynergies:BookwormShot(player) do
+			local orbit = swiftBase:MultiSwiftTearDistanceFromTear(player)
+			local anglePos = swiftBase:SpawnPosMulti(player, degreeOfKnifeSpawns, offset, multiOffset, orbit, i)
+			local tearKnifeMulti = player:FireTear(tearKnife.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, false, false, false, player, 1)
 			local knifeMulti = player:FireKnife(player)
 			local dataMultiTear = tearKnifeMulti:GetData()
 			

@@ -17,17 +17,16 @@ local function CalculateSwiftStats(player)
 	local degreeOfWeaponSpawns = 360/count
 	local offset = EEVEEMOD.API.GetIsaacShootingDirection(player):Rotated(-1 * degreeOfWeaponSpawns):GetAngleDegrees()
 	local duration = swiftBase:SwiftFireDelay(player) * count
-
+	
+	local isConstant = false
 	dataPlayer.Swift.AttackDuration = duration
 	dataPlayer.Swift.AttackDurationSet = duration
-	if not dataPlayer.Swift.RateOfOrbitRotation then
-		dataPlayer.Swift.RateOfOrbitRotation = 0
-	end
+	dataPlayer.Swift.RateOfOrbitRotation = 0
 	dataPlayer.Swift.Instance = {degreeOfWeaponSpawns, offset} --Even if stats change while the attack is active, this is to ensure consistency during 1 instance of a Swift attack
 	dataPlayer.Swift.NumWeaponsSpawned = 1
 	dataPlayer.Swift.TimeTillNextWeapon = swiftBase:SwiftFireDelay(player)
-	dataPlayer.Swift.MultiShots = swiftSynergies:MultiShotCount(player)
-	local isConstant = false
+	dataPlayer.Swift.MultiShots = swiftSynergies:MultiShotCountInit(player)
+	
 	if swiftBase:SwiftShouldBeConstant(player) then
 		isConstant = true
 	else
@@ -102,7 +101,6 @@ local function SwiftWeaponUpdateSynergies(weapon, player)
 	
 	swiftSynergies:ChocolateMilkDamageScaling(weapon, player)
 	swiftSynergies:DelayTearFlags(weapon, player)
-	swiftSynergies:TinyPlanetDistance(player, weapon)
 	swiftSynergies:AntiGravityDuration(player, weapon)
 			
 	if swiftSynergies:ShouldAttachTech2Laser(weapon, player)
@@ -180,7 +178,7 @@ function swiftAttack:SwiftMainFireWeapon(weapon, player)
 	end
 	
 	if not dataWeapon.Swift.ConstantOrbit then
-		if weapon.Type ~= EntityType.ENTITY_EFFECT then
+		if not swiftBase:IsSwiftLaserEffect(weapon) then
 			if not player:HasCollectible(CollectibleType.COLLECTIBLE_ANTI_GRAVITY) then
 				weapon.Velocity = swiftBase:TryFireToEnemy(player, weapon, fireDirection)
 			else
@@ -283,13 +281,13 @@ function swiftAttack:SwiftAttackWaitingToFire(weapon, player)
 	local dataPlayer = player:GetData()
 	local dataWeapon = weapon:GetData()
 	local shootDir = EEVEEMOD.API.GetIsaacShootingDirection(player)
-	
+
 	--Orbiting the player, rotating around them.
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_TRACTOR_BEAM) then
-		if dataPlayer.Swift.RateOfOrbitRotation and dataWeapon.Swift.PosToFollow then
-			if not dataWeapon.MultiSwiftTear then
-				weapon.Velocity = player.Position - (weapon.Position + dataWeapon.Swift.PosToFollow:Resized(dataWeapon.Swift.DistFromPlayer):Rotated(dataPlayer.Swift.RateOfOrbitRotation))			
-			end
+		if dataPlayer.Swift.RateOfOrbitRotation
+		and dataWeapon.Swift.PosToFollow
+		and not dataWeapon.MultiSwiftTear then
+			weapon.Velocity = player.Position - (weapon.Position + dataWeapon.Swift.PosToFollow:Resized(dataWeapon.Swift.DistFromPlayer):Rotated(dataPlayer.Swift.RateOfOrbitRotation))			
 		end
 	else
 		weapon.Position = player.Position + dataWeapon.Swift.ShotDir:Resized(dataWeapon.Swift.DistFromPlayer)
@@ -331,11 +329,11 @@ function swiftAttack:SwiftAttackUpdate(weapon)
 	if weapon.SpawnerType == EntityType.ENTITY_PLAYER then
 		local player = weapon.SpawnerEntity:ToPlayer() or weapon.SpawnerEntity:ToFamiliar().Player
 		local dataPlayer = player:GetData()
-		
+
 		if dataPlayer.Swift
 		and dataWeapon.Swift
 		and dataWeapon.Swift.IsSwiftWeapon then
-		
+
 			SwiftWeaponUpdateSynergies(weapon, player)
 			swiftAttack:ShouldRestoreSwiftTrail(player, weapon)
 			swiftAttack:SwiftMultiRotation(player, weapon)
@@ -356,7 +354,7 @@ function swiftAttack:SwiftAttackUpdate(weapon)
 							end
 							swiftAttack:SwiftMainFireWeapon(weapon, player)
 							dataWeapon.Swift.HasFired = true
-						end
+						end				
 					else
 						if dataWeapon.Swift.ShotDelay <= 0 then
 							if swiftBase:IsSwiftLaserEffect(weapon) == "brim" then
@@ -507,6 +505,7 @@ local function SwiftShotDelayTimer()
 		{EntityType.ENTITY_TEAR, -1},
 		{EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT},
 		{EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL},
+		{EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.EVIL_EYE},
 		{EntityType.ENTITY_KNIFE, -1},
 		{EntityType.ENTITY_LASER, -1},
 		{EntityType.ENTITY_BOMBDROP, -1}
@@ -517,7 +516,6 @@ local function SwiftShotDelayTimer()
 			
 			if dataWeapon.Swift then
 				if dataWeapon.Swift.IsSwiftWeapon 
-				and dataWeapon.Swift.CanFire
 				and dataWeapon.Swift.ShotDelay
 				and dataWeapon.Swift.ShotDelay > 0 then
 					dataWeapon.Swift.ShotDelay = dataWeapon.Swift.ShotDelay - 0.5
@@ -548,9 +546,9 @@ local function SwiftShotDelayTimer()
 					if dataWeapon.Swift.LaserHasFired then
 						fired = "true"
 					end
-					--Isaac.RenderText(hasFired, screenposW.X, screenposW.Y + 30, 1, 1, 1, 1)
+					--Isaac.RenderText(shotdelay, screenposW.X, screenposW.Y + 30, 1, 1, 1, 1)
 					--Isaac.RenderText(tostring(dataWeapon.Swift.Timer), screenposW.X, screenposW.Y + 70, 1, 1, 1, 1)
-					--Isaac.RenderText("Dir: "..shootDir.X..", "..shootDir.Y, screenposW.X, screenposW.Y + 30, 1, 1, 1, 1)
+					--Isaac.RenderText("Dir: "..shootDir.X..", "..shootDir.Y, screenposW.X, screenposW.Y + 50, 1, 1, 1, 1)
 					--Isaac.RenderText("Constant: "..inConstantOrbit, screenposW.X, screenposW.Y + 10, 1, 1, 1, 1)
 					--Isaac.RenderText("Has Fired Laser: "..fired, screenposW.X, screenposW.Y + 50, 1, 1, 1, 1)
 					--Isaac.RenderText("Tech 2: "..hasTech2, screenposW.X, screenposW.Y + 50, 1, 1, 1, 1)
@@ -611,7 +609,6 @@ local function SwiftCooldownTimer(player)
 		else
 			dataPlayer.Swift.AttackCooldown = nil
 			dataPlayer.Swift.AttackInit = false
-			dataPlayer.Swift.RateOfOrbitRotation = 0
 		end
 	end
 end
@@ -654,6 +651,34 @@ end
 
 -- MISC
 
+function swiftAttack:InitSwiftEvilEye(effect)
+
+	if effect.Parent
+	and effect.Parent.Type == EntityType.ENTITY_PLAYER
+	and effect.Parent:ToPlayer() ~= nil then
+		local player = effect.Parent:ToPlayer()
+		local playerType = player:GetPlayerType()
+		local dataPlayer = player:GetData()
+		local dataEffect = effect:GetData()
+		
+		if effect.SpawnerEntity == nil and effect.SpawnerType == EntityType.ENTITY_NULL then
+			effect.SpawnerEntity = effect.Parent
+			effect.SpawnerType = EntityType.ENTITY_PLAYER
+		end
+		if dataEffect.Swift then
+			--print(dataEffect.Swift.PosToFollow)
+		end
+		if playerType == EEVEEMOD.PlayerType.EEVEE
+		and dataPlayer.Swift
+		and not dataEffect.Swift then
+			swiftBase:AssignSwiftBasicData(effect, player, swiftBase:SpawnPos(player, dataPlayer.Swift.Instance[1], dataPlayer.Swift.Instance[2]))
+			swiftBase:AddSwiftTrail(effect, player)
+			local tC = effect:GetSprite().Color
+			effect:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 15, 1, true, false)
+		end
+	end
+end
+
 function swiftAttack:RespawnSwiftPerRoom(player)
 	local dataPlayer = player:GetData()
 
@@ -685,6 +710,13 @@ function swiftAttack:SwiftTrailUpdate(trail)
 				if weapon:GetData().Swift.IsFakeKnife then
 					trail:SetColor(Color(wC.R, wC.G, wC.B, 1, wC.RO, wC.GO, wC.BO), -1, 1, true, false)
 				else
+					if not swiftBase:AreColorsDifferent(wC, Color.Default) then
+						if weapon:GetSprite():GetFilename() == "gfx/tear_swift_blood.anm2" then
+							wC = EEVEEMOD.TrailColor.Blood
+						else
+							wC = EEVEEMOD.TrailColor.Normal
+						end
+					end
 					trail:SetColor(wC, -1, 1, true, false)
 				end
 			end
@@ -706,7 +738,10 @@ function swiftAttack:SwiftTrailUpdate(trail)
 			end
 			trail.Position = Vector(weapon.Position.X, (weapon.Position.Y + (tearHeightToFollow + heightDif)) - sizeToFollow) + weapon:ToTear().PosDisplacement
 		else
-			trail.Position = Vector(weapon.Position.X, weapon.Position.Y + weapon.PositionOffset.Y)
+			if weapon.Type == EntityType.ENTITY_EFFECT and weapon.Variant == EffectVariant.EVIL_EYE then
+				heightDif = 10
+			end
+			trail.Position = Vector(weapon.Position.X, weapon.Position.Y + weapon.PositionOffset.Y + heightDif)
 		end
 	end
 end

@@ -71,6 +71,7 @@ local EeveeLuas = {
 		"postLaserUpdate",
 		"postKnifeInit",
 		"postKnifeUpdate",
+		"postEffectInit",
 		"postEffectUpdate",
 		"postBombUpdate",
 	},
@@ -138,6 +139,7 @@ EeveeReunited:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, EEVEEMOD.Src["callba
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE, EEVEEMOD.Src["callbacks"]["postLaserUpdate"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_KNIFE_INIT, EEVEEMOD.Src["callbacks"]["postKnifeInit"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, EEVEEMOD.Src["callbacks"]["postKnifeUpdate"].main)
+EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, EEVEEMOD.Src["callbacks"]["postEffectInit"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, EEVEEMOD.Src["callbacks"]["postEffectUpdate"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, EEVEEMOD.Src["callbacks"]["postBombUpdate"].main)
 

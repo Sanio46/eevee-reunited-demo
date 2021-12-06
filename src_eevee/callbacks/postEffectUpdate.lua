@@ -6,6 +6,7 @@ local eeveeBirthright = EEVEEMOD.Src["items"]["collectibles.eeveeBirthright"]
 local eeveeBasics = EEVEEMOD.Src["player"]["eeveeBasics"]
 
 function postEffectUpdate:main(effect)
+
 	if effect.Variant == EffectVariant.SPRITE_TRAIL then
 		swiftAttack:SwiftTrailUpdate(effect)
 	end
@@ -18,8 +19,13 @@ function postEffectUpdate:main(effect)
 		eeveeBasics:FindDeadPlayerEffect(effect)
 	end
 	
-	if swiftBase:IsSwiftLaserEffect(effect) then
-	
+	if swiftBase:IsSwiftLaserEffect(effect)
+	or effect.Variant == EffectVariant.EVIL_EYE then
+		
+		if effect.Variant == EffectVariant.EVIL_EYE then
+			swiftAttack:InitSwiftEvilEye(effect)
+		end
+		
 		swiftAttack:SwiftAttackUpdate(effect)
 		
 		if swiftBase:IsSwiftLaserEffect(effect) == "brim" then

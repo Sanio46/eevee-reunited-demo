@@ -138,31 +138,41 @@ local MultiWeaponTypeCombos = {
 	[WeaponType.WEAPON_KNIFE] = CollectibleType.COLLECTIBLE_MOMS_KNIFE
 }
 
-function swiftSynergies:MultiShotCount(player)
+local ItemToShotNum = {
+	[CollectibleType.COLLECTIBLE_20_20] = 1,
+	[CollectibleType.COLLECTIBLE_INNER_EYE] = 2,
+	[CollectibleType.COLLECTIBLE_MUTANT_SPIDER] = 3
+}
+
+function swiftSynergies:MultiShotCountInit(player)
 	local count = 0
-	if player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then
-		if EEVEEMOD.RandomNum(2) == 2 then
-			count = count + (1 * player:GetCollectibleNum(CollectibleType.COLLECTIBLE_20_20))
+
+	for itemID, num in pairs(ItemToShotNum) do
+		if player:HasCollectible(itemID) then
+			count = count + num
+			if player:GetCollectibleNum(itemID) >= 2 then
+				count = count + (player:GetCollectibleNum(itemID) - 1)
+			end
 		end
-	end
-	
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_INNER_EYE) then
-		count = count + (2 * player:GetCollectibleNum(CollectibleType.COLLECTIBLE_INNER_EYE))
 	end
 	if player:GetEffects():HasNullEffect(NullItemID.ID_REVERSE_HANGED_MAN) then
-		count = count + 2
-	end
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_MUTANT_SPIDER) then
-		count = count + (3 * player:GetCollectibleNum(CollectibleType.COLLECTIBLE_MUTANT_SPIDER))
-	end
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_20_20) then
-		count = count + (1 * player:GetCollectibleNum(CollectibleType.COLLECTIBLE_20_20))
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_COLLECTIBLE_INNER_EYE)
-		or player:HasCollectible(CollectibleType.COLLECTIBLE_MUTANT_SPIDER)
-		or player:GetEffects():HasNullEffect(NullItemID.ID_REVERSE_HANGED_MAN)
+		if  not player:HasCollectible(CollectibleType.COLLECTIBLE_20_20)
+		and not player:HasCollectible(CollectibleType.COLLECTIBLE_COLLECTIBLE_INNER_EYE)
+		and not player:HasCollectible(CollectibleType.COLLECTIBLE_MUTANT_SPIDER)
 		then
-			count = count - 1
+			count = count + 2
+		else
+			count = count + 1
 		end
+	end
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_20_20) and
+	(
+		player:HasCollectible(CollectibleType.COLLECTIBLE_INNER_EYE)
+	or player:HasCollectible(CollectibleType.COLLECTIBLE_MUTANT_SPIDER)
+	or player:GetEffects():HasNullEffect(NullItemID.ID_REVERSE_HANGED_MAN)
+	)
+	then
+		count = count - 1
 	end
 	local wizCount = 0
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_THE_WIZ) then
@@ -192,6 +202,17 @@ function swiftSynergies:MultiShotCount(player)
 	end
 	if count > 16 then
 		count = 16
+	end
+
+	return count
+end
+
+function swiftSynergies:BookwormShot(player)
+	local count = 0
+	if player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then
+		if EEVEEMOD.RandomNum(2) == 2 then
+			count = 1
+		end
 	end
 	return count
 end
@@ -227,7 +248,7 @@ function swiftSynergies:ShouldFireExtraShot(player, itemID)
 	end
 end
 
-function swiftSynergies:TinyPlanetDistance(player, weapon)
+--[[function swiftSynergies:TinyPlanetDistance(player, weapon)
 	local dataPlayer = player:GetData()
 	local dataWeapon = weapon:GetData()
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_TINY_PLANET) then
@@ -242,7 +263,7 @@ function swiftSynergies:TinyPlanetDistance(player, weapon)
 			dataWeapon.Swift.DistFromPlayer = dataWeapon.Swift.OriginalDist - (dataWeapon.Swift.OriginalDist * distanceCalc)
 		end
 	end
-end
+end]]
 
 function swiftSynergies:IsKidneyStoneActive(player)
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_KIDNEY_STONE) then
@@ -281,7 +302,12 @@ function swiftSynergies:AntiGravityDuration(player, weapon)
 		if dataWeapon.Swift.AntiGravTimer > 0 and player:GetFireDirection() ~= Direction.NO_DIRECTION then
 			if dataWeapon.Swift.AntiGravTimer % 15 == 0 then
 				local c = weapon:GetSprite().Color
-				weapon:SetColor(Color(c.R, c.G, c.B, c.A, 0, 0.5, 0.5), 14, 2, true, false)
+				if dataWeapon.Swift.IsFakeKnife then
+					c = weapon.Child:GetSprite().Color
+					weapon.Child:SetColor(Color(c.R, c.G, c.B, 1, 0, 0.5, 0.5), 14, 2, true, false)
+				else
+					weapon:SetColor(Color(c.R, c.G, c.B, 1, 0, 0.5, 0.5), 14, 2, true, false)
+				end
 			end
 			dataWeapon.Swift.AntiGravTimer = dataWeapon.Swift.AntiGravTimer - 1
 			if weapon.Type == EntityType.ENTITY_TEAR and dataWeapon.Swift.AntiGravHeight then

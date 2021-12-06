@@ -7,10 +7,9 @@ function swiftBase:SpawnPos(player, degreeOfTearSpawns, offset)
 	return anglePos
 end
 
-function swiftBase:SpawnPosMulti(player, degreeOfTearSpawns, offset, multiOffset, i)
+function swiftBase:SpawnPosMulti(player, degreeOfTearSpawns, offset, multiOffset, orbit, i)
 	local dataPlayer = player:GetData()
 	local degrees = 360/dataPlayer.Swift.MultiShots
-	local orbit = swiftBase:MultiSwiftTearDistanceFromTear(player)
 	local anglePos = Vector.FromAngle(((degrees * i) * dataPlayer.Swift.NumWeaponsSpawned)):Resized(orbit):Rotated(multiOffset)
 	return anglePos
 end
@@ -33,7 +32,7 @@ end
 function swiftBase:SwiftShotVelocity(direction, player, useMovement)
 	local newDirection = direction:Resized(10 * player.ShotSpeed)
 	if useMovement then
-		return newDirection + player:GetMovementInput():Resized(5)
+		return newDirection + player:GetMovementInput():Resized(3)
 	else
 		return newDirection
 	end
@@ -46,29 +45,40 @@ function swiftBase:TryFireToEnemy(player, weapon, fireDir)
 	local dirToEnemy = nil
 	local angleLimit = 45
 	
-	if closestEnemy ~= nil then
-		dirToEnemy = (closestEnemy.Position - weapon.Position):Normalized()
-	end
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)
+	and not player:HasCollectible(CollectibleType.COLLECTIBLE_TRACTOR_BEAM)
+	and not player:HasCollectible(CollectibleType.COLLECTIBLE_EYE_OF_THE_OCCULT)
+	then
+		if closestEnemy ~= nil then
+			dirToEnemy = (closestEnemy.Position - weapon.Position):Normalized()
+		end
 
-	if dirToEnemy ~= nil and math.abs(math.abs(dirToEnemy:GetAngleDegrees()) - math.abs(fireDir:GetAngleDegrees())) <= angleLimit then
-		newFireDir = swiftBase:SwiftShotVelocity(dirToEnemy, player, true)
+		if dirToEnemy ~= nil and math.abs(math.abs(dirToEnemy:GetAngleDegrees()) - math.abs(fireDir:GetAngleDegrees())) <= angleLimit then
+			newFireDir = swiftBase:SwiftShotVelocity(dirToEnemy, player, true)
+		end
 	end
 	return newFireDir
 end
 
 function swiftBase:SwiftShotDelay(weapon, player)
 	local dataPlayer = player:GetData()
+	local dataWeapon = weapon:GetData()
 	local delay = swiftBase:SwiftFireDelay(player) / (5 / dataPlayer.Swift.NumWeaponsSpawned)
+
 	if not dataPlayer.Swift.Constant then
 		if swiftBase:SwiftFireDelay(player) < 5
 		or weapon.Type == EntityType.ENTITY_EFFECT
 		or (weapon.Type == EntityType.ENTITY_TEAR
-		and weapon:GetData().Swift.IsFakeKnife)
+		and dataWeapon.Swift.IsFakeKnife)
 		then
 			delay = 0
 		end
 	else
-		delay = swiftBase:SwiftFireDelay(player) + math.abs(swiftBase:SwiftFireDelay(player) * 5)
+		if dataPlayer.Swift.AttackDuration > 0 and player.MaxFireDelay <= 1 then
+			delay = 2 * dataPlayer.Swift.NumWeaponsSpawned
+		else
+			delay = swiftBase:SwiftFireDelay(player) + math.abs(swiftBase:SwiftFireDelay(player) * 5)
+		end
 	end
 	return delay
 end
@@ -98,11 +108,15 @@ function swiftBase:AddSwiftTrail(weapon, player)
 				local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):ToEffect()
 				
 				if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
-					local tC = Color(1, 1, 0.5, 1, 0.176, 0.05, 0)
+					local tC = EEVEEMOD.TrailColor.Normal
 					local dC = Color.Default
 					local wC = weapon:GetSprite().Color
 					
 					if weapon.Type == EntityType.ENTITY_TEAR then --Covers tears and knives
+						if weapon:GetSprite():GetFilename() == "gfx/tear_swift_blood.anm2" then
+							tC = EEVEEMOD.TrailColor.Blood
+						end
+					
 						if swiftBase:AreColorsDifferent(wC, dC) == true then
 							if weapon:GetData().Swift.IsFakeKnife then
 								tC = Color(wC.R, wC.G, wC.B, 0, wC.RO, wC.GO, wC.BO)
@@ -142,9 +156,6 @@ function swiftBase:SwiftTearDistanceFromPlayer(player)
 		distFromPlayer = 70
 	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_LOST_CONTACT) then
 		distFromPlayer = 30
-	end
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_TINY_PLANET) then
-		distFromPlayer = distFromPlayer * 2
 	end
 	return distFromPlayer
 end
@@ -218,12 +229,13 @@ function swiftBase:AreColorsDifferent(c1, c2)
 end
 
 function swiftBase:IsSwiftLaserEffect(effect)
+	local variant = nil
 	if effect.Variant == EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT then
-		return "tech"
+		variant = "tech"
 	elseif effect.Variant == EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL then
-		return "brim"
+		variant = "brim"
 	else
-		return nil
+		return variant
 	end
 end
 
@@ -231,6 +243,7 @@ function swiftBase:SwiftShouldBeConstant(player)
 	local playerEffects = player:GetEffects()
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_SOY_MILK)
 	or player:HasCollectible(CollectibleType.COLLECTIBLE_ALMOND_MILK)
+	or player:HasCollectible(CollectibleType.COLLECTIBLE_TINY_PLANET)
 	or swiftBase:SwiftFireDelay(player) <= 1
 	then
 		return true

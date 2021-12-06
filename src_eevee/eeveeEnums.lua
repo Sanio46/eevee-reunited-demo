@@ -95,4 +95,9 @@ EEVEEMOD.SkinColorToString = {
 	[SkinColor.SKIN_SHADOW] = "_shadow"
 }
 
+EEVEEMOD.TrailColor = {
+	Normal = Color(1, 1, 0.5, 1, 0.176, 0.05, 0),
+	Blood = Color(1, 0, 0, 1, 0, 0, 0),
+}
+
 return EEVEEMOD

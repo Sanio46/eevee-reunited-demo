@@ -1,5 +1,6 @@
 local swiftLaser = {}
 local swiftBase = EEVEEMOD.Src["attacks"]["swift.swiftBase"]
+local swiftSynergies = EEVEEMOD.Src["attacks"]["swift.swiftSynergies"]
 
 local function SwiftLaserType(player)
 	if player:HasWeaponType(WeaponType.WEAPON_TECH_X) then
@@ -50,7 +51,7 @@ end
 
 function swiftLaser:SpawnSwiftLasers(player, degreeOfLaserSpawns, offset)
 	local dataPlayer = player:GetData()
-	local anglePos = swiftBase:SpawnPos(player, degreeOfTearSpawns, offset)
+	local anglePos = swiftBase:SpawnPos(player, degreeOfLaserSpawns, offset)
 	local laserVariant = nil
 	if SwiftLaserType(player) == "brim"
 	or (SwiftLaserType(player) == "techX" and player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE)) then
@@ -66,8 +67,9 @@ function swiftLaser:SpawnSwiftLasers(player, degreeOfLaserSpawns, offset)
 		
 		if dataPlayer.Swift.MultiShots > 0 then
 		local multiOffset = EEVEEMOD.RandomNum(360)
-			for i = 1, dataPlayer.Swift.MultiShots do
-				local anglePos = swiftBase:SpawnPosMulti(player, degreeOfTearSpawns, offset, multiOffset, i)
+			for i = 1, dataPlayer.Swift.MultiShots + swiftSynergies:BookwormShot(player) do
+				local orbit = swiftBase:MultiSwiftTearDistanceFromTear(player)
+				local anglePos = swiftBase:SpawnPosMulti(player, degreeOfLaserSpawns, offset, multiOffset, orbit, i)
 				local effectMulti = Isaac.Spawn(EntityType.ENTITY_EFFECT, laserVariant, 0, effect.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, player):ToEffect()
 				local dataMultiEffect = effectMulti:GetData()
 				
@@ -116,7 +118,7 @@ function swiftLaser:FireTechXLaser(parent, player, direction)
 	if damageMult == 0 then
 		damageMult = 0.25
 	end
-	local techX = player:FireTechXLaser(parent.Position, direction, radius, player, damageMult)
+	local techX = player:FireTechXLaser(parent.Position, swiftBase:SwiftShotVelocity(direction, player, true), radius, player, damageMult)
 	local dataTechX = techX:GetData()
 	dataTechX.Swift = {}
 	dataTechX.Swift.Player = player
@@ -189,7 +191,10 @@ local LaserEffectSize = {
 
 function swiftLaser:SwiftLaserEffectUpdate(effect)
 	
-	if effect.Parent and effect.Parent.Type == EntityType.ENTITY_PLAYER then
+	if effect.Parent
+	and effect.Parent.Type == EntityType.ENTITY_PLAYER
+	and swiftBase:IsSwiftLaserEffect(effect) then
+
 	local player = effect.Parent:ToPlayer()
 	local dataPlayer = player:GetData()
 	local dataEffect = effect:GetData()
