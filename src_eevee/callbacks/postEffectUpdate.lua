@@ -3,7 +3,7 @@ local postEffectUpdate = {}
 local swiftAttack = EEVEEMOD.Src["attacks"]["swift.swiftAttack"]
 local swiftBase = EEVEEMOD.Src["attacks"]["swift.swiftBase"]
 local eeveeBirthright = EEVEEMOD.Src["items"]["collectibles.eeveeBirthright"]
-local eeveeBasics = EEVEEMOD.Src["player"]["eeveeBasics"]
+local eeveeSFX = EEVEEMOD.Src["player"]["eeveeSFX"]
 
 function postEffectUpdate:main(effect)
 
@@ -16,7 +16,7 @@ function postEffectUpdate:main(effect)
 	end
 	
 	if effect.Variant == EffectVariant.DEVIL then
-		eeveeBasics:FindDeadPlayerEffect(effect)
+		eeveeSFX:FindDeadPlayerEffect(effect)
 	end
 	
 	if swiftBase:IsSwiftLaserEffect(effect)

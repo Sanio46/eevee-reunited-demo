@@ -1,10 +1,10 @@
 local useCard = {}
 
-local eeveeBasics = EEVEEMOD.Src["player"]["eeveeBasics"]
+local eeveeSFX = EEVEEMOD.Src["player"]["eeveeSFX"]
 
 function useCard:main(card, player, useFlags)
 	if card == Card.CARD_SOUL_SAMSON then
-		eeveeBasics:OnSamsonSoul(card, player, useFlags)
+		eeveeSFX:OnSamsonSoul(card, player, useFlags)
 	end
 end
 

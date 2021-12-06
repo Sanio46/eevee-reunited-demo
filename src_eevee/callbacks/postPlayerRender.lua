@@ -1,12 +1,12 @@
 local postPlayerRender = {}
 
-local eeveeBasics = EEVEEMOD.Src["player"]["eeveeBasics"]
+local eeveeSFX = EEVEEMOD.Src["player"]["eeveeSFX"]
 local ccp = EEVEEMOD.Src["player"]["characterCostumeProtector"]
 local swiftAttack = EEVEEMOD.Src["attacks"]["swift.swiftAttack"]
 
 function postPlayerRender:main(player)
 	ccp:RestoreCostumeInMineshaft(player)
-	eeveeBasics:PlayHurtSFX(player)
+	eeveeSFX:PlayHurtSFX(player)
 	swiftAttack:SwiftAttackTimers(player)
 end
 

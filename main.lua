@@ -43,6 +43,7 @@ local EeveeLuas = {
 	{"player", {
 		"characterCostumeProtector",
 		"eeveeBasics",
+		"eeveeSFX",
 		"eeveeGhost",
 		"eeveeStats",
 		"itemEffectOnFire",
