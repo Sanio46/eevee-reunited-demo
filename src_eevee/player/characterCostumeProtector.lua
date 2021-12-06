@@ -17,6 +17,7 @@ local playerSpritesheet = {
 }
 local playerItemCostumeWhitelist = {}
 local playerNullItemCostumeWhitelist = {}
+local playerTrinketCostumeWhitelist = {}
 local costumeList = {
 	[CollectibleType.COLLECTIBLE_SAD_ONION] = false,
 	[CollectibleType.COLLECTIBLE_INNER_EYE] = false,
@@ -480,6 +481,11 @@ local nullEffectsList = { --Null effects that are detectable that have costumes.
 	[125] = true, --Double Guppy's Eye
 	[126] = false --Double Glass Eye
 }
+local trinketCostumeList = {
+	[TrinketType.TRINKET_RED_PATCH] = false,
+	[TrinketType.TRINKET_TICK] = false,
+	[TrinketType.TRINKET_AZAZELS_STUMP] = true
+}
 local activeItemCostumes = {
 	[CollectibleType.COLLECTIBLE_BIBLE] = true,
 	[CollectibleType.COLLECTIBLE_BOOK_OF_BELIAL] = true,
@@ -600,6 +606,18 @@ local function RemoveBlacklistedCostumes(player)
 		and playerNullItemCostumeWhitelist[playerType][nullItemID] == false
 		then
 			player:TryRemoveNullCostume(nullItemID)
+		end
+	end
+	
+	--Trinkets
+	for trinketID, _ in pairs(trinketCostumeList) do
+		if ((trinketID == TrinketType.TRINKET_TICK
+		and player:HasTrinket(trinketID))
+		or playerEffects:HasTrinketEffect(trinketID))
+		and data.CCP.TrinketActive[trinketID]
+		and playerTrinketCostumeWhitelist[playerType][trinketID] == true then
+			local trinketCostume = Isaac.GetItemConfig():GetTrinket(trinketID)
+			player:RemoveCostume(trinketCostume)
 		end
 	end
 	
@@ -737,10 +755,18 @@ local function InitiateNullItemWhitelist(playerType)
 	end
 end
 
+local function InitiateTrinketWhitelist(playerType)
+	playerTrinketCostumeWhitelist[playerType] = {}
+	for trinketID, boolean in pairs(trinketCostumeList) do
+		playerTrinketCostumeWhitelist[playerType][trinketID] = boolean
+	end
+end
+
 local function InitiateWhitelists()
 	for playerType, boolean in pairs(playerToProtect) do
 		InitiateItemWhitelist(playerType)
 		InitiateNullItemWhitelist(playerType)
+		InitiateTrinketWhitelist(playerType)
 	end
 end
 
@@ -801,13 +827,11 @@ function ccp:ResetPlayerCostumes(player)
 		player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(basePath.."delirious.anm2"))
 	
 		--Item Costumes
-		if playerItemCostumeWhitelist[playerType] then
-			for itemID, _ in pairs(playerItemCostumeWhitelist[playerType]) do
-				local itemCostume = Isaac.GetItemConfig():GetCollectible(itemID)
-				if ccp:CanRemoveCollectibleCostume(player, itemID)
-				and playerItemCostumeWhitelist[playerType][itemID] == false then
-					player:AddCostume(itemCostume, false)
-				end
+		for itemID, _ in pairs(playerItemCostumeWhitelist[playerType]) do
+			local itemCostume = Isaac.GetItemConfig():GetCollectible(itemID)
+			if ccp:CanRemoveCollectibleCostume(player, itemID)
+			and playerItemCostumeWhitelist[playerType][itemID] == false then
+				player:AddCostume(itemCostume, false)
 			end
 		end
 		
@@ -827,6 +851,18 @@ function ccp:ResetPlayerCostumes(player)
 			and playerNullItemCostumeWhitelist[playerType][nullItemID] == false
 			and not nullEffectsList[nullItemID] then
 				player:AddNullCostume(nullItemID)
+			end
+		end
+		
+		--Trinkets
+		for trinketID, _ in pairs(trinketCostumeList) do
+			if ((trinketID == TrinketType.TRINKET_TICK
+			and player:HasTrinket(trinketID))
+			or playerEffects:HasTrinketEffect(trinketID))
+			and data.CCP.TrinketActive[trinketID]
+			and playerTrinketCostumeWhitelist[playerType][trinketID] == false then
+				local trinketCostume = Isaac.GetItemConfig():GetTrinket(trinketID)
+				player:AddCostume(trinketCostume)
 			end
 		end
 		
@@ -856,6 +892,7 @@ function ccp:InitPlayerCostume(player)
 			data.CCP.NumCollectibles = player:GetCollectibleCount()
 			data.CCP.NumTemporaryEffects = player:GetEffects():GetEffectsList().Size
 			data.CCP.QueueCostumeRemove = {}
+			data.CCP.TrinketActive = {}
 			data.CCP.HasCostumeInitialized = {
 				[playerType] = true
 			}
@@ -871,20 +908,19 @@ function ccp:DeinitPlayerCostume(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 	
-	if not playerToProtect[playerType] --PlayerType isn't in local protection system
-	and data.CCP
+	if data.CCP
 	and data.CCP.HasCostumeInitialized --Has the protection data
-	and not data.CCP.HasCostumeInitialized[playerType] --For those given protection outside of this mod
+	and not data.CCP.HasCostumeInitialized[playerType] --For other characters given protection in their own copy of the library
+	and not playerToProtect[playerType] --PlayerType isn't in local protection system
 	then
 		ccp:ResetPlayerCostumes(player)
-		data.CCP.NumCollectibles = nil
-		data.CCP.NumTemporaryEffects = nil
-		data.CCP.HasCostumeInitialized = nil
+		data.CCP = nil
 	end
 end
 
 function ccp:MiscCostumeResets(player)
 	local data = player:GetData()
+	local playerEffects = player:GetEffects()
 	
 	if data.CCP.NumCollectibles
 	and data.CCP.NumCollectibles ~= player:GetCollectibleCount()
@@ -899,6 +935,28 @@ function ccp:MiscCostumeResets(player)
 	then
 		data.CCP.NumTemporaryEffects = player:GetEffects():GetEffectsList().Size
 		ccp:MainResetPlayerCostumes(player)
+	end
+	
+	for trinketID, _ in pairs(trinketCostumeList) do
+		if ((trinketID == TrinketType.TRINKET_TICK
+		and player:HasTrinket(trinketID))
+		or playerEffects:HasTrinketEffect(trinketID))
+		then
+			if not data.CCP.TrinketActive[trinketID] then
+				if not playerTrinketCostumeWhitelist[playerType][trinketID] then
+					local trinketCostume = Isaac.GetItemConfig():GetTrinket(trinketID)
+					player:RemoveCostume(trinketCostume)
+				end	
+				data.CCP.TrinketActive[trinketID] = true
+			end
+		elseif (trinketID == TrinketType.TRINKET_TICK
+		and not player:HasTrinket(trinketID))
+		or not playerEffects:HasTrinketEffect(trinketID)
+		then
+			if data.CCP.TrinketActive[trinketID] then
+				data.CCP.TrinketActive[trinketID] = false
+			end
+		end
 	end
 end
 
@@ -929,6 +987,7 @@ function ccp:AstralProjectionUpdate(player)
 		end
 	else
 		if data.CCP.AP_Disabled then
+			data.CCP.DelaySpritesheetChange = ""
 			data.CCP.AP_Disabled = nil
 		end
 	end
