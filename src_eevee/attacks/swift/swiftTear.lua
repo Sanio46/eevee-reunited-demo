@@ -1,10 +1,15 @@
 local swiftTear = {}
 local swiftBase = EEVEEMOD.Src["attacks"]["swift.swiftBase"]
+local swiftSynergies = EEVEEMOD.Src["attacks"]["swift.swiftSynergies"]
 
 local function AssignSwiftSprite(tear)
 local tearSprite = tear:GetSprite()
 local animationToPlay = "RegularTear6"
 local anm2ToUse = "gfx/tear_swift.anm2"
+	--Apparently spawne
+	local BloodVariants = {
+		
+	}
 	for i = 1,13 do
 		if tearSprite:IsPlaying("RegularTear" .. tostring(i)) then
 			animationToPlay = "RegularTear" .. tostring(i)
@@ -31,7 +36,7 @@ local function AssignSwiftTearData(player, tear, anglePos)
 end
 
 function swiftTear:FireSwiftTear(tearParent, player, direction)
-	local tear = player:FireTear(tearParent.Position, direction):ToTear()
+	local tear = player:FireTear(tearParent.Position, direction, true, false, true, player, 1):ToTear()
 	local tC = tear:GetSprite().Color
 	local pC = tearParent:GetSprite().Color
 	local dataTear = tear:GetData()
@@ -51,17 +56,18 @@ end
 function swiftTear:SpawnSwiftTears(player, degreeOfTearSpawns, offset)
 	local dataPlayer = player:GetData()
 	local anglePos = swiftBase:SpawnPos(player, degreeOfTearSpawns, offset)
-	local tear = player:FireTear(player.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero):ToTear()
-	
+	local tear = player:FireTear(player.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, true, false, true, player, 1):ToTear()
+
 	AssignSwiftTearData(player, tear, anglePos)
 	AssignSwiftSprite(tear)
 	swiftBase:AddSwiftTrail(tear, player)
-	
+
 	if dataPlayer.Swift.MultiShots > 0 then
 	local multiOffset = EEVEEMOD.RandomNum(360)
-		for i = 1, dataPlayer.Swift.MultiShots do
-			local anglePos = swiftBase:SpawnPosMulti(player, degreeOfTearSpawns, offset, multiOffset, i)
-			local tearMulti = player:FireTear(tear.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero):ToTear()
+		for i = 0, dataPlayer.Swift.MultiShots + swiftSynergies:BookwormShot(player) do
+			local orbit = swiftBase:MultiSwiftTearDistanceFromTear(player)
+			local anglePos = swiftBase:SpawnPosMulti(player, degreeOfTearSpawns, offset, multiOffset, orbit, i)
+			local tearMulti = player:FireTear(tear.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, true, false, true, player, 1):ToTear()
 			local dataMultiTear = tearMulti:GetData()
 			
 			dataMultiTear.MultiSwiftTear = tear
@@ -93,7 +99,7 @@ local SwiftTearVariantBlacklist = {
 	[TearVariant.FIRE] = true,
 }
 
-function swiftTear:OnTearInit(tear)
+function swiftTear:MakeSwiftTear(tear)
 	local dataTear = tear:GetData()
 
 	if tear.SpawnerType == EntityType.ENTITY_PLAYER 
