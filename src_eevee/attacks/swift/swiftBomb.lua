@@ -31,6 +31,7 @@ function swiftBomb:FireSwiftBomb(bombParent, player, direction)
 		local invisTime = bombParent.FrameCount
 		bomb:SetColor(Color(pC.R, pC.G, pC.B, 0, pC.RO, pC.GO, pC.BO), 15 - invisTime, 1, true, false)
 	end
+	swiftBase:AssignSwiftSounds(bomb)
 end
 
 function swiftBomb:SpawnSwiftBombs(player, degreeOfBombSpawns, offset)
@@ -55,6 +56,7 @@ function swiftBomb:SpawnSwiftBombs(player, degreeOfBombSpawns, offset)
 			bombMulti:SetSize(bomb.Size/2, Vector(0.5, 0.5), 8)
 		end
 	end
+	swiftBase:AssignSwiftSounds(bomb)
 end
 
 function swiftBomb:SwiftBombUpdate(bomb)

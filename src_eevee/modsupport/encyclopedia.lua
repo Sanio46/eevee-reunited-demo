@@ -125,7 +125,7 @@ if Encyclopedia then
 				{str = "A Pony turns the pony's head into that of the Pokemon 'Rapidash', while White Pony turns the head into Rapidash's Galarian form."},
 				{str = "There are several costumes that take on the look of different glasses found within the Pokemon Mystery Dungeon series. X-Ray Vision is 'X-Ray Specs', Deadeye is 'Scope Lens', Epiphora is 'Heavy Rotation Specs', and Tractor Beam is 'Lock-on Specs'."},
 				{str = "Dr. Fetus only adds the hat, but with an added gold band. The Bookworm transformation adds a mustache. Both of these costumes are in reference to Sanio's Pokesona, the main creator of this mod."},
-				{str = "Both Maggy's Bow and <3 are replaced with a bow worn on Sylveon, one of Eevee's evolutions."},
+				{str = "Both Maggy's Bow and 'Heart' are replaced with a bow worn on Sylveon, one of Eevee's evolutions."},
 				{str = "Chaos makes Eevee 'scrunge'. In this context, scrunge is a term used to describe when cats squint their eyes and pull their mouth back, slightly opening them and revealing their teeth."},
 				{str = "Infamy is replaced with the mask carried by the Pokemon 'Yamask'."},
 				{str = "With Whore of Babylon and Luna, where the appropriate symbol on Isaac's head would usually be, is replaced with an oval ring. This ring references the same one attached to Umbreon, one of Eevee's evolutions, although it is normally yellow."},

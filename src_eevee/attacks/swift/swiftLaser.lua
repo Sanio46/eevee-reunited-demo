@@ -79,6 +79,7 @@ function swiftLaser:SpawnSwiftLasers(player, degreeOfLaserSpawns, offset)
 				effectMulti:GetSprite().Scale = Vector(0.5,0.5)
 			end
 		end
+		swiftBase:AssignSwiftSounds(effect)
 	end
 end
 

@@ -51,6 +51,7 @@ function swiftTear:FireSwiftTear(tearParent, player, direction)
 		local invisTime = tearParent.FrameCount
 		tear:SetColor(Color(pC.R, pC.G, pC.B, 0, pC.RO, pC.GO, pC.BO), 15 - invisTime, 1, true, false)
 	end
+	swiftBase:AssignSwiftSounds(tear)
 end
 
 function swiftTear:SpawnSwiftTears(player, degreeOfTearSpawns, offset)
@@ -77,6 +78,7 @@ function swiftTear:SpawnSwiftTears(player, degreeOfTearSpawns, offset)
 			tearMulti:SetSize(tear.Size/2, Vector(0.5, 0.5), 8)
 		end
 	end
+	swiftBase:AssignSwiftSounds(tear)
 end
 
 local function ShouldGiveFamiliarSwiftTear(tear)

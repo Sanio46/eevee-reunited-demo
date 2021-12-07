@@ -51,10 +51,10 @@ function swiftBase:TryFireToEnemy(player, weapon, fireDir)
 	then
 		if closestEnemy ~= nil then
 			dirToEnemy = (closestEnemy.Position - weapon.Position):Normalized()
-		end
-
-		if dirToEnemy ~= nil and math.abs(math.abs(dirToEnemy:GetAngleDegrees()) - math.abs(fireDir:GetAngleDegrees())) <= angleLimit then
-			newFireDir = swiftBase:SwiftShotVelocity(dirToEnemy, player, true)
+			
+			if math.abs(math.abs(dirToEnemy:GetAngleDegrees()) - math.abs(fireDir:GetAngleDegrees())) <= angleLimit then
+				newFireDir = swiftBase:SwiftShotVelocity(dirToEnemy, player, true)
+			end
 		end
 	end
 	return newFireDir
@@ -74,8 +74,8 @@ function swiftBase:SwiftShotDelay(weapon, player)
 			delay = 0
 		end
 	else
-		if dataPlayer.Swift.AttackDuration > 0 and player.MaxFireDelay <= 1 then
-			delay = 2 * dataPlayer.Swift.NumWeaponsSpawned
+		if dataPlayer.Swift.RespawnNewRoom then
+			delay = swiftBase:SwiftFireDelay(player) + math.abs(swiftBase:SwiftFireDelay(player) * dataPlayer.Swift.NumWeaponsSpawned)
 		else
 			delay = swiftBase:SwiftFireDelay(player) + math.abs(swiftBase:SwiftFireDelay(player) * 5)
 		end
@@ -168,6 +168,30 @@ function swiftBase:MultiSwiftTearDistanceFromTear(player)
 	return distFromTear
 end
 
+function swiftBase:AssignSwiftSounds(weapon)
+	local dataWeapon = weapon:GetData()
+	
+	--EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
+	
+	if weapon.Type == EntityType.ENTITY_TEAR then
+		if dataWeapon.Swift.IsFakeKnife then
+			EEVEEMOD.sfx:Play(SoundEffect.SOUND_1UP, 1, 0, false, 1)
+		else
+			--EEVEEMOD.sfx:Play(SoundEffect.SOUND_1UP, 1, 0, false, 1)
+		end
+	elseif weapon.Type == EntityType.ENTITY_EFFECT then
+		if weapon.Variant == EffectVariant.EVIL_EYE then
+			EEVEEMOD.sfx:Play(SoundEffect.SOUND_1UP, 1, 0, false, 1)
+		elseif swiftBase:IsSwiftLaserEffect(effect) == "brim" then
+			EEVEEMOD.sfx:Play(SoundEffect.SOUND_1UP, 1, 0, false, 1)
+		elseif swiftBase:IsSwiftLaserEffect(effect) == "tech" then
+			EEVEEMOD.sfx:Play(SoundEffect.SOUND_LASERRING_WEAK, 0.7, 0, false, 3, 0)
+		end
+	elseif weapon.Type == EntityType.ENTITY_BOMBDROP then
+		EEVEEMOD.sfx:Play(SoundEffect.SOUND_FETUS_LAND, 1, 0, false, 1)
+	end
+end
+
 function swiftBase:AssignSwiftBasicData(weapon, player, anglePos)
 	local dataWeapon = weapon:GetData()
 	local dataPlayer = player:GetData()
@@ -175,6 +199,9 @@ function swiftBase:AssignSwiftBasicData(weapon, player, anglePos)
 	dataWeapon.Swift = {}
 	
 	if weapon.Type == EntityType.ENTITY_TEAR then
+		if player:HasCollectible(CollectibleType.COLLECTIBLE_KIDNEY_STONE) then
+			weapon.Height = weapon.Height - 16
+		end
 		dataWeapon.Swift.HoldTearHeight = weapon.Height
 	end
 

@@ -67,6 +67,7 @@ function swiftKnife:FireSwiftKnife(knifeParent, player, direction)
 	swiftBase:SwiftTearFlags(tearKnife, true, true)
 	dataTearKnife.Swift.IsSwiftWeapon = true
 	dataTearKnife.Swift.HasFired = true
+	swiftBase:AssignSwiftSounds(tearKnife)
 end
 
 function swiftKnife:SpawnSwiftKnives(player, degreeOfKnifeSpawns, offset)
@@ -95,6 +96,7 @@ function swiftKnife:SpawnSwiftKnives(player, degreeOfKnifeSpawns, offset)
 			knifeMulti:GetSprite().Scale = Vector(0.5,0.5)
 		end
 	end
+	swiftBase:AssignSwiftSounds(tearKnife)
 end
 
 function swiftKnife:SwiftKnifeUpdate(knife)

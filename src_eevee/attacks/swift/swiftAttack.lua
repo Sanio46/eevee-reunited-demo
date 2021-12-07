@@ -35,7 +35,7 @@ local function CalculateSwiftStats(player)
 	if swiftSynergies:IsKidneyStoneActive(player) then
 		isConstant = true
 		if not dataPlayer.Swift.KidneyTimer then
-			dataPlayer.Swift.KidneyTimer = 300
+			dataPlayer.Swift.KidneyTimer = 345
 		end
 	end
 	dataPlayer.Swift.Constant = isConstant
@@ -76,7 +76,7 @@ local function TriggerSwiftCooldown(player)
 	dataPlayer.Swift.NumWeaponsSpawned = 0
 
 	if not dataPlayer.Swift.AttackCooldown then
-		dataPlayer.Swift.AttackCooldown = swiftBase:SwiftFireDelay(player)
+		dataPlayer.Swift.AttackCooldown = swiftBase:SwiftFireDelay(player) + 0.5
 		dataPlayer.Swift.ExistingShots = nil
 	end
 end
@@ -154,11 +154,7 @@ function swiftAttack:SwiftMainFireWeapon(weapon, player)
 		if not dataPlayer.Swift.WizardShot then
 			dataPlayer.Swift.WizardShot = 45
 		else
-			if dataPlayer.Swift.WizardShot == 45 then
-				dataPlayer.Swift.WizardShot = -45
-			elseif dataPlayer.Swift.WizardShot == -45 then
-				dataPlayer.Swift.WizardShot = 45
-			end
+			dataPlayer.Swift.WizardShot = dataPlayer.Swift.WizardShot * -1
 		end
 	else
 		dataPlayer.Swift.WizardShot = 0
@@ -193,6 +189,9 @@ function swiftAttack:SwiftMainFireWeapon(weapon, player)
 			weapon.Velocity = Vector.Zero
 		end
 	else
+		if not dataPlayer.Swift.Constant then
+			weapon.Velocity = swiftBase:TryFireToEnemy(player, weapon, fireDirection)
+		end
 		swiftAttack:FireExtraWeapon(weapon, player, fireDirection)
 	end
 	
@@ -302,7 +301,12 @@ function swiftAttack:SwiftAttackWaitingToFire(weapon, player)
 		dataWeapon.Swift.CanFire = true
 	end
 	
-	if player:IsDead() and not dataWeapon.Swift.HasFired then
+	if player:IsDead() 
+	or (dataWeapon.Swift.ConstantOrbit and not dataPlayer.Swift.Constant)
+	and not dataWeapon.Swift.HasFired then
+		if weapon.Type ~= EntityType.ENTITY_EFFECT then
+			swiftBase:SwiftTearFlags(weapon, false, true)
+		end
 		swiftAttack:SwiftMainFireWeapon(weapon, player)
 		dataWeapon.Swift.HasFired = true
 	end
@@ -500,7 +504,45 @@ end
 --  TIMERS  --
 --------------
 
-local function SwiftShotDelayTimer()
+local function SwiftShotDebug(weapon)
+	local dataWeapon = weapon:GetData()
+	local screenpos = EEVEEMOD.game:GetRoom():WorldToScreenPosition(weapon.Position)
+	local shootDir = "nil"
+	local hasTech2 = "false"
+	local inConstantOrbit = "false"
+	local shotdelay = "nil"
+	local hasFired = "false"
+	if dataWeapon.Swift then
+		if dataWeapon.Swift.HasFired then
+			hasFired = "true"
+		end
+		if dataWeapon.Swift.ShotDelay then
+			shotdelay = dataWeapon.Swift.ShotDelay
+		end
+		if dataWeapon.Swift.Tech2Attached then
+			hasTech2 = "true"
+		end
+		if dataWeapon.Swift.ShotDir then
+			shootDir = Vector(math.floor(dataWeapon.Swift.ShotDir.X), math.floor(dataWeapon.Swift.ShotDir.Y))
+		end
+		if dataWeapon.Swift.ConstantOrbit then
+			inConstantOrbit = "true"
+		end
+		local fired = "false"
+		if dataWeapon.Swift.LaserHasFired then
+			fired = "true"
+		end
+		--Isaac.RenderText(weapon:ToTear().Height, screenpos.X, screenpos.Y + 30, 1, 1, 1, 1)
+		Isaac.RenderText(shotdelay, screenpos.X, screenpos.Y + 30, 1, 1, 1, 1)
+		--Isaac.RenderText(tostring(dataWeapon.Swift.Timer), screenposW.X, screenposW.Y + 70, 1, 1, 1, 1)
+		--Isaac.RenderText("Dir: "..tostring(shootDir.X)..", "..tostring(shootDir.Y), screenpos.X, screenpos.Y + 50, 1, 1, 1, 1)
+		--Isaac.RenderText("Constant: "..inConstantOrbit, screenposW.X, screenposW.Y + 10, 1, 1, 1, 1)
+		--Isaac.RenderText("Has Fired Laser: "..fired, screenposW.X, screenposW.Y + 50, 1, 1, 1, 1)
+		--Isaac.RenderText("Tech 2: "..hasTech2, screenposW.X, screenposW.Y + 50, 1, 1, 1, 1)
+	end
+end
+
+local function SwiftShotDelayTimer(player)
 	local TypeToFind = {
 		{EntityType.ENTITY_TEAR, -1},
 		{EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT},
@@ -513,46 +555,17 @@ local function SwiftShotDelayTimer()
 	for i = 1, #TypeToFind do
 		for _, weapon in pairs(Isaac.FindByType(TypeToFind[i][1], TypeToFind[i][2], 0)) do
 			local dataWeapon = weapon:GetData()
+			local dataPlayer = player:GetData()
 			
 			if dataWeapon.Swift then
 				if dataWeapon.Swift.IsSwiftWeapon 
 				and dataWeapon.Swift.ShotDelay
-				and dataWeapon.Swift.ShotDelay > 0 then
+				and dataWeapon.Swift.ShotDelay > 0
+				and ((not dataPlayer.Swift.Constant and dataWeapon.Swift.CanFire)
+				or (dataPlayer.Swift.Constant)) then
 					dataWeapon.Swift.ShotDelay = dataWeapon.Swift.ShotDelay - 0.5
 				end
-				local screenposW = EEVEEMOD.game:GetRoom():WorldToScreenPosition(weapon.Position)
-				local shootDir = "nil"
-				local hasTech2 = "false"
-				local inConstantOrbit = "false"
-				local shotdelay = "nil"
-				local hasFired = "false"
-				if dataWeapon.Swift then
-					if dataWeapon.Swift.HasFired then
-						hasFired = "true"
-					end
-					if dataWeapon.Swift.ShotDelay then
-						shotdelay = dataWeapon.Swift.ShotDelay
-					end
-					if dataWeapon.Swift.Tech2Attached then
-						hasTech2 = "true"
-					end
-					if dataWeapon.Swift.ShotDir then
-						shootDir = dataWeapon.Swift.ShotDir
-					end
-					if dataWeapon.Swift.ConstantOrbit then
-						inConstantOrbit = "true"
-					end
-					local fired = "false"
-					if dataWeapon.Swift.LaserHasFired then
-						fired = "true"
-					end
-					--Isaac.RenderText(shotdelay, screenposW.X, screenposW.Y + 30, 1, 1, 1, 1)
-					--Isaac.RenderText(tostring(dataWeapon.Swift.Timer), screenposW.X, screenposW.Y + 70, 1, 1, 1, 1)
-					--Isaac.RenderText("Dir: "..shootDir.X..", "..shootDir.Y, screenposW.X, screenposW.Y + 50, 1, 1, 1, 1)
-					--Isaac.RenderText("Constant: "..inConstantOrbit, screenposW.X, screenposW.Y + 10, 1, 1, 1, 1)
-					--Isaac.RenderText("Has Fired Laser: "..fired, screenposW.X, screenposW.Y + 50, 1, 1, 1, 1)
-					--Isaac.RenderText("Tech 2: "..hasTech2, screenposW.X, screenposW.Y + 50, 1, 1, 1, 1)
-				end
+				SwiftShotDebug(weapon)
 			end
 		end
 	end
@@ -588,16 +601,18 @@ local function SwiftRateOfRotation(player)
 	if dataPlayer.Swift
 	and dataPlayer.Swift.RateOfOrbitRotation
 	and dataPlayer.Swift.AttackDuration
-	and not dataPlayer.Swift.AttackCooldown
+	and ((not dataPlayer.Swift.Constant and dataPlayer.Swift.AttackDuration <= (dataPlayer.Swift.AttackDurationSet - holdStarFrames))
+	or (dataPlayer.Swift.Constant))
 	then
-		local rate = dataPlayer.Swift.RateOfOrbitRotation
+		local currentRotation = dataPlayer.Swift.RateOfOrbitRotation
+		local rateOfRotation = (8 * (player.ShotSpeed * (dataPlayer.Swift.AttackDuration / dataPlayer.Swift.AttackDurationSet)))
 		if dataPlayer.Swift.Constant then
-			rate = rate + (5 * player.ShotSpeed)
-		elseif dataPlayer.Swift.AttackDuration <= dataPlayer.Swift.AttackDurationSet - holdStarFrames then
-			rate = rate + (8 * (player.ShotSpeed * (dataPlayer.Swift.AttackDuration / dataPlayer.Swift.AttackDurationSet)))
+			rateOfRotation = (5 * player.ShotSpeed)
 		end
-		if rate > 360 then rate = rate - 360 end
-		dataPlayer.Swift.RateOfOrbitRotation = rate
+		if rateOfRotation <= 2 then rateOfRotation = 2 end
+		currentRotation = currentRotation + rateOfRotation
+		if currentRotation > 360 then currentRotation = currentRotation - 360 end
+		dataPlayer.Swift.RateOfOrbitRotation = currentRotation
 	end
 end
 
@@ -640,7 +655,7 @@ function swiftAttack:SwiftAttackTimers(player)
 	and renderMode == RenderMode.RENDER_NORMAL
 	or renderMode == RenderMode.RENDER_WATER_ABOVE then
 		
-		SwiftShotDelayTimer()
+		SwiftShotDelayTimer(player)
 		SwiftDurationHandle(player)
 		SwiftRateOfRotation(player)
 		SwiftCooldownTimer(player)
@@ -686,12 +701,14 @@ function swiftAttack:RespawnSwiftPerRoom(player)
 	and dataPlayer.Swift.NumWeaponsSpawned
 	and dataPlayer.Swift.NumWeaponsSpawned > 0 then
 	local currentCount = dataPlayer.Swift.NumWeaponsSpawned
+	dataPlayer.Swift.RespawnNewRoom = true
 		for i = 1, currentCount do
 			dataPlayer.Swift.NumWeaponsSpawned = i
 			swiftAttack:SpawnSwiftWeapon(player, dataPlayer.Swift.Instance[1], dataPlayer.Swift.Instance[2])
 			EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
 		end
 	end
+	dataPlayer.Swift.RespawnNewRoom = nil
 end
 
 function swiftAttack:SwiftTrailUpdate(trail)
@@ -726,11 +743,10 @@ function swiftAttack:SwiftTrailUpdate(trail)
 			local tC = trail.Color
 			trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 5, 2, true, false)
 		end
-		
+		local heightDif = 0
 		if weapon.Type == EntityType.ENTITY_TEAR then
 			local tearHeightToFollow = weapon:ToTear().Height
 			local sizeToFollow = weapon.Size * 0.5
-			local heightDif = 0
 			trail.SpriteScale = Vector(weapon.Size * 0.2, 1)
 
 			if weapon:GetData().Swift.IsFakeKnife then
@@ -739,9 +755,9 @@ function swiftAttack:SwiftTrailUpdate(trail)
 			trail.Position = Vector(weapon.Position.X, (weapon.Position.Y + (tearHeightToFollow + heightDif)) - sizeToFollow) + weapon:ToTear().PosDisplacement
 		else
 			if weapon.Type == EntityType.ENTITY_EFFECT and weapon.Variant == EffectVariant.EVIL_EYE then
-				heightDif = 10
+				heightDif = 20
 			end
-			trail.Position = Vector(weapon.Position.X, weapon.Position.Y + weapon.PositionOffset.Y + heightDif)
+			trail.Position = Vector(weapon.Position.X, weapon.Position.Y + weapon.PositionOffset.Y - heightDif)
 		end
 	end
 end
@@ -772,11 +788,16 @@ function swiftAttack:onRender()
 		if dataPlayer.Swift.NumWeaponsSpawned then
 			numtears = dataPlayer.Swift.NumWeaponsSpawned
 		end
+		local kidney = 0
+		if dataPlayer.Swift.KidneyTimer then
+			kidney = dataPlayer.Swift.KidneyTimer
+		end
 		--Isaac.RenderText("Cooldown: "..cooldown, 50, 50, 1, 1, 1, 1)
 		--Isaac.RenderText("Duration: "..duration, 50, 70, 1, 1, 1, 1)
 		--Isaac.RenderText("Rotation: "..rotation, 50, 90, 1, 1, 1, 1)
 		--Isaac.RenderText("Tear Spawn: "..delaybetweenshots, 50, 110, 1, 1, 1, 1)
 		--Isaac.RenderText("Num Tears Spawned: "..numtears, 50, 130, 1, 1, 1, 1)
+		--Isaac.RenderText("Kidney: "..kidney, 50, 30, 1, 1, 1, 1)
 	end
 end
 
