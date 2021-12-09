@@ -18,14 +18,14 @@ function postEffectUpdate:main(effect)
 	if effect.Variant == EffectVariant.DEVIL then
 		eeveeSFX:FindDeadPlayerEffect(effect)
 	end
-	
+
 	if swiftBase:IsSwiftLaserEffect(effect)
 	or effect.Variant == EffectVariant.EVIL_EYE then
 		
 		if effect.Variant == EffectVariant.EVIL_EYE then
 			swiftAttack:InitSwiftEvilEye(effect)
 		end
-		
+
 		swiftAttack:SwiftAttackUpdate(effect)
 		
 		if swiftBase:IsSwiftLaserEffect(effect) == "brim" then
