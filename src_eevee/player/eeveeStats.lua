@@ -4,7 +4,7 @@ local statsEevee = {
 	[CacheFlag.CACHE_SPEED] = 0,
 	[CacheFlag.CACHE_FIREDELAY] = 1,
 	[CacheFlag.CACHE_DAMAGE] = 0.8,
-	[CacheFlag.CACHE_RANGE] = 4.5,
+	[CacheFlag.CACHE_RANGE] = 3,
 	[CacheFlag.CACHE_SHOTSPEED] = 0.2,
 	[CacheFlag.CACHE_LUCK] = 0,
 }
