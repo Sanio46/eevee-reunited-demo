@@ -201,7 +201,7 @@ function swiftBase:AssignSwiftBasicData(weapon, player, anglePos)
 	dataWeapon.Swift = {}
 	
 	if weapon.Type == EntityType.ENTITY_TEAR then
-		f player:HasCollectible(CollectibleType.COLLECTIBLE_KIDNEY_STONE) then
+		if player:HasCollectible(CollectibleType.COLLECTIBLE_KIDNEY_STONE) then
 			weapon.Height = weapon.Height - 16
 		elseif player:HasCollectible(CollectibleType.COLLECTIBLE_NUMBER_ONE)  then
 			weapon.Height = weapon.Height - 8
