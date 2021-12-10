@@ -44,32 +44,13 @@ local function CalculateSwiftStats(player)
 	end
 end
 
-local function FireKnifeBrim(player)
-	local dataPlayer = player:GetData()
-	
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE)
-	and player:HasWeaponType(WeaponType.WEAPON_KNIFE) then
-		if dataPlayer.Swift
-		and dataPlayer.Swift.NumWeaponsSpawned
-		and dataPlayer.Swift.NumWeaponsSpawned > 0
-		then
-			local knivesSpawned = dataPlayer.Swift.NumWeaponsSpawned
-			for i = 1, knivesSpawned do
-				local degrees = Vector.FromAngle(((360/knivesSpawned) * i)) --???
-				local direction = swiftBase:SwiftShotVelocity(degrees, player, false)
-				swiftAttack:FireExtraWeapon(player, player, direction)
-			end
-		end
-	end
-end
-
 local function TriggerSwiftCooldown(player)
 	local dataPlayer = player:GetData()
 	
 	if dataPlayer.Swift.AttackDuration
 	and dataPlayer.Swift.AttackDuration == 0 
 	and not dataPlayer.Swift.AttackCooldown then
-		FireKnifeBrim(player)
+		swiftSynergies:FireKnifeBrim(player)
 	end
 	
 	dataPlayer.Swift.AttackDuration = 0
@@ -89,7 +70,7 @@ local function TriggerSwiftCooldownIfPlayerStopsShooting(player)
 	and dataPlayer.Swift.AttackDuration 
 	and ((not dataPlayer.Swift.Constant and dataPlayer.Swift.AttackDuration > 0)
 	or (dataPlayer.Swift.Constant and dataPlayer.Swift.ConstantFiring == true)) then
-		FireKnifeBrim(player)
+		swiftSynergies:FireKnifeBrim(player)
 		TriggerSwiftCooldown(player)
 		dataPlayer.Swift.ConstantFiring = false
 	end
@@ -104,7 +85,6 @@ local function SwiftWeaponUpdateSynergies(weapon, player)
 	swiftSynergies:AntiGravityDuration(player, weapon)
 			
 	if swiftSynergies:ShouldAttachTech2Laser(weapon, player)
-	and dataWeapon.Swift
 	and dataWeapon.Swift.ShotDir 
 	and not dataWeapon.Swift.Tech2Attached then
 		swiftLaser:FireTechLaser(weapon, player, dataWeapon.Swift.ShotDir, true)
@@ -149,7 +129,7 @@ function swiftAttack:SwiftMainFireWeapon(weapon, player)
 	local dataWeapon = weapon:GetData()
 	local dataPlayer = player:GetData()
 	local fireDirection = swiftBase:SwiftShotVelocity(dataWeapon.Swift.ShotDir, player, true)
-	
+	--[[
 	if player:GetEffects():HasNullEffect(NullItemID.ID_WIZARD) then
 		if not dataPlayer.Swift.WizardShot then
 			dataPlayer.Swift.WizardShot = 45
@@ -158,7 +138,7 @@ function swiftAttack:SwiftMainFireWeapon(weapon, player)
 		end
 	else
 		dataPlayer.Swift.WizardShot = 0
-	end
+	end]]
 	
 	--Loki's Horns, Mom's Eye, Eye Sore, Monstro's Lung
 	if not dataWeapon.MultiSwiftTear then
@@ -170,7 +150,7 @@ function swiftAttack:SwiftMainFireWeapon(weapon, player)
 	--Wiz rotation
 	if ShouldWizShot(player) 
 	and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then
-		fireDirection = fireDirection:Rotated(45 + dataPlayer.Swift.WizardShot)
+		fireDirection = fireDirection:Rotated(45)
 	end
 	
 	if not dataWeapon.Swift.ConstantOrbit then
@@ -198,14 +178,15 @@ function swiftAttack:SwiftMainFireWeapon(weapon, player)
 	--Wiz opposite rotation
 	if ShouldWizShot(player)
 	and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then
-		fireDirection = fireDirection:Rotated(-90 + dataPlayer.Swift.WizardShot)
+		fireDirection = fireDirection:Rotated(-90)
 	end
 	
+	--Wiz "normal" shot
 	if ShouldWizShot(player) then
 		swiftAttack:FireExtraWeapon(weapon, player, fireDirection)
 		if player:GetCollectibleNum(CollectibleType.COLLECTIBLE_THE_WIZ) >= 2
 		or player:HasPlayerForm(PlayerForm.PLAYERFORM_BABY) then
-			swiftAttack:FireExtraWeapon(weapon, player, fireDirection:Rotated(45 + dataPlayer.Swift.WizardShot))
+			swiftAttack:FireExtraWeapon(weapon, player, swiftBase:TryFireToEnemy(player, weapon, fireDirection:Rotated(45)))
 		end
 	end
 	
@@ -216,17 +197,22 @@ end
 
 function swiftAttack:FireExtraWeapon(parent, player, direction, rotationOffset)
 	local dataPlayer = player:GetData()
-	if player:HasWeaponType(WeaponType.WEAPON_KNIFE) then
-		swiftKnife:FireSwiftKnife(parent, player, direction)
-	elseif player:HasWeaponType(WeaponType.WEAPON_BOMBS) then
-		swiftBomb:FireSwiftBomb(parent, player, direction)
-	elseif player:HasWeaponType(WeaponType.WEAPON_LASER)
-	or player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
-	or player:HasWeaponType(WeaponType.WEAPON_TECH_X) then
-		swiftLaser:FireSwiftLaser(parent, player, swiftBase:SwiftShotVelocity(parent:GetData().Swift.ShotDir, player, false), rotationOffset)
-	elseif player:HasWeaponType(WeaponType.WEAPON_TEARS)
-	or player:HasWeapon(WeaponType.WEAPON_MONSTROS_LUNGS) then
-		swiftTear:FireSwiftTear(parent, player, direction)
+	if (
+	parent.Type ~= EntityType.ENTITY_EFFECT
+	or (parent.Type == EntityType.ENTITY_EFFECT and swiftBase:IsSwiftLaserEffect(parent)) --No Evil Eye!
+	) then
+		if player:HasWeaponType(WeaponType.WEAPON_KNIFE) then
+			swiftKnife:FireSwiftKnife(parent, player, direction)
+		elseif player:HasWeaponType(WeaponType.WEAPON_BOMBS) then
+			swiftBomb:FireSwiftBomb(parent, player, direction)
+		elseif player:HasWeaponType(WeaponType.WEAPON_LASER)
+		or player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
+		or player:HasWeaponType(WeaponType.WEAPON_TECH_X) then
+			swiftLaser:FireSwiftLaser(parent, player, swiftBase:SwiftShotVelocity(parent:GetData().Swift.ShotDir, player, false), rotationOffset)
+		elseif player:HasWeaponType(WeaponType.WEAPON_TEARS)
+		or player:HasWeapon(WeaponType.WEAPON_MONSTROS_LUNGS) then
+			swiftTear:FireSwiftTear(parent, player, direction)
+		end
 	end
 end
 
@@ -533,7 +519,7 @@ local function SwiftShotDebug(weapon)
 			fired = "true"
 		end
 		--Isaac.RenderText(weapon:ToTear().Height, screenpos.X, screenpos.Y + 30, 1, 1, 1, 1)
-		Isaac.RenderText(shotdelay, screenpos.X, screenpos.Y + 30, 1, 1, 1, 1)
+		--Isaac.RenderText(shotdelay, screenpos.X, screenpos.Y + 30, 1, 1, 1, 1)
 		--Isaac.RenderText(tostring(dataWeapon.Swift.Timer), screenposW.X, screenposW.Y + 70, 1, 1, 1, 1)
 		--Isaac.RenderText("Dir: "..tostring(shootDir.X)..", "..tostring(shootDir.Y), screenpos.X, screenpos.Y + 50, 1, 1, 1, 1)
 		--Isaac.RenderText("Constant: "..inConstantOrbit, screenposW.X, screenposW.Y + 10, 1, 1, 1, 1)
@@ -596,7 +582,7 @@ end
 
 local function SwiftRateOfRotation(player)
 	local dataPlayer = player:GetData()
-	local holdStarFrames = 3
+	local holdStarFrames = swiftBase:SwiftFireDelay(player) * 0.35
 
 	if dataPlayer.Swift
 	and dataPlayer.Swift.RateOfOrbitRotation
@@ -707,8 +693,8 @@ function swiftAttack:RespawnSwiftPerRoom(player)
 			swiftAttack:SpawnSwiftWeapon(player, dataPlayer.Swift.Instance[1], dataPlayer.Swift.Instance[2])
 			EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
 		end
+		dataPlayer.Swift.RespawnNewRoom = nil
 	end
-	dataPlayer.Swift.RespawnNewRoom = nil
 end
 
 function swiftAttack:SwiftTrailUpdate(trail)

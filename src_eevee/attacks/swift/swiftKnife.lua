@@ -1,6 +1,8 @@
 local swiftKnife = {}
+
 local swiftBase = EEVEEMOD.Src["attacks"]["swift.swiftBase"]
 local swiftSynergies = EEVEEMOD.Src["attacks"]["swift.swiftSynergies"]
+local swiftLaser = EEVEEMOD.Src["attacks"]["swift.swiftLaser"]
 
 local knifeLifetime = 50
 
@@ -17,6 +19,9 @@ local function AssignSwiftFakeKnifeData(player, tearKnife, knife, anglePos)
 	dataTearKnife.HeightDuration = knifeLifetime
 	tearKnife.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
 	tearKnife.CollisionDamage = 0
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) then
+		swiftLaser:FireTechXLaser(tearKnife, player, Vector.Zero, true)
+	end
 end
 
 local function AssignSwiftKnifeData(knife, tearKnife, invis)
@@ -45,7 +50,7 @@ local function AssignSwiftKnifeData(knife, tearKnife, invis)
 end
 
 function swiftKnife:FireSwiftKnife(knifeParent, player, direction)
-	local tearKnife = player:FireTear(knifeParent.Position, direction, false, false, false, player, 1)
+	local tearKnife = player:FireTear(knifeParent.Position - player.TearsOffset, direction, false, false, false, player)
 	local knife = player:FireKnife(tearKnife)
 	local dataTearKnife = tearKnife:GetData()
 	
@@ -73,7 +78,7 @@ end
 function swiftKnife:SpawnSwiftKnives(player, degreeOfKnifeSpawns, offset)
 	local dataPlayer = player:GetData()
 	local anglePos = swiftBase:SpawnPos(player, degreeOfKnifeSpawns, offset)
-	local tearKnife = player:FireTear(player.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, false, false, false, player, 1)
+	local tearKnife = player:FireTear((player.Position - player.TearsOffset) + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, false, false, false, player)
 	local knife = player:FireKnife(player)
 	
 	AssignSwiftFakeKnifeData(player, tearKnife, knife, anglePos)
@@ -85,7 +90,7 @@ function swiftKnife:SpawnSwiftKnives(player, degreeOfKnifeSpawns, offset)
 		for i = 1, dataPlayer.Swift.MultiShots + swiftSynergies:BookwormShot(player) do
 			local orbit = swiftBase:MultiSwiftTearDistanceFromTear(player)
 			local anglePos = swiftBase:SpawnPosMulti(player, degreeOfKnifeSpawns, offset, multiOffset, orbit, i)
-			local tearKnifeMulti = player:FireTear(tearKnife.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, false, false, false, player, 1)
+			local tearKnifeMulti = player:FireTear((tearKnife.Position - player.TearsOffset) + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, false, false, false, player)
 			local knifeMulti = player:FireKnife(player)
 			local dataMultiTear = tearKnifeMulti:GetData()
 			
@@ -110,10 +115,7 @@ function swiftKnife:SwiftKnifeUpdate(knife)
 		local dataTearKnife = tearKnife:GetData()
 
 		if dataTearKnife.Swift.IsSwiftWeapon then
-		
-			local fKC = tearKnife:GetSprite().Color
-			knife.Color = Color(fKC.R, fKC.G, fKC.B, 1, fKC.RO, fKC.GO, fKC.BO)
-		
+				
 			if dataTearKnife.HeightDuration and dataTearKnife.HeightDuration > 0 then
 				if dataTearKnife.Swift.HoldTearHeight then
 					tearKnife:ToTear().Height = dataTearKnife.Swift.HoldTearHeight

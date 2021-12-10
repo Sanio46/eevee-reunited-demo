@@ -1,25 +1,38 @@
 local swiftTear = {}
+
 local swiftBase = EEVEEMOD.Src["attacks"]["swift.swiftBase"]
 local swiftSynergies = EEVEEMOD.Src["attacks"]["swift.swiftSynergies"]
 
 local function AssignSwiftSprite(tear)
-local tearSprite = tear:GetSprite()
-local animationToPlay = "RegularTear6"
-local anm2ToUse = "gfx/tear_swift.anm2"
-	--Apparently spawne
-	local BloodVariants = {
-		
-	}
-	for i = 1,13 do
-		if tearSprite:IsPlaying("RegularTear" .. tostring(i)) then
-			animationToPlay = "RegularTear" .. tostring(i)
-		elseif tearSprite:IsPlaying("BloodTear" .. tostring(i)) then
-			animationToPlay = "BloodTear" .. tostring(i)
-			anm2ToUse = "gfx/tear_swift_blood.anm2"
+	local tearSprite = tear:GetSprite()
+	local dataTear = tear:GetData()
+	local animationToPlay = tearSprite:GetAnimation()
+	local anm2ToUse = "gfx/tear_swift.anm2"
+	local x, isBlood = string.gsub(animationToPlay, "BloodTear", "")
+	
+	for i = 1, 13 do
+		local foundNum = string.find(animationToPlay, tostring(i))
+		if foundNum ~= nil then
+			animationToPlay = i
 		end
 	end
-	tearSprite:Load(anm2ToUse, true) --Load in the animation file
-	tearSprite:Play(animationToPlay, true) --Play the animation assigned by code above
+	
+	if (dataTear.ForceBlood and dataTear.ForceBlood == true)
+	or (isBlood ~= 0 
+	and (
+	dataTear.ForceBlood == nil or 
+	dataTear.ForceBlood ~= false
+	)
+	)
+	then
+		animationToPlay = "BloodTear"..animationToPlay
+		anm2ToUse = "gfx/tear_swift_blood.anm2"
+	else
+		animationToPlay = "RegularTear"..animationToPlay
+	end
+	
+	tearSprite:Load(anm2ToUse, true)
+	tearSprite:Play(animationToPlay, true)
 end
 
 local function AssignSwiftTearData(player, tear, anglePos)
@@ -36,13 +49,14 @@ local function AssignSwiftTearData(player, tear, anglePos)
 end
 
 function swiftTear:FireSwiftTear(tearParent, player, direction)
-	local tear = player:FireTear(tearParent.Position, direction, true, false, true, player, 1):ToTear()
+	local tear = player:FireTear((tearParent.Position - player.TearsOffset), direction, true, false, true, player):ToTear()
 	local tC = tear:GetSprite().Color
 	local pC = tearParent:GetSprite().Color
 	local dataTear = tear:GetData()
 	dataTear.Swift = {}
 	dataTear.Swift.IsSwiftWeapon = true
 	dataTear.Swift.HasFired = true
+	swiftSynergies:EyeItemDamageChance(player, tear)
 	AssignSwiftSprite(tear)
 	swiftBase:AddSwiftTrail(tear, player)
 	swiftBase:SwiftTearFlags(tear, true, true)
@@ -57,8 +71,9 @@ end
 function swiftTear:SpawnSwiftTears(player, degreeOfTearSpawns, offset)
 	local dataPlayer = player:GetData()
 	local anglePos = swiftBase:SpawnPos(player, degreeOfTearSpawns, offset)
-	local tear = player:FireTear(player.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, true, false, true, player, 1):ToTear()
+	local tear = player:FireTear((player.Position - player.TearsOffset) + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, true, false, true, player):ToTear()
 
+	swiftSynergies:EyeItemDamageChance(player, tear)
 	AssignSwiftTearData(player, tear, anglePos)
 	AssignSwiftSprite(tear)
 	swiftBase:AddSwiftTrail(tear, player)
@@ -68,13 +83,14 @@ function swiftTear:SpawnSwiftTears(player, degreeOfTearSpawns, offset)
 		for i = 0, dataPlayer.Swift.MultiShots + swiftSynergies:BookwormShot(player) do
 			local orbit = swiftBase:MultiSwiftTearDistanceFromTear(player)
 			local anglePos = swiftBase:SpawnPosMulti(player, degreeOfTearSpawns, offset, multiOffset, orbit, i)
-			local tearMulti = player:FireTear(tear.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, true, false, true, player, 1):ToTear()
+			local tearMulti = player:FireTear((tear.Position - player.TearsOffset) + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, true, false, true, player):ToTear()
 			local dataMultiTear = tearMulti:GetData()
 			
 			dataMultiTear.MultiSwiftTear = tear
 			dataMultiTear.MultiSwiftOrbitDistance = orbit
+			swiftSynergies:EyeItemDamageChance(player, tearMulti)
 			AssignSwiftTearData(player, tearMulti, anglePos)
-			AssignSwiftSprite(tear)
+			AssignSwiftSprite(tearMulti)
 			tearMulti:SetSize(tear.Size/2, Vector(0.5, 0.5), 8)
 		end
 	end
@@ -85,7 +101,8 @@ local function ShouldGiveFamiliarSwiftTear(tear)
 	if tear.SpawnerType == EntityType.ENTITY_FAMILIAR then
 		if tear.SpawnerVariant == FamiliarVariant.INCUBUS 
 		or tear.SpawnerVariant == FamiliarVariant.TWISTED_BABY
-		or tear.SpawnerVariant == FamiliarVariant.MINISAAC then
+		or tear.SpawnerVariant == FamiliarVariant.MINISAAC
+		then
 			return true
 		end
 	end
@@ -112,11 +129,16 @@ function swiftTear:MakeSwiftTear(tear)
 		
 		if dataPlayer.Swift 
 		and not dataTear.Swift
-		and SwiftTearVariantBlacklist[tear.Variant] ~= true then
+		and not SwiftTearVariantBlacklist[tear.Variant]
+		and tear.FrameCount > 0 then
 			dataTear.Swift = {}
 			dataTear.Swift.IsSwiftWeapon = true
 			dataTear.Swift.HasFired = true
 			AssignSwiftSprite(tear)
+			local c = tear:GetSprite().Color
+			if c.A ~= 1 then
+				tear.Color = Color(c.R, c.G, c.B, 1, c.RO, c.GO, c.BO)
+			end
 		end
 	end
 end

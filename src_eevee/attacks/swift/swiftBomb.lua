@@ -1,4 +1,5 @@
 local swiftBomb = {}
+
 local swiftBase = EEVEEMOD.Src["attacks"]["swift.swiftBase"]
 local swiftSynergies = EEVEEMOD.Src["attacks"]["swift.swiftSynergies"]
 
@@ -17,7 +18,7 @@ local function AssignSwiftBombData(player, bomb, anglePos)
 end
 
 function swiftBomb:FireSwiftBomb(bombParent, player, direction)
-	local bomb = player:FireBomb(bombParent.Position, direction)
+	local bomb = player:FireBomb((bombParent.Position - player.TearsOffset), direction, player)
 	local bC = bomb:GetSprite().Color
 	local pC = bombParent:GetSprite().Color
 	local dataBomb = bomb:GetData()
@@ -37,8 +38,8 @@ end
 function swiftBomb:SpawnSwiftBombs(player, degreeOfBombSpawns, offset)
 	local dataPlayer = player:GetData()
 	local anglePos = swiftBase:SpawnPos(player, degreeOfBombSpawns, offset)
-	local bomb = player:FireBomb(player.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero)
-	
+	local bomb = player:FireBomb((player.Position - player.TearsOffset) + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, player)
+
 	AssignSwiftBombData(player, bomb, anglePos)
 	swiftBase:AddSwiftTrail(bomb)
 	
@@ -47,7 +48,7 @@ function swiftBomb:SpawnSwiftBombs(player, degreeOfBombSpawns, offset)
 		for i = 1, dataPlayer.Swift.MultiShots + swiftSynergies:BookwormShot(player) do
 			local orbit = swiftBase:MultiSwiftTearDistanceFromTear(player)
 			local anglePos = swiftBase:SpawnPosMulti(player, degreeOfBombSpawns, offset, multiOffset, orbit, i)
-			local bombMulti = player:FireBomb(bomb.Position + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero)
+			local bombMulti = player:FireBomb((bomb.Position - player.TearsOffset) + (anglePos:Rotated(dataPlayer.Swift.RateOfOrbitRotation)), Vector.Zero, player)
 			local dataMultiBomb = bombMulti:GetData()
 			
 			dataMultiBomb.MultiSwiftTear = bomb

@@ -48,6 +48,7 @@ function swiftBase:TryFireToEnemy(player, weapon, fireDir)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)
 	and not player:HasCollectible(CollectibleType.COLLECTIBLE_TRACTOR_BEAM)
 	and not player:HasCollectible(CollectibleType.COLLECTIBLE_EYE_OF_THE_OCCULT)
+	and not swiftBase:IsSwiftLaserEffect(weapon)
 	then
 		if closestEnemy ~= nil then
 			dirToEnemy = (closestEnemy.Position - weapon.Position):Normalized()
@@ -152,7 +153,8 @@ function swiftBase:SwiftTearDistanceFromPlayer(player)
 	local distFromPlayer = 50
 	if player:GetEffects():HasCollectibleEffect(CollectibleType.COLLECTIBLE_MEGA_MUSH) then
 		distFromPlayer = 100
-	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_IPECAC) then
+	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_IPECAC)
+	or player:HasCollectible(CollectibleType.COLLECTIBLE_FIRE_MIND) then
 		distFromPlayer = 70
 	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_LOST_CONTACT) then
 		distFromPlayer = 30
@@ -175,16 +177,16 @@ function swiftBase:AssignSwiftSounds(weapon)
 	
 	if weapon.Type == EntityType.ENTITY_TEAR then
 		if dataWeapon.Swift.IsFakeKnife then
-			EEVEEMOD.sfx:Play(SoundEffect.SOUND_1UP, 1, 0, false, 1)
+			--EEVEEMOD.sfx:Play(SoundEffect.SOUND_1UP, 1, 0, false, 1)
 		else
 			--EEVEEMOD.sfx:Play(SoundEffect.SOUND_1UP, 1, 0, false, 1)
 		end
 	elseif weapon.Type == EntityType.ENTITY_EFFECT then
 		if weapon.Variant == EffectVariant.EVIL_EYE then
-			EEVEEMOD.sfx:Play(SoundEffect.SOUND_1UP, 1, 0, false, 1)
-		elseif swiftBase:IsSwiftLaserEffect(effect) == "brim" then
-			EEVEEMOD.sfx:Play(SoundEffect.SOUND_1UP, 1, 0, false, 1)
-		elseif swiftBase:IsSwiftLaserEffect(effect) == "tech" then
+			--EEVEEMOD.sfx:Play(SoundEffect.SOUND_1UP, 1, 0, false, 1)
+		elseif swiftBase:IsSwiftLaserEffect(weapon) == "brim" then
+			--EEVEEMOD.sfx:Play(SoundEffect.SOUND_1UP, 1, 0, false, 1)
+		elseif swiftBase:IsSwiftLaserEffect(weapon) == "tech" then
 			EEVEEMOD.sfx:Play(SoundEffect.SOUND_LASERRING_WEAK, 0.7, 0, false, 3, 0)
 		end
 	elseif weapon.Type == EntityType.ENTITY_BOMBDROP then
@@ -199,8 +201,10 @@ function swiftBase:AssignSwiftBasicData(weapon, player, anglePos)
 	dataWeapon.Swift = {}
 	
 	if weapon.Type == EntityType.ENTITY_TEAR then
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_KIDNEY_STONE) then
+		f player:HasCollectible(CollectibleType.COLLECTIBLE_KIDNEY_STONE) then
 			weapon.Height = weapon.Height - 16
+		elseif player:HasCollectible(CollectibleType.COLLECTIBLE_NUMBER_ONE)  then
+			weapon.Height = weapon.Height - 8
 		end
 		dataWeapon.Swift.HoldTearHeight = weapon.Height
 	end
@@ -261,9 +265,8 @@ function swiftBase:IsSwiftLaserEffect(effect)
 		variant = "tech"
 	elseif effect.Variant == EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL then
 		variant = "brim"
-	else
-		return variant
 	end
+	return variant
 end
 
 function swiftBase:SwiftShouldBeConstant(player)
@@ -283,11 +286,11 @@ function swiftBase:RetainArcShot(player, tear)
 	local dataTear = tear:GetData()
 	
 	if tear.Type == EntityType.ENTITY_TEAR then
-	if tear.FallingAcceleration ~= 0 and not dataTear.Swift.StoredFallingAccel then
+		if tear.FallingAcceleration ~= 0 and not dataTear.Swift.StoredFallingAccel then
 			dataTear.Swift.StoredFallingAccel = tear.FallingAcceleration
 		elseif dataTear.Swift.StoredFallingAccel then
 			if not dataTear.Swift.HasFired then
-				tear.FallingAcceleration = 0
+				--tear.FallingAcceleration = 0
 			elseif dataTear.Swift.HasFired then
 				if dataTear.Swift.StoredFallingAccel then
 					tear.FallingAcceleration = dataTear.Swift.StoredFallingAccel

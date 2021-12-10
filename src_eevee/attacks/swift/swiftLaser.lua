@@ -1,4 +1,5 @@
 local swiftLaser = {}
+
 local swiftBase = EEVEEMOD.Src["attacks"]["swift.swiftBase"]
 local swiftSynergies = EEVEEMOD.Src["attacks"]["swift.swiftSynergies"]
 
@@ -83,16 +84,26 @@ function swiftLaser:SpawnSwiftLasers(player, degreeOfLaserSpawns, offset)
 	end
 end
 
-function swiftLaser:TechXRadiusScaling(weapon, player)
+function swiftLaser:TechXRadiusScaling(player)
+	local dataPlayer = player:GetData()
+	local radius = 15
+	
+	if dataPlayer.Swift
+	and dataPlayer.Swift.AttackDuration > 0
+	and dataPlayer.Swift.AttackDurationSet then
+		radius = 15 + (45 * (dataPlayer.Swift.AttackDurationSet - dataPlayer.Swift.AttackDuration) / dataPlayer.Swift.AttackDurationSet)
+	end
+	return radius
+end
+
+function swiftLaser:TechXDamageScaling(weapon, player)
 	local dataPlayer = player:GetData()
 	local dataWeapon = weapon:GetData()
 	
-	if player:HasWeaponType(WeaponType.WEAPON_TECH_X)
-	and dataWeapon.Swift then
+	if dataWeapon.Swift then
 		if dataPlayer.Swift.AttackDuration > 0
 		and dataPlayer.Swift.AttackDurationSet
 		and not dataWeapon.Swift.HasFired then
-			local radius = 15 + (45 * (dataPlayer.Swift.AttackDurationSet - dataPlayer.Swift.AttackDuration) / dataPlayer.Swift.AttackDurationSet)
 			local playerDamage = player.Damage * 0.25
 			local damageCalc = playerDamage + (3 * (dataPlayer.Swift.AttackDurationSet - dataPlayer.Swift.AttackDuration) / dataPlayer.Swift.AttackDurationSet)
 			if damageCalc < 0.1 then
@@ -102,25 +113,25 @@ function swiftLaser:TechXRadiusScaling(weapon, player)
 			else
 				weapon.CollisionDamage = damageCalc
 			end
-			dataWeapon.Swift.TechXRadius = radius
 		end
 	end
 end
 
-function swiftLaser:FireTechXLaser(parent, player, direction)
+function swiftLaser:FireTechXLaser(parent, player, direction, knifeOverride)
 	local dataPlayer = player:GetData()
 	local dataParent = parent:GetData()
-	local damageMult = parent.CollisionDamage / player.Damage
-	local radius = 15
-	if dataParent.Swift
-	and dataParent.Swift.TechXRadius then
-		radius = dataParent.Swift.TechXRadius
-	end
+	local damageMult = knifeOverride and player.Damage * 0.50 or parent.CollisionDamage / player.Damage
+	local radius = knifeOverride and 30 or swiftLaser:TechXRadiusScaling(player)
+	
 	if damageMult == 0 then
 		damageMult = 0.25
 	end
+	
 	local techX = player:FireTechXLaser(parent.Position, swiftBase:SwiftShotVelocity(direction, player, true), radius, player, damageMult)
 	local dataTechX = techX:GetData()
+	if knifeOverride then
+		techX.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE 
+	end
 	dataTechX.Swift = {}
 	dataTechX.Swift.Player = player
 	techX.Parent = parent
@@ -203,7 +214,7 @@ function swiftLaser:SwiftLaserEffectUpdate(effect)
 		if dataEffect.Swift and dataEffect.Swift.IsSwiftWeapon then
 		
 			if SwiftLaserType(player) == "techX" then
-				swiftLaser:TechXRadiusScaling(effect, player)
+				swiftLaser:TechXDamageScaling(weapon, player)
 			elseif not player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then
 				effect.CollisionDamage = player.Damage
 			end
@@ -255,13 +266,17 @@ function swiftLaser:SwiftLaserUpdate(laser)
 	and dataLaser.Swift.Player
 	and laser.Parent
 	and laser.Parent:GetData().Swift
-	and laser.Parent:GetData().Swift.ShotDir then
+	and (
+	laser.Parent:GetData().Swift.ShotDir
+	)	then
 		local player = dataLaser.Swift.Player
 		local parent = laser.Parent
 		local dataPlayer = player:GetData()
 		local dataParent = laser.Parent:GetData()
 		
 		laser.Position = parent.Position
+		
+		swiftSynergies:TechXKnifeUpdate(laser, parent)
 
 		if (dataLaser.Swift.IsTech2 and not dataParent.Swift.HasFired)
 		or (dataLaser.Swift.IsConstantLaser and player:GetFireDirection() ~= Direction.NO_DIRECTION

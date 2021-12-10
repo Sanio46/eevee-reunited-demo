@@ -98,6 +98,7 @@ function swiftSynergies:ChocolateMilkDamageScaling(weapon, player)
 end
 
 local TearFlagsToDelay = {
+	TearFlags.TEAR_GROW, --Lump of Coal
 	TearFlags.TEAR_SHRINK, --Proptosis
 	TearFlags.TEAR_ORBIT, --Tiny Planet
 	TearFlags.TEAR_SQUARE, --Hook Worm
@@ -105,6 +106,7 @@ local TearFlagsToDelay = {
 	TearFlags.TEAR_BIG_SPIRAL, --Ouroborus Worm
 	TearFlags.TEAR_HYDROBOUNCE, --Flat Stone
 	TearFlags.TEAR_BOUNCE, --Rubber Cement
+	TearFlags.TEAR_TURN_HORIZONTAL -- Brain Worm
 }
 
 function swiftSynergies:DelayTearFlags(weapon, player)
@@ -318,6 +320,84 @@ function swiftSynergies:AntiGravityDuration(player, weapon)
 			dataWeapon.Swift.AntiGravDir = nil
 			dataWeapon.Swift.AntiGravTimer = nil
 		end
+	end
+end
+
+function swiftSynergies:EyeItemDamageChance(player, weapon)
+	local shouldBeBlood
+	if weapon.Type == EntityType.ENTITY_TEAR then --All other weapon types seem to handle the synergy automatically
+		if player:HasCollectible(CollectibleType.COLLECTIBLE_STYE) then
+			if EEVEEMOD.RandomNum(2) == 2 then
+				local c = weapon:GetSprite().Color
+				weapon.CollisionDamage = weapon.CollisionDamage / 1.24
+				weapon.Height = weapon.Height + 5
+				weapon.Velocity = weapon.Velocity:Resized(1.2)
+				if c.R == 1.5 and c.G == 2.0 and c.B == 2.0 then
+					weapon:SetColor(Color(1, 1, 1, 1, c.RO, c.GO, c.BO), -1, 0, true, false)
+				end
+			end
+		end
+		if player:GetEffects():HasCollectibleEffect(CollectibleType.COLLECTIBLE_SCOOPER) then
+			if EEVEEMOD.RandomNum(2) == 2 then
+				weapon.CollisionDamage = weapon.CollisionDamage / 1.34
+				shouldBeBlood = false
+			end
+		end
+		if player:HasCollectible(CollectibleType.COLLECTIBLE_BLOOD_CLOT) then
+			if EEVEEMOD.RandomNum(2) == 2 then
+				weapon.CollisionDamage = weapon.CollisionDamage + 1
+				weapon.Height = weapon.Height - 10
+				shouldBeBlood = true
+			end
+		end
+		if player:HasCollectible(CollectibleType.COLLECTIBLE_CHEMICAL_PEEL) then
+			if EEVEEMOD.RandomNum(2) == 2 then
+				weapon.CollisionDamage = weapon.CollisionDamage + 2
+				shouldBeBlood = true
+			end
+		end
+		if player:HasCollectible(CollectibleType.COLLECTIBLE_PEEPER) then
+			if EEVEEMOD.RandomNum(2) == 2 then
+				weapon.CollisionDamage = weapon.CollisionDamage * 1.34
+				shouldBeBlood = true
+			end
+		end
+		weapon:GetData().ForceBlood = shouldBeBlood
+	end
+end
+
+function swiftSynergies:FireKnifeBrim(player)
+	local dataPlayer = player:GetData()
+	
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE)
+	and player:HasWeaponType(WeaponType.WEAPON_KNIFE) then
+		if dataPlayer.Swift
+		and dataPlayer.Swift.NumWeaponsSpawned
+		and dataPlayer.Swift.NumWeaponsSpawned > 0
+		then
+			local knivesSpawned = dataPlayer.Swift.NumWeaponsSpawned
+			for i = 1, knivesSpawned do
+				local degrees = Vector.FromAngle(((360/knivesSpawned) * i))
+				local direction = swiftBase:SwiftShotVelocity(degrees, player, false)
+				swiftAttack:FireExtraWeapon(player, player, direction)
+			end
+		end
+	end
+end
+
+function swiftSynergies:TechXKnifeUpdate(laser, tearKnife)
+	if tearKnife.Type == EntityType.ENTITY_TEAR
+	and laser.SubType == LaserSubType.LASER_SUBTYPE_RING_PROJECTILE
+	then
+	
+		laser.Position = tearKnife.Position
+
+		if tearKnife:GetData().Swift.HasFired
+		and (not EEVEEMOD.game:GetRoom():IsPositionInRoom(tearKnife.Position, -30)
+		or tearKnife:IsDead())
+		then
+			laser:Remove()
+		end	
 	end
 end
 
