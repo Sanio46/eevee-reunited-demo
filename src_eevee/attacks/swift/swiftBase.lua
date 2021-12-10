@@ -153,8 +153,11 @@ function swiftBase:SwiftTearDistanceFromPlayer(player)
 	local distFromPlayer = 50
 	if player:GetEffects():HasCollectibleEffect(CollectibleType.COLLECTIBLE_MEGA_MUSH) then
 		distFromPlayer = 100
+	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_ANGELIC_PRISM) then
+		distFromPlayer = 40
 	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_IPECAC)
-	or player:HasCollectible(CollectibleType.COLLECTIBLE_FIRE_MIND) then
+	or player:HasCollectible(CollectibleType.COLLECTIBLE_FIRE_MIND)
+	then
 		distFromPlayer = 70
 	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_LOST_CONTACT) then
 		distFromPlayer = 30

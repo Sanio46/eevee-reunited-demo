@@ -120,8 +120,8 @@ end
 function swiftLaser:FireTechXLaser(parent, player, direction, knifeOverride)
 	local dataPlayer = player:GetData()
 	local dataParent = parent:GetData()
-	local damageMult = knifeOverride and player.Damage * 0.50 or parent.CollisionDamage / player.Damage
-	local radius = knifeOverride and 30 or swiftLaser:TechXRadiusScaling(player)
+	local damageMult = knifeOverride and player.Damage * 0.25 or parent.CollisionDamage / player.Damage
+	local radius = knifeOverride and 25 or swiftLaser:TechXRadiusScaling(player)
 	
 	if damageMult == 0 then
 		damageMult = 0.25

@@ -183,7 +183,7 @@ function swiftAttack:SwiftMainFireWeapon(weapon, player)
 	
 	--Wiz "normal" shot
 	if ShouldWizShot(player) then
-		swiftAttack:FireExtraWeapon(weapon, player, fireDirection)
+		swiftAttack:FireExtraWeapon(weapon, player, swiftBase:TryFireToEnemy(player, weapon, fireDirection))
 		if player:GetCollectibleNum(CollectibleType.COLLECTIBLE_THE_WIZ) >= 2
 		or player:HasPlayerForm(PlayerForm.PLAYERFORM_BABY) then
 			swiftAttack:FireExtraWeapon(weapon, player, swiftBase:TryFireToEnemy(player, weapon, fireDirection:Rotated(45)))
@@ -714,7 +714,8 @@ function swiftAttack:SwiftTrailUpdate(trail)
 					trail:SetColor(Color(wC.R, wC.G, wC.B, 1, wC.RO, wC.GO, wC.BO), -1, 1, true, false)
 				else
 					if not swiftBase:AreColorsDifferent(wC, Color.Default) then
-						if weapon:GetSprite():GetFilename() == "gfx/tear_swift_blood.anm2" then
+						if weapon:GetSprite():GetFilename() == "gfx/tear_swift_blood.anm2"
+						or weapon.Variant == TearVariant.BELIAL then
 							wC = EEVEEMOD.TrailColor.Blood
 						else
 							wC = EEVEEMOD.TrailColor.Normal
