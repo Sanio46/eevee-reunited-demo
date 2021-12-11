@@ -3,17 +3,38 @@ local swiftTear = {}
 local swiftBase = EEVEEMOD.Src["attacks"]["swift.swiftBase"]
 local swiftSynergies = EEVEEMOD.Src["attacks"]["swift.swiftSynergies"]
 
+local SwiftTearVariantBlacklist = {
+	[TearVariant.BOBS_HEAD] = true,
+	[TearVariant.CHAOS_CARD] = true,
+	[TearVariant.COIN] = true,
+	[TearVariant.BELIAL] = true,
+	[TearVariant.ICE] = true,
+	[TearVariant.ROCK] = true,
+	[TearVariant.KEY] = true,
+	[TearVariant.KEY_BLOOD] = true,
+	[TearVariant.FIRE] = true,
+}
+
 local function AssignSwiftSprite(tear)
+
+	if SwiftTearVariantBlacklist[tear.Variant] then
+		return
+	end
+	
+	local maxSizes = 13
 	local tearSprite = tear:GetSprite()
 	local dataTear = tear:GetData()
 	local animationToPlay = tearSprite:GetAnimation()
 	local anm2ToUse = "gfx/tear_swift.anm2"
 	local x, isBlood = string.gsub(animationToPlay, "BloodTear", "")
 	
-	for i = 1, 13 do
+	for i = 1, maxSizes do
 		local foundNum = string.find(animationToPlay, tostring(i))
 		if foundNum ~= nil then
 			animationToPlay = i
+		end
+		if i == maxSizes and foundNum == nil then
+			animationToPlay = 6
 		end
 	end
 	
@@ -109,15 +130,6 @@ local function ShouldGiveFamiliarSwiftTear(tear)
 	return false
 end
 
-local SwiftTearVariantBlacklist = {
-	[TearVariant.BOBS_HEAD] = true,
-	[TearVariant.CHAOS_CARD] = true,
-	[TearVariant.ICE] = true,
-	[TearVariant.KEY] = true,
-	[TearVariant.KEY_BLOOD] = true,
-	[TearVariant.FIRE] = true,
-}
-
 function swiftTear:MakeSwiftTear(tear)
 	local dataTear = tear:GetData()
 
@@ -156,17 +168,34 @@ function swiftTear:SwiftTearUpdate(tear)
 		if dataPlayer.Swift 
 		and dataTear.Swift
 		and dataTear.Swift.IsSwiftWeapon then
+		
 			if not dataTear.Swift.HasFired then
 				if dataTear.Swift.HoldTearHeight then
 					tear.Height = dataTear.Swift.HoldTearHeight
 				end
-				tear:GetSprite().Rotation = (dataPlayer.Swift.RateOfOrbitRotation * -2)
-			else
-				if not dataTear.Swift.AfterFireRotation then 
-					dataTear.Swift.AfterFireRotation = tear:GetSprite().Rotation
+			end
+			
+			if tear.StickTarget then return end
+			
+			if tear.Variant == TearVariant.ICE then
+				local sprite = tear:GetSprite()
+				if not dataTear.Swift.HasFired then
+					sprite.Rotation = dataTear.Swift.ShotDir:GetAngleDegrees()
 				else
-					tear:GetSprite().Rotation = dataTear.Swift.AfterFireRotation
-					dataTear.Swift.AfterFireRotation = dataTear.Swift.AfterFireRotation - 20
+					if dataTear.Swift.AntiGravDir then
+						sprite.Rotation = dataTear.Swift.AntiGravDir:GetAngleDegrees()
+					end
+				end
+			else
+				if not dataTear.Swift.HasFired then
+					tear:GetSprite().Rotation = (dataPlayer.Swift.RateOfOrbitRotation * -2)
+				else
+					if not dataTear.Swift.AfterFireRotation then 
+						dataTear.Swift.AfterFireRotation = tear:GetSprite().Rotation
+					else
+						tear:GetSprite().Rotation = dataTear.Swift.AfterFireRotation
+						dataTear.Swift.AfterFireRotation = dataTear.Swift.AfterFireRotation - 20
+					end
 				end
 			end
 		end
