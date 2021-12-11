@@ -43,7 +43,7 @@ function swiftBase:TryFireToEnemy(player, weapon, fireDir)
 	local radius = player.TearRange / 2
 	local closestEnemy = EEVEEMOD.API.DetectNearestEnemy(weapon, radius)
 	local dirToEnemy = nil
-	local angleLimit = 45
+	local angleLimit = 30
 	
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)
 	and not player:HasCollectible(CollectibleType.COLLECTIBLE_TRACTOR_BEAM)
@@ -107,30 +107,20 @@ function swiftBase:AddSwiftTrail(weapon, player)
 			if (not dataPlayer.Swift.Constant) or (dataPlayer.Swift.Constant and dataWeapon.Swift.ConstantOrbit) then
 				
 				local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):ToEffect()
+				local wC = weapon:GetSprite().Color
+				local tC = Color(wC.R, wC.G, wC.B, 1, wC.RO, wC.GO, wC.BO)
 				
-				if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
-					local tC = EEVEEMOD.TrailColor.Normal
-					local dC = Color.Default
-					local wC = weapon:GetSprite().Color
-					
-					if weapon.Type == EntityType.ENTITY_TEAR then --Covers tears and knives
-						if weapon:GetSprite():GetFilename() == "gfx/tear_swift_blood.anm2" then
-							tC = EEVEEMOD.TrailColor.Blood
-						end
-					
-						if swiftBase:AreColorsDifferent(wC, dC) == true then
-							if weapon:GetData().Swift.IsFakeKnife then
-								tC = Color(wC.R, wC.G, wC.B, 0, wC.RO, wC.GO, wC.BO)
+				if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then	
+					if weapon.Type == EntityType.ENTITY_TEAR then
+						if not swiftBase:AreColorsDifferent(wC, Color.Default) then
+							if weapon:GetSprite():GetFilename() == "gfx/tear_swift_blood.anm2" then
+								tC = EEVEEMOD.TrailColor.Blood
+							elseif EEVEEMOD.TrailColor[weapon.Variant] ~= nil then
+								tC = EEVEEMOD.TrailColor[weapon.Variant]
 							else
-								tC = wC
+								tC = EEVEEMOD.TrailColor.Normal
 							end
 						end
-					elseif weapon.Type == EntityType.ENTITY_EFFECT then --Covers lasers
-						tC = wC
-					end
-					trail.Color = tC
-					if weapon:GetData().Swift.IsFakeKnife then
-						trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 15, 1, true, false)
 					end
 				else
 					if weapon.Type ~= EntityType.ENTITY_EFFECT and weapon.Type ~= EntityType.ENTITY_LASER then
@@ -140,6 +130,9 @@ function swiftBase:AddSwiftTrail(weapon, player)
 					end
 				end
 				trail.Parent = weapon
+				trail:GetData().TrailColor = tC
+				trail.Color = tC
+				trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 15, 1, true, false)
 				dataWeapon.Swift.Trail = trail
 				trail.MinRadius = 0.2
 				trail.RenderZOffset = -10
@@ -251,15 +244,15 @@ function swiftBase:PlaydoughRandomColor(entity)
 end
 
 function swiftBase:AreColorsDifferent(c1, c2)
+	local isDifferent = false
 	if c1 ~= nil and c2 ~= nil then
 		--print(c1.R, c1.G, c1.B, c1.RO, c1.GO, c1.BO)
 		--print(c2.R, c2.G, c2.B, c2.RO, c2.GO, c2.BO)	
 		if c1.R ~= c2.R or c1.G ~= c2.G or c1.B ~= c2.B or c1.RO ~= c2.RO or c1.GO ~= c2.GO or c1.BO ~= c2.BO then
-			return true
-		else
-			return false
+			isDifferent = true
 		end
 	end
+	return isDifferent
 end
 
 function swiftBase:IsSwiftLaserEffect(effect)

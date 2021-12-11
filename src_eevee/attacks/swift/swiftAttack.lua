@@ -431,7 +431,7 @@ function swiftAttack:SwiftInit(player)
 		
 			if EEVEEMOD.API.PlayerCanControl(player)
 			and EEVEEMOD.API.IsPlayerWalking(player) then
-			
+				
 				if player:GetFireDirection() ~= Direction.NO_DIRECTION
 				and not dataPlayer.Swift.AttackCooldown
 				and not dataPlayer.Swift.AttackInit then
@@ -703,31 +703,19 @@ function swiftAttack:SwiftTrailUpdate(trail)
 	and trail.Parent:GetData().Swift.IsSwiftWeapon then
 		local weapon = trail.Parent
 		local room = EEVEEMOD.game:GetRoom()
+		local tC = trail.Color
 		
 		if trail:GetData().EeveeRGB == true then
 			EEVEEMOD.API.GiveRGB(trail:GetSprite())
 		else
-			local tC = trail.Color
 			local wC = weapon:GetSprite().Color
-			if weapon.Type == EntityType.ENTITY_TEAR then
-				if weapon:GetData().Swift.IsFakeKnife then
-					trail:SetColor(Color(wC.R, wC.G, wC.B, 1, wC.RO, wC.GO, wC.BO), -1, 1, true, false)
-				else
-					if not swiftBase:AreColorsDifferent(wC, Color.Default) then
-						if weapon:GetSprite():GetFilename() == "gfx/tear_swift_blood.anm2"
-						or weapon.Variant == TearVariant.BELIAL then
-							wC = EEVEEMOD.TrailColor.Blood
-						else
-							wC = EEVEEMOD.TrailColor.Normal
-						end
-					end
-					trail:SetColor(wC, -1, 1, true, false)
-				end
+			if swiftBase:AreColorsDifferent(wC, trail:GetData().TrailColor)
+			and swiftBase:AreColorsDifferent(wC, Color.Default) then
+				trail:SetColor(wC, -1, 1, true, false)
 			end
 		end
 		
 		if not room:IsPositionInRoom(trail.Position, -30) then
-			local tC = trail.Color
 			trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 5, 2, true, false)
 		end
 		local heightDif = 0
