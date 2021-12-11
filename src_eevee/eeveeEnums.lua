@@ -98,6 +98,9 @@ EEVEEMOD.SkinColorToString = {
 EEVEEMOD.TrailColor = {
 	Normal = Color(1, 1, 0.5, 1, 0.176, 0.05, 0),
 	Blood = Color(1, 0, 0, 1, 0, 0, 0),
+	[TearVariant.BELIAL] = Color(1, 0, 0, 1, 0, 0, 0),
+	[TearVariant.ROCK] = Color(0.5, 0.5, 0.5, 1, 0, 0, 0),
+	[TearVariant.ICE] = Color(0.4, 0.5, 0.9, 1, 0, 0, 0)
 }
 
 return EEVEEMOD
