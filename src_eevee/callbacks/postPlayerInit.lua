@@ -4,6 +4,7 @@ local ccp = EEVEEMOD.Src["player"]["characterCostumeProtector"]
 local eeveeBasics = EEVEEMOD.Src["player"]["eeveeBasics"]
 
 function playerInit:main(player)
+	eeveeBasics:NoTainted(player)
 	eeveeBasics:OnPlayerInit(player)
 	ccp:OnPlayerInit(player)
 end

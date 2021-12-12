@@ -5,4 +5,8 @@
 		nameimage="PlayerName_Eevee.png" 
 		portrait="PlayerPortrait_Eevee.png" skinColor="-1" costumeSuffix="eevee"
 		birthright="Eevee learned Tail Whip!" />
+	<player name="Eevee" bSkinParent="Eevee" skin="character_eevee.png" hp="4"
+		nameimage="PlayerName_Eevee.png" 
+		portrait="PlayerPortrait_Eevee.png" skinColor="-1" costumeSuffix="eevee"
+		birthright="Eevee learned Tail Whip!" />
 </players>

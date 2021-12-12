@@ -46,7 +46,8 @@ EEVEEMOD.KnifeVariant = {
 }
 
 EEVEEMOD.PlayerType = {
-	EEVEE = Isaac.GetPlayerTypeByName("Eevee"),
+	EEVEE = Isaac.GetPlayerTypeByName("Eevee", false),
+	EEVEE_B = Isaac.GetPlayerTypeByName("Eevee", true)
 }
 
 EEVEEMOD.PlayerTypeToString = {

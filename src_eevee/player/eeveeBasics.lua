@@ -57,7 +57,16 @@ function eeveeBasics:GiveEsauJrEeveeData(player)
 			table.remove(EeveeToEsauJr, 1)
 		end
 	end
-end	
+end
+
+function eeveeBasics:NoTainted(player)
+	local playerType = player:GetPlayerType()
+	
+	if playerType == EEVEEMOD.PlayerType.EEVEE_B then
+		player:ChangePlayerType(EEVEEMOD.PlayerType.EEVEE)
+		eeveeBasics:OnPlayerInit(player)
+	end
+end
 
 function eeveeBasics:TryDeinitEevee(player)
 	local dataPlayer = player:GetData()
