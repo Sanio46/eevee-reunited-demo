@@ -80,6 +80,7 @@ if Encyclopedia then
 				{str = "Mom's Eye: For each star being fired, it has a random chance to fire an additional star in the opposite direction. The direction is not influenced by Swift's auto-aim."},
 				{str = "Mom's Knife: Stars are replaced by floating knives that deal 2x damage. They have a minimum lifetime of 2 seconds before the player's range stat can take effect, and all fire simultaneously. The rate that these knives appear are determined are equal to your firerate x 1.5."},
 				{str = "Mom's Knife + Tech X: Tech X rings surround each knife, having a small radius and deals 25% of the player's damage."},
+				{str = "Mom's Wig: Functions normally with Eevee, bypassing their blindfold."},
 				{str = "Monstro's Lung: Acts as a multi-tear modifier, having 6 additional stars orbit every initially spawned star, with their distance from the star and size being randomized."},
 				{str = "- Monstro's Lung + 20/20 and other multi-shot effects: The number of stars that these items would usually add are doubled, up to a maximum of 16."},
 				{str = "- Monstro's Lung + Brimstone: Shoots 3-5 additional beams in random directions around the initial star."},
