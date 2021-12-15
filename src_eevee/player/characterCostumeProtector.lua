@@ -5,7 +5,6 @@ local ccp = {}
 
 local baseCostumePath = "gfx/characters/costume_"
 local baseCostumeSuffixPath = "gfx/characters/costumes_"
-
 local playerToProtect = {
 	[EEVEEMOD.PlayerType.EEVEE] = true,
 }
@@ -393,7 +392,7 @@ local costumeList = {
 	[CollectibleType.COLLECTIBLE_GIANT_CELL] = true,
 	[CollectibleType.COLLECTIBLE_TROPICAMIDE] = false,
 	[CollectibleType.COLLECTIBLE_CARD_READING] = false,
-	[CollectibleType.COLLECTIBLE_TOOTH_AND_NAIL] = true,
+	[CollectibleType.COLLECTIBLE_TOOTH_AND_NAIL] = false,
 	[CollectibleType.COLLECTIBLE_BINGE_EATER] = false, --TODO
 	[CollectibleType.COLLECTIBLE_GUPPYS_EYE] = true,
 	[CollectibleType.COLLECTIBLE_SAUSAGE] = true,
@@ -484,7 +483,7 @@ local nullEffectsList = { --Null effects that are detectable that have costumes.
 local trinketCostumeList = {
 	[TrinketType.TRINKET_RED_PATCH] = false,
 	[TrinketType.TRINKET_TICK] = false,
-	[TrinketType.TRINKET_AZAZELS_STUMP] = true
+	[TrinketType.TRINKET_AZAZELS_STUMP] = true,
 }
 local activeItemCostumes = {
 	[CollectibleType.COLLECTIBLE_BIBLE] = true,
@@ -575,22 +574,21 @@ end
 local function RemoveBlacklistedCostumes(player)
 	local playerType = player:GetPlayerType()
 	local playerEffects = player:GetEffects()
-
+	local data = player:GetData()
+	
 	--Item Costumes
-	if playerItemCostumeWhitelist[playerType] then
-		for itemID, _ in pairs(playerItemCostumeWhitelist[playerType]) do
-			local itemCostume = Isaac.GetItemConfig():GetCollectible(itemID)
-			if ccp:CanRemoveCollectibleCostume(player, itemID)
-			and playerItemCostumeWhitelist[playerType][itemID] == false then
-				player:RemoveCostume(itemCostume, false)
-			end
+	for itemID, _ in pairs(costumeList) do
+		local itemCostume = Isaac.GetItemConfig():GetCollectible(itemID)
+		if ccp:CanRemoveCollectibleCostume(player, itemID)
+		and costumeList[itemID] == false then
+			player:RemoveCostume(itemCostume, false)
 		end
 	end
 
 	--Active Items
 	for itemID, boolean in pairs(activeItemCostumes) do
 		if playerEffects:HasCollectibleEffect(itemID)
-		and playerItemCostumeWhitelist[playerType][itemID] == false
+		and costumeList[itemID] == false
 		then
 			local itemCostume = Isaac.GetItemConfig():GetCollectible(itemID)
 			player:RemoveCostume(itemCostume)
@@ -601,21 +599,21 @@ local function RemoveBlacklistedCostumes(player)
 	end
 	
 	--Null Costumes
-	for nullItemID = 1, NullItemID.NUM_NULLITEMS do
+	for nullItemID, boolean in pairs(nullEffectsList) do
 		if playerEffects:HasNullEffect(nullItemID)
-		and playerNullItemCostumeWhitelist[playerType][nullItemID] == false
+		and nullEffectsList[nullItemID] == false
 		then
 			player:TryRemoveNullCostume(nullItemID)
 		end
 	end
-	
+
 	--Trinkets
 	for trinketID, _ in pairs(trinketCostumeList) do
 		if ((trinketID == TrinketType.TRINKET_TICK
 		and player:HasTrinket(trinketID))
 		or playerEffects:HasTrinketEffect(trinketID))
 		and data.CCP.TrinketActive[trinketID]
-		and playerTrinketCostumeWhitelist[playerType][trinketID] == true then
+		and trinketCostumeList[trinketID] == false then
 			local trinketCostume = Isaac.GetItemConfig():GetTrinket(trinketID)
 			player:RemoveCostume(trinketCostume)
 		end
@@ -624,7 +622,7 @@ local function RemoveBlacklistedCostumes(player)
 	--Transformations
 	for playerForm, nullItemID in pairs(playerFormToNullItemID) do
 		if player:HasPlayerForm(playerForm)
-		and playerNullItemCostumeWhitelist[playerType][nullItemID] == false
+		and nullEffectsList[nullItemID] == false
 		then
 			player:TryRemoveNullCostume(nullItemID)
 		end
@@ -644,29 +642,29 @@ local function RemoveBlacklistedCostumes(player)
 	
 	--Double Glass Eye
 	if player:GetCollectibleNum(CollectibleType.COLLECTIBLE_GLASS_EYE) >= 2 then
-		if playerItemCostumeWhitelist[CollectibleType.COLLECTIBLE_GLASS_EYE] == false then
-			player:TryRemoveNullCostume(126)
+		if costumeList[CollectibleType.COLLECTIBLE_GLASS_EYE] == false then
+			player:TryRemoveNullCostume(CollectibleType.COLLECTIBLE_GLASS_EYE)
 		end
 	end
 end
 
 local ItemToCostume = {
-	[CollectibleType.COLLECTIBLE_BALL_OF_TAR] = "balloftar", --1
-	[CollectibleType.COLLECTIBLE_LIBRA] = "libra", --1
-	[CollectibleType.COLLECTIBLE_TERRA] = "terra", --2
-	[CollectibleType.COLLECTIBLE_URANUS] = "uranus", --2
-	[CollectibleType.COLLECTIBLE_WHORE_OF_BABYLON] = "whoreofbabylon", --24
-	[CollectibleType.COLLECTIBLE_BRIMSTONE] = "brimstone", --24
-	[CollectibleType.COLLECTIBLE_TOOTH_AND_NAIL] = "toothandnail", --52
+	[CollectibleType.COLLECTIBLE_BALL_OF_TAR] = "balloftar",
+	[CollectibleType.COLLECTIBLE_LIBRA] = "libra",
+	[CollectibleType.COLLECTIBLE_TERRA] = "terra",
+	[CollectibleType.COLLECTIBLE_URANUS] = "uranus",
+	[CollectibleType.COLLECTIBLE_WHORE_OF_BABYLON] = "whoreofbabylon",
+	[CollectibleType.COLLECTIBLE_BRIMSTONE] = "brimstone",
 }
 
 local function AddItemSpecificCostumes(player)
 	local playerType = player:GetPlayerType()
 	local playerEffects = player:GetEffects()
-	local basePath = "gfx/characters/costume_"..EEVEEMOD.PlayerTypeToString[playerType].."_"
+	local basePath = playerCostume[playerType].."_"
+	
 	for itemID, costumePath in pairs(ItemToCostume) do
-		
 		local itemCostume = Isaac.GetCostumeIdByPath(basePath..ItemToCostume[itemID]..".anm2")
+		
 		if ccp:CanRemoveCollectibleCostume(player, itemID) then
 			ccp:AddCustomNullCostume(player, itemCostume, basePath..ItemToCostume[itemID]..".anm2")
 		else
@@ -721,6 +719,15 @@ local function AddItemSpecificCostumes(player)
 	else
 		player:TryRemoveNullCostume(curseCustomCostume)
 	end
+	
+	--Tooth and Nail
+	local toothPath = basePath.."toothandnail.anm2"
+	local toothCustomCostume = Isaac.GetCostumeIdByPath(toothPath)
+	if playerEffects:HasNullEffect(NullItemID.ID_TOOTH_AND_NAIL) then
+		ccp:AddCustomNullCostume(player, toothCustomCostume, toothPath)
+	else
+		player:TryRemoveNullCostume(toothCustomCostume)
+	end
 end
 
 local function RemoveModdedCostumes(player)
@@ -738,27 +745,6 @@ local function RemoveModdedCostumes(player)
 		if player:HasCollectible(id) and ItemConfig.Config.ShouldAddCostumeOnPickup(itemConfigID) then
 			player:RemoveCostume(itemConfigID)
 		end
-	end
-end
-
-local function InitiateItemWhitelist(playerType)
-	playerItemCostumeWhitelist[playerType] = {}
-	for itemID, boolean in pairs(costumeList) do
-		playerItemCostumeWhitelist[playerType][itemID] = boolean
-	end
-end
-
-local function InitiateNullItemWhitelist(playerType)
-	playerNullItemCostumeWhitelist[playerType] = {}
-	for nullItemID, boolean in pairs(nullEffectsList) do
-		playerNullItemCostumeWhitelist[playerType][nullItemID] = boolean
-	end
-end
-
-local function InitiateTrinketWhitelist(playerType)
-	playerTrinketCostumeWhitelist[playerType] = {}
-	for trinketID, boolean in pairs(trinketCostumeList) do
-		playerTrinketCostumeWhitelist[playerType][trinketID] = boolean
 	end
 end
 
@@ -823,14 +809,18 @@ function ccp:ResetPlayerCostumes(player)
 		end
 		
 		player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(basePath..".anm2"))
-		player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(basePath.."azazel.anm2"))
-		player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(basePath.."delirious.anm2"))
+		player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(basePath.."_azazel.anm2"))
+		player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(basePath.."_delirious.anm2"))
+		player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(basePath.."_berserk.anm2"))
+		player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(basePath.."_lostcurse.anm2"))
+		player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(basePath.."_brimstone2.anm2"))
+		player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(basePath.."_toothandnail.anm2"))
 	
 		--Item Costumes
-		for itemID, _ in pairs(playerItemCostumeWhitelist[playerType]) do
+		for itemID, _ in pairs(costumeList) do
 			local itemCostume = Isaac.GetItemConfig():GetCollectible(itemID)
 			if ccp:CanRemoveCollectibleCostume(player, itemID)
-			and playerItemCostumeWhitelist[playerType][itemID] == false then
+			and costumeList[itemID] == false then
 				player:AddCostume(itemCostume, false)
 			end
 		end
@@ -838,7 +828,7 @@ function ccp:ResetPlayerCostumes(player)
 		--Active Items
 		for itemID, boolean in pairs(activeItemCostumes) do
 			if playerEffects:HasCollectibleEffect(itemID)
-			and playerItemCostumeWhitelist[playerType][itemID] == false
+			and costumeList[itemID] == false
 			then
 				local itemCostume = Isaac.GetItemConfig():GetCollectible(itemID)
 				player:AddCostume(itemCostume)
@@ -848,7 +838,7 @@ function ccp:ResetPlayerCostumes(player)
 		--Null Costumes
 		for nullItemID = 1, NullItemID.NUM_NULLITEMS do
 			if playerEffects:HasNullEffect(nullItemID)
-			and playerNullItemCostumeWhitelist[playerType][nullItemID] == false
+			and nullEffectsList[nullItemID] == false
 			and not nullEffectsList[nullItemID] then
 				player:AddNullCostume(nullItemID)
 			end
@@ -860,7 +850,7 @@ function ccp:ResetPlayerCostumes(player)
 			and player:HasTrinket(trinketID))
 			or playerEffects:HasTrinketEffect(trinketID))
 			and data.CCP.TrinketActive[trinketID]
-			and playerTrinketCostumeWhitelist[playerType][trinketID] == false then
+			and trinketCostumeList[trinketID] == false then
 				local trinketCostume = Isaac.GetItemConfig():GetTrinket(trinketID)
 				player:AddCostume(trinketCostume)
 			end
@@ -869,7 +859,7 @@ function ccp:ResetPlayerCostumes(player)
 		--Transformations
 		for playerForm, nullItemID in pairs(playerFormToNullItemID) do
 			if player:HasPlayerForm(playerForm)
-			and playerNullItemCostumeWhitelist[playerType][nullItemID] == false
+			and nullEffectsList[nullItemID] == false
 			then
 				player:AddNullCostume(nullItemID)
 			end
@@ -886,13 +876,15 @@ function ccp:InitPlayerCostume(player)
 	and not player:IsCoopGhost() then
 	
 		if not data.CCP.HasCostumeInitialized then
-
-			InitiateWhitelists()
 			ccp:MainResetPlayerCostumes(player)
 			data.CCP.NumCollectibles = player:GetCollectibleCount()
 			data.CCP.NumTemporaryEffects = player:GetEffects():GetEffectsList().Size
 			data.CCP.QueueCostumeRemove = {}
-			data.CCP.TrinketActive = {}
+			data.CCP.TrinketActive = {
+			[TrinketType.TRINKET_TICK] = false,
+			[TrinketType.TRINKET_AZAZELS_STUMP] = false,
+			[TrinketType.TRINKET_RED_PATCH] = false
+			}
 			data.CCP.HasCostumeInitialized = {
 				[playerType] = true
 			}
@@ -943,11 +935,24 @@ function ccp:MiscCostumeResets(player)
 		or playerEffects:HasTrinketEffect(trinketID))
 		then
 			if not data.CCP.TrinketActive[trinketID] then
-				if not playerTrinketCostumeWhitelist[playerType][trinketID] then
+				if not trinketCostumeList[trinketID] then
 					local trinketCostume = Isaac.GetItemConfig():GetTrinket(trinketID)
-					player:RemoveCostume(trinketCostume)
-				end	
-				data.CCP.TrinketActive[trinketID] = true
+					if trinketID == TrinketType.TRINKET_TICK then
+						if player.QueuedItem.Item then
+							if player.QueuedItem.Item.ID == TrinketType.TRINKET_TICK then
+								data.CCP.DelayTick = true
+							end
+						else
+							if data.CCP.DelayTick then
+								player:RemoveCostume(trinketCostume)
+								data.CCP.DelayTick = false
+								data.CCP.TrinketActive[trinketID] = true
+							end
+						end
+					else
+						player:RemoveCostume(trinketCostume)
+					end
+				end
 			end
 		elseif (trinketID == TrinketType.TRINKET_TICK
 		and not player:HasTrinket(trinketID))
@@ -1055,8 +1060,8 @@ function ccp:ResetCostumeOnItem(itemID, rng, player, useFlags, activeSlot, custo
 	and data.CCP
 	and data.CCP.HasCostumeInitialized
 	and playerUsedItem then
-		if playerItemCostumeWhitelist[playerType]
-		and (playerItemCostumeWhitelist[playerType][itemID] == false
+		if costumeList
+		and (costumeList[itemID] == false
 		or itemID == CollectibleType.COLLECTIBLE_LEMEGETON)
 		then
 			data.CCP.DelayCostumeReset = true
@@ -1080,8 +1085,8 @@ function ccp:ResetCostumeOnPill(pillID, player)
 	and data.CCP
 	and data.CCP.HasCostumeInitialized
 	and playerUsedPill
-	and playerNullItemCostumeWhitelist[playerType]
-	and playerNullItemCostumeWhitelist[playerType][pillCostumes[pillID]] == false
+	and nullEffectsList
+	and nullEffectsList[pillCostumes[pillID]] == false
 	then
 		data.CCP.DelayPillCostumeRemove = pillID
 	end
@@ -1157,7 +1162,7 @@ function ccp:ModelingClay(player)
 	if data.CCP.CheckForModelingClay then
 		if player:HasTrinket(TrinketType.TRINKET_MODELING_CLAY)
 		and itemID ~= 0
-		and not playerItemCostumeWhitelist[playerType][itemID]
+		and not costumeList[itemID]
 		then
 			table.insert(data.CCP.QueueCostumeRemove, itemID)
 		end
@@ -1261,7 +1266,5 @@ function ccp:OnNewLevel(player)
 		ccp:ResetOnMissingNoNewFloor(player)
 	end
 end
-
-InitiateWhitelists()
 
 return ccp
