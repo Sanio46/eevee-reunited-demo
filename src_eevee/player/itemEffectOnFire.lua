@@ -4,7 +4,7 @@ local itemEffectOnFire = {}
 
 local tech05Duration = 2
 
-function itemEffectOnFire:FireTech05(player)
+function itemEffectOnFire:Tech05(player)
 	local playerType = player:GetPlayerType()
 	local dataPlayer = player:GetData()
 	
@@ -51,6 +51,9 @@ function itemEffectOnFire:DeadTooth(player)
 	end
 end
 
+
+--Disabled currently, as there's no current way to reliably track when the player is considered "firing" for other weapon types.
+--Same goes for Mom's Wig, Ghost Pepper, Bird's Eye, and Eye of Greed.
 function itemEffectOnFire:ImmaculateHeart(weapon)
 	local dataWeapon = weapon:GetData()
 	
@@ -60,7 +63,7 @@ function itemEffectOnFire:ImmaculateHeart(weapon)
 	then
 		local player = weapon.SpawnerEntity:ToPlayer() or weapon.SpawnerEntity:ToFamiliar().Player
 		local dataPlayer = player:GetData()
-	
+
 		if player:HasCollectible(CollectibleType.COLLECTIBLE_IMMACULATE_HEART)
 		and player:GetPlayerType() == EEVEEMOD.PlayerType.EEVEE
 		and not player:CanShoot()
@@ -68,6 +71,8 @@ function itemEffectOnFire:ImmaculateHeart(weapon)
 			if EEVEEMOD.RandomNum(4) == 4 and not dataWeapon.IsImmaculateTear then
 				local tear = player:FireTear(player.Position, EEVEEMOD.API.GetIsaacShootingDirection(player):Resized(10), false, false, false, player, 1):ToTear()
 				tear:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_ORBIT_ADVANCED)
+				tear.Color = Color(1.5, 2.0, 2.0, 1, 0, 0, 0)
+				tear.FallingSpeed = -6.5
 				tear:GetData().IsImmaculateTear = true
 			end
 		end

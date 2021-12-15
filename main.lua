@@ -6,9 +6,9 @@ if not REPENTANCE then
 	return
 end
 
-EEVEEMOD = include("src_eevee.eeveeEnums")
-EEVEEMOD.API = include("src_eevee.eeveeApi")
---Current Version = 1.5
+EEVEEMOD = include("src_eevee.EeveeEnums")
+EEVEEMOD.API = include("src_eevee.EeveeApi")
+--Current Version = 1.5.1
 
 local EeveeLuas = {
 	{"attacks", {
@@ -75,6 +75,7 @@ local EeveeLuas = {
 		"postEffectInit",
 		"postEffectUpdate",
 		"postBombUpdate",
+		"postFireTear"
 	},
 	},
 }
@@ -148,6 +149,7 @@ EeveeReunited:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, EEVEEMOD.Src["callb
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, EEVEEMOD.Src["callbacks"]["postEffectInit"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, EEVEEMOD.Src["callbacks"]["postEffectUpdate"].main)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, EEVEEMOD.Src["callbacks"]["postBombUpdate"].main)
+EeveeReunited:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, EEVEEMOD.Src["callbacks"]["postFireTear"].main)
 
 EeveeReunited:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, EeveeReunited.SaveEeveeData)
 EeveeReunited:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, EeveeReunited.SaveEeveeData)
