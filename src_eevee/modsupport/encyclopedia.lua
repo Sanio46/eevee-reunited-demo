@@ -51,7 +51,6 @@ local CharactersWiki = {
 			{str = "Anti-Gravity: If the fire buttons are held, for each star that would fire, instead stays in place. The star will fire off in its originally fired direction after the fire buttons are released, or the star flashes a blue color a set amount of times."},
 			{str = "Anti-Gravity + Brimstone / Technology: Swift's orbs will fire another orb, of which will function like their regular Anti-Gravity synergy."},
 			{str = "Anti-Gravity + Mom's Knife: / Dr. Fetus: Functions with Anti-Gravity unlike normal characters."},
-			{str = "Bird's Eye / Ghost Pepper: Functions normally with Eevee."},
 			{str = "Blood Clot / Chemical Peel / The Peeper / The Scooper / Stye: Each item's effect has a 50/50 chance per star to trigger, all able to stack."},
 			{str = "Brimstone: Stars are replaced by Brimstone orbs. The orbs do continuous damage to anything that touches it, determined by the player's damage. Once Swift fires, all surrounding orbs simultaneously fire a Brimstone laser in the direction the player fired them in. The rate that these orbs appear are determined are equal to your firerate x 1.5."},
 			{str = "Brimstone + Almond Milk / Soy Milk: Brimstone beams can be fired continuously after fully charging Swift as long as the fire buttons are held."},
@@ -61,7 +60,6 @@ local CharactersWiki = {
 			{str = "Evil Eye: Stars have a chance to be replaced by an Evil Eye."},
 			{str = "Evil Eye + Almond Milk / Soy Milk / Tiny Planet: Eye does not fire additional stars from Swift, as it already does so itself."},
 			{str = "Esau Jr: Esau Jr. retains the Swift attack."},
-			{str = "Eye of Greed: Functions normally with Eevee, with the exception that the coin replaces a star instead of being an additional shot."},
 			{str = "Eye of the Occult: Stars will stay in orbit until fired, allowing manual control."},
 			{str = "Eye Sore: For each star being fired, it has a random chance to fire 1-3 additional stars in random directions. The direction is not influenced by Swift's auto-aim."},
 			{str = "Fire Mind / Ipecac: Stars orbit further away from the player, out of explosion radius."},
@@ -74,11 +72,10 @@ local CharactersWiki = {
 			{str = "Loki's Horns: For each star being fired, it has a random chance to fire additional stars in the remaining 3 cardinal directions. The direction is not influenced by Swift's auto-aim."},
 			{str = "Lost Conact: Stars orbit much closer to the player."},
 			{str = "Lost Contact + Fire Mind / Ipecac: Lost Contact's orbit distance is overridden by Fire Mind's and Ipecac's."},
-			{str = "Marked: Stars will fire in the direction of the target, but will not converge onto it directly."},
+			{str = "Marked: Stars will fire directly at the target."},
 			{str = "Mom's Eye: For each star being fired, it has a random chance to fire an additional star in the opposite direction. The direction is not influenced by Swift's auto-aim."},
 			{str = "Mom's Knife: Stars are replaced by floating knives that deal 2x damage. They have a minimum lifetime of 2 seconds before the player's range stat can take effect, and all fire simultaneously. The rate that these knives appear are determined are equal to your firerate x 1.5."},
 			{str = "Mom's Knife + Tech X: Tech X rings surround each knife, having a small radius and deals 25% of the player's damage."},
-			{str = "Mom's Wig: Functions normally with Eevee, bypassing their blindfold."},
 			{str = "Monstro's Lung: Acts as a multi-tear modifier, having 6 additional stars orbit every initially spawned star, with their distance from the star and size being randomized."},
 			{str = "- Monstro's Lung + 20/20 and other multi-shot effects: The number of stars that these items would usually add are doubled, up to a maximum of 16."},
 			{str = "- Monstro's Lung + Brimstone: Shoots 3-5 additional beams in random directions around the initial star."},
@@ -108,6 +105,7 @@ local CharactersWiki = {
 			{str = "Tractor Beam: Stars float directly in front of Eevee until fired."},
 			{str = "-- Negative"},
 			{str = "Aquarius: Creeps do not inherit Swift's homing effect."},
+			{str = "Bird's Eye / Ghost Pepper: No effect."},
 			{str = "Brain Worm: Stars do not turn to enemies until fired, although given Swift's auto aim and homing, this is nearly pointless."},
 			{str = "C Section: Overrides Swift."},
 			{str = "Compound Fracture / The Parasite: Combined with Swift's spectral, stars will continuously create split stars as long as they hover over an obstacle. However, most split stars may end up staying in place due to them copying the initial star's velocity, which isn't very fast while Swift is in orbit around the player."},
@@ -116,8 +114,10 @@ local CharactersWiki = {
 			{str = "Dead Tooth: No effect on Eevee, because they brush their teeth regularly."},
 			{str = "Decap Attack: Stars will continue to orbit the body, making the item effectively useless."},
 			{str = "Epic Fetus: Overrides Swift."},
-			{str = "Incubus / Twisted Pair: Fires normally with stars, but it's only a cosmetic change."},
+			{str = "Eye of Greed: No effect."},
+			{str = "Incubus / Twisted Pair: Fires normally. Swift stars are purely cosmetic."},
 			{str = "Lead Pencil: No effect."},
+			{str = "Mom's Wig: No effect."},
 			{str = "Neptunus: No effect."},	
 			{str = "Spirit Sword: Overrides Swift."},
 			{str = "The Ludovico Technique: Overrides Swift."},
@@ -185,6 +185,7 @@ local ItemsWiki = {
 
 function eeveeEncyclopedia.Init(mod)
 	EeveePortrait = Encyclopedia.RegisterSprite(mod.path .. "content/gfx/characterportraits.anm2", "Eevee", 0)
+	EeveeBPortrait = Encyclopedia.RegisterSprite(mod.path .. "content/gfx/characterportraitsalt.anm2", "Eevee", 0)
 end
 
 function eeveeEncyclopedia.AddEncyclopediaDescs()
@@ -195,6 +196,21 @@ function eeveeEncyclopedia.AddEncyclopediaDescs()
 		ID = EEVEEMOD.PlayerType.EEVEE,
 		Sprite = EeveePortrait,
 		WikiDesc = CharactersWiki.PlayerEevee,
+	})
+	
+	Encyclopedia.AddCharacterTainted({
+		ModName = EEVEEMOD.Name,
+		Name = "Eevee",
+		Description = "The Dithered",
+		ID = EEVEEMOD.PlayerType.EEVEE_B,
+		Sprite = EeveeBPortrait,
+		UnlockFunc = function(self) -- Again this is in case your tainted is "unlockable"
+			self.Spr = EeveeBPortrait
+			self.Desc = "Coming soon."
+			self.TargetColor = Encyclopedia.VanillaColor
+			
+			return self
+		end,
 	})
 
 	Encyclopedia.AddItem({
