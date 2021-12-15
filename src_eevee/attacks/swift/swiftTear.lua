@@ -15,6 +15,12 @@ local SwiftTearVariantBlacklist = {
 	[TearVariant.FIRE] = true,
 }
 
+local BloodTearFlags = {
+	[TearVariant.EYE] = true,
+	[TearVariant.BALLOON] = true,
+	[TearVariant.BALLOON_BRIMSTONE] = true,
+}
+
 local function AssignSwiftSprite(tear)
 
 	if SwiftTearVariantBlacklist[tear.Variant] then
@@ -32,6 +38,7 @@ local function AssignSwiftSprite(tear)
 		local foundNum = string.find(animationToPlay, tostring(i))
 		if foundNum ~= nil then
 			animationToPlay = i
+			break
 		end
 		if i == maxSizes and foundNum == nil then
 			animationToPlay = 6
@@ -43,8 +50,8 @@ local function AssignSwiftSprite(tear)
 	and (
 	dataTear.ForceBlood == nil or 
 	dataTear.ForceBlood ~= false
-	)
-	)
+	))
+	or BloodTearFlags[tear.Variant]
 	then
 		animationToPlay = "BloodTear"..animationToPlay
 		anm2ToUse = "gfx/tear_swift_blood.anm2"
@@ -118,23 +125,11 @@ function swiftTear:SpawnSwiftTears(player, degreeOfTearSpawns, offset)
 	swiftBase:AssignSwiftSounds(tear)
 end
 
-local function ShouldGiveFamiliarSwiftTear(tear)
-	if tear.SpawnerType == EntityType.ENTITY_FAMILIAR then
-		if tear.SpawnerVariant == FamiliarVariant.INCUBUS 
-		or tear.SpawnerVariant == FamiliarVariant.TWISTED_BABY
-		or tear.SpawnerVariant == FamiliarVariant.MINISAAC
-		then
-			return true
-		end
-	end
-	return false
-end
-
 function swiftTear:MakeSwiftTear(tear)
 	local dataTear = tear:GetData()
 
 	if tear.SpawnerType == EntityType.ENTITY_PLAYER 
-	or ShouldGiveFamiliarSwiftTear(tear)
+	and tear.SpawnerEntity
 	then
 		local player = tear.SpawnerEntity:ToPlayer() or tear.SpawnerEntity:ToFamiliar().Player
 		local dataPlayer = player:GetData()
@@ -157,9 +152,7 @@ end
 
 function swiftTear:SwiftTearUpdate(tear)
 	
-	if tear.SpawnerType == EntityType.ENTITY_PLAYER 
-	or ShouldGiveFamiliarSwiftTear(tear)
-	then
+	if tear.SpawnerType == EntityType.ENTITY_PLAYER then
 
 		local player = tear.SpawnerEntity:ToPlayer() or tear.SpawnerEntity:ToFamiliar().Player
 		local dataPlayer = player:GetData()
@@ -177,7 +170,7 @@ function swiftTear:SwiftTearUpdate(tear)
 			
 			if tear.StickTarget then return end
 			
-			if tear.Variant == TearVariant.ICE then
+			if tear.Variant == TearVariant.ICE or tear.Variant == TearVariant.COIN then
 				local sprite = tear:GetSprite()
 				if not dataTear.Swift.HasFired then
 					sprite.Rotation = dataTear.Swift.ShotDir:GetAngleDegrees()

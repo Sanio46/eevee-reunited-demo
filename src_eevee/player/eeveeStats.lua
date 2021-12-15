@@ -27,6 +27,7 @@ function eeveeStats:onCache(player, cacheFlag)
 		end
 		if cacheFlag == CacheFlag.CACHE_RANGE then
 			player.TearRange = player.TearRange + (statsEeveelutions[playerType][cacheFlag] * 40)
+			player.TearFallingAcceleration = 0
 		end
 		if cacheFlag == CacheFlag.CACHE_SHOTSPEED then
 			player.ShotSpeed = player.ShotSpeed + statsEeveelutions[playerType][cacheFlag]

@@ -16,7 +16,7 @@ function postPeffectUpdate:main(player)
 	eeveeBirthright:GivePocketActive(player)
 	eeveeBasics:GiveEsauJrEeveeData(player)
 	eeveeBasics:TryDeinitEevee(player)
-	itemEffectOnFire:FireTech05(player)
+	itemEffectOnFire:Tech05(player)
 	swiftAttack:SwiftInit(player)
 
 end

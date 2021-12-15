@@ -66,7 +66,7 @@ function EEVEEMOD.API.PlayerStandingStill(player)
 	end
 end
 
-local function FindMarkedTarget(player)
+function FindMarkedTarget(player)
 	local targetPos = nil
 	for _, target in pairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, EffectVariant.TARGET, 0)) do
 		if target.SpawnerEntity.Index == player.Index then
@@ -81,7 +81,7 @@ local function FindMarkedTarget(player)
 	return targetPos
 end
 
-function EEVEEMOD.API.GetIsaacShootingDirection(player)
+function EEVEEMOD.API.GetIsaacShootingDirection(player, weapon)
 	local shootDir = player:GetShootingInput()
 	local data = player:GetData()
 	local HeadDirectionFire = Vector(-1, 0):Rotated(90 * player:GetHeadDirection())
@@ -94,8 +94,8 @@ function EEVEEMOD.API.GetIsaacShootingDirection(player)
 	or player:HasCollectible(CollectibleType.COLLECTIBLE_EYE_OF_THE_OCCULT)
 	and (player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE) 
 	or player:HasWeaponType(WeaponType.WEAPON_LASER)) then
-		if FindMarkedTarget(player) ~= nil then
-			data.LastSavedShootDirection = (FindMarkedTarget(player) - player.Position):Normalized()
+		if FindMarkedTarget(player) ~= nil and weapon ~= nil then
+			data.LastSavedShootDirection = (FindMarkedTarget(player) - weapon.Position):Normalized()
 		end
 	elseif (
 	player:HasCollectible(CollectibleType.COLLECTIBLE_ANALOG_STICK)

@@ -210,7 +210,7 @@ function swiftAttack:FireExtraWeapon(parent, player, direction, rotationOffset)
 		or player:HasWeaponType(WeaponType.WEAPON_TECH_X) then
 			swiftLaser:FireSwiftLaser(parent, player, swiftBase:SwiftShotVelocity(parent:GetData().Swift.ShotDir, player, false), rotationOffset)
 		elseif player:HasWeaponType(WeaponType.WEAPON_TEARS)
-		or player:HasWeapon(WeaponType.WEAPON_MONSTROS_LUNGS) then
+		or player:HasWeaponType(WeaponType.WEAPON_MONSTROS_LUNGS) then
 			swiftTear:FireSwiftTear(parent, player, direction)
 		end
 	end
@@ -265,7 +265,6 @@ end
 function swiftAttack:SwiftAttackWaitingToFire(weapon, player)
 	local dataPlayer = player:GetData()
 	local dataWeapon = weapon:GetData()
-	local shootDir = EEVEEMOD.API.GetIsaacShootingDirection(player)
 
 	--Orbiting the player, rotating around them.
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_TRACTOR_BEAM) then
@@ -278,7 +277,7 @@ function swiftAttack:SwiftAttackWaitingToFire(weapon, player)
 		weapon.Position = player.Position + dataWeapon.Swift.ShotDir:Resized(dataWeapon.Swift.DistFromPlayer)
 	end
 	
-	dataWeapon.Swift.ShotDir = shootDir
+	dataWeapon.Swift.ShotDir = EEVEEMOD.API.GetIsaacShootingDirection(player, weapon)
 
 	if dataPlayer.Swift.AttackDuration
 	and dataPlayer.Swift.AttackDuration <= 0
@@ -316,7 +315,8 @@ function swiftAttack:SwiftAttackUpdate(weapon)
 		swiftBomb:SwiftBombUpdate(weapon)
 	end
 	
-	if weapon.SpawnerType == EntityType.ENTITY_PLAYER then
+	if weapon.SpawnerType == EntityType.ENTITY_PLAYER
+	and weapon.SpawnerEntity then
 		local player = weapon.SpawnerEntity:ToPlayer() or weapon.SpawnerEntity:ToFamiliar().Player
 		local dataPlayer = player:GetData()
 
@@ -327,7 +327,7 @@ function swiftAttack:SwiftAttackUpdate(weapon)
 			SwiftWeaponUpdateSynergies(weapon, player)
 			swiftAttack:ShouldRestoreSwiftTrail(player, weapon)
 			swiftAttack:SwiftMultiRotation(player, weapon)
-			swiftBase:RetainArcShot(player, weapon)
+			swiftBase:DelayFallingAcceleration(player, weapon)
 			
 			if not dataWeapon.Swift.HasFired then
 
@@ -666,9 +666,6 @@ function swiftAttack:InitSwiftEvilEye(effect)
 			effect.SpawnerEntity = effect.Parent
 			effect.SpawnerType = EntityType.ENTITY_PLAYER
 		end
-		if dataEffect.Swift then
-			--print(dataEffect.Swift.PosToFollow)
-		end
 		if playerType == EEVEEMOD.PlayerType.EEVEE
 		and dataPlayer.Swift
 		and not dataEffect.Swift then
@@ -720,7 +717,7 @@ function swiftAttack:SwiftTrailUpdate(trail)
 		end
 		local heightDif = 0
 		if weapon.Type == EntityType.ENTITY_TEAR then
-			local tearHeightToFollow = weapon:ToTear().Height
+			local tearHeightToFollow = (weapon:ToTear().Height * 0.4) - 15
 			local sizeToFollow = weapon.Size * 0.5
 			trail.SpriteScale = Vector(weapon.Size * 0.2, 1)
 

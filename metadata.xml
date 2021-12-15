@@ -5,8 +5,6 @@
     <id>2653691445</id>
     <description>[img]https://imgur.com/nvTka55.png[/img]
 
-(With the release of the latest PC update, we are currently working on updating Eevee to account for everything changed/added)
-
 (Be sure to uninstall the old AB+ Eevee! There will obviously be compatibility issues)
 
 Eevee: Reunited is an overhaul project of the original [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1809450880]Eevee Mod for Afterbirth+[/url]. This aims to reunite every Eeveelution back to Eevee as the original mod always meant to do, all with unique attacks, many unique Pokémon-themed items, and much more. This is a demo release that only contains Eevee, for the purpose of gaining support for the project and putting forward the quality you can expect for the full release. If you would like to follow development or directly contribute to the mod, join the Discord Server linked below. We're looking for spriters and artists, but coders are also welcome. Enjoy the mod!
@@ -48,7 +46,7 @@ When the mod is done, it’ll be made into a separate upload so people can enjoy
 [img]https://imgur.com/fgaODN0.png[/img]
 [u]On The Team[/u]
 Sanio – Lead Dev. Creator of the OG Eevee Mod, made all code and sprites not mentioned otherwise.
-Fertifo0 – Artist. Art on Steam Workshop images
+Fertifo0 – Artist. Art on most of the Steam Workshop images, excluding ones already mentioned below.
 Stewartisme – Spriter. Made various costume sprites, Mega Mush sprite, and Giant Cell Eevee familiar sprites.
 Eevee's boss/stage portrait was made between all 3 of us.
 
@@ -62,7 +60,7 @@ Ilias – Assisted in Eevee’s sprite redesign
 Seb135, lambchop_is_ok, fly_6, ChemicatGamingYT – Playtesters
 Special thanks to JSG, Agent Cucco, siraxtas, wofsauge, Sentinel, Im_tem, everyone above and many others for their continued support!
 You - Checked out this workshop page! You're cool! Thank you!</description>
-    <version>1.7</version>
+    <version>1.9</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>

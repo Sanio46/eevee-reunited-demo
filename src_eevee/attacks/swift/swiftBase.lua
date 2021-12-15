@@ -22,9 +22,11 @@ function swiftBase:SwiftFireDelay(player)
 	or player:HasWeaponType(WeaponType.WEAPON_KNIFE) then
 		nextTearTime = nextTearTime * 1.5
 	end
-	if (not dataPlayer.Swift.Constant and player.MaxFireDelay <= 0.5)
-	or (player:GetData().Swift.KidneyTimer and dataPlayer.Swift.AttackDuration ~= 0) then
-		nextTearTime = 0.5
+	if dataPlayer.Swift then
+		if (not dataPlayer.Swift.Constant and player.MaxFireDelay <= 0.5)
+		or (player:GetData().Swift.KidneyTimer and dataPlayer.Swift.AttackDuration ~= 0) then
+			nextTearTime = 0.5
+		end
 	end
 	return nextTearTime
 end
@@ -169,8 +171,6 @@ end
 function swiftBase:AssignSwiftSounds(weapon)
 	local dataWeapon = weapon:GetData()
 	
-	--EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
-	
 	if weapon.Type == EntityType.ENTITY_TEAR then
 		if dataWeapon.Swift.IsFakeKnife then
 			--EEVEEMOD.sfx:Play(SoundEffect.SOUND_1UP, 1, 0, false, 1)
@@ -183,6 +183,7 @@ function swiftBase:AssignSwiftSounds(weapon)
 		elseif swiftBase:IsSwiftLaserEffect(weapon) == "brim" then
 			--EEVEEMOD.sfx:Play(SoundEffect.SOUND_1UP, 1, 0, false, 1)
 		elseif swiftBase:IsSwiftLaserEffect(weapon) == "tech" then
+			EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
 			EEVEEMOD.sfx:Play(SoundEffect.SOUND_LASERRING_WEAK, 0.7, 0, false, 3, 0)
 		end
 	elseif weapon.Type == EntityType.ENTITY_BOMBDROP then
@@ -207,7 +208,7 @@ function swiftBase:AssignSwiftBasicData(weapon, player, anglePos)
 
 	dataWeapon.Swift.ShotDelay = swiftBase:SwiftShotDelay(weapon, player)
 	dataWeapon.Swift.PosToFollow = anglePos:Rotated(180)
-	dataWeapon.Swift.ShotDir = EEVEEMOD.API.GetIsaacShootingDirection(player)
+	dataWeapon.Swift.ShotDir = EEVEEMOD.API.GetIsaacShootingDirection(player, weapon)
 	dataWeapon.Swift.DistFromPlayer = swiftBase:SwiftTearDistanceFromPlayer(player)
 	
 	if not dataWeapon.MultiSwiftTear then
@@ -278,7 +279,46 @@ function swiftBase:SwiftShouldBeConstant(player)
 	end
 end
 
-function swiftBase:RetainArcShot(player, tear)
+function swiftBase:RestoreArcShot(player, tear)
+	local dataTear = tear:GetData()
+	local range = player.TearRange / 10
+	
+	if not dataTear.Swift
+	or (
+	not tear:HasTearFlags(TearFlags.TEAR_EXPLOSIVE)
+	and not tear:HasTearFlags(TearFlags.TEAR_BURSTSPLIT)
+	and not player:GetEffects():HasCollectibleEffect(CollectibleType.COLLECTIBLE_MEGA_MUSH)
+	)
+	then
+		return
+	end
+	
+	if not dataTear.Swift.PeakReached then
+		if not dataTear.Swift.HeightToAdd
+		and not dataTear.Swift.HeighToReach
+		and not dataTear.Swift.OriginalHeight then
+			dataTear.Swift.OriginalHeight = tear.Height
+			dataTear.Swift.HeightToAdd = range / 2
+			dataTear.Swift.HeightToReach = dataTear.Swift.OriginalHeight - range 
+		elseif dataTear.Swift.HeightToAdd > 0 then
+			dataTear.Swift.HeightToAdd = dataTear.Swift.HeightToAdd / 2
+			if dataTear.Swift.HeightToAdd < 5 then
+				dataTear.Swift.HeightToAdd = 5
+			end
+		end
+
+		tear.Height = tear.Height - dataTear.Swift.HeightToAdd
+
+		if tear.Height <= dataTear.Swift.HeightToReach then
+			dataTear.Swift.PeakReached = true
+			if tear.FallingAcceleration ~= dataTear.Swift.StoredFallingAccel then
+				tear.FallingAcceleration = dataTear.Swift.StoredFallingAccel
+			end
+		end
+	end
+end
+
+function swiftBase:DelayFallingAcceleration(player, tear)
 	local dataTear = tear:GetData()
 	
 	if tear.Type == EntityType.ENTITY_TEAR then
@@ -286,12 +326,12 @@ function swiftBase:RetainArcShot(player, tear)
 			dataTear.Swift.StoredFallingAccel = tear.FallingAcceleration
 		elseif dataTear.Swift.StoredFallingAccel then
 			if not dataTear.Swift.HasFired then
-				--tear.FallingAcceleration = 0
+				tear.FallingAcceleration = 0
 			elseif dataTear.Swift.HasFired then
-				if dataTear.Swift.StoredFallingAccel then
+				if tear.FallingAcceleration ~= dataTear.Swift.StoredFallingAccel then
 					tear.FallingAcceleration = dataTear.Swift.StoredFallingAccel
-					dataTear.Swift.StoredFallingAccel = nil
 				end
+				--swiftBase:RestoreArcShot(player, tear)
 			end
 		end
 	end
