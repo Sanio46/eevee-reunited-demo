@@ -159,7 +159,7 @@ function swiftSynergies:MultiShotCountInit(player)
 	end
 	if player:GetEffects():HasNullEffect(NullItemID.ID_REVERSE_HANGED_MAN) then
 		if  not player:HasCollectible(CollectibleType.COLLECTIBLE_20_20)
-		and not player:HasCollectible(CollectibleType.COLLECTIBLE_COLLECTIBLE_INNER_EYE)
+		and not player:HasCollectible(CollectibleType.COLLECTIBLE_INNER_EYE)
 		and not player:HasCollectible(CollectibleType.COLLECTIBLE_MUTANT_SPIDER)
 		then
 			count = count + 2

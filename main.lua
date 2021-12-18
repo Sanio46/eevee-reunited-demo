@@ -1,3 +1,5 @@
+--Current Version = 1.5.3
+
 local EeveeReunited = RegisterMod("Eevee: Reunited - Character Demo", 1)
 
 if not REPENTANCE then
@@ -8,7 +10,6 @@ end
 
 EEVEEMOD = include("src_eevee.EeveeEnums")
 EEVEEMOD.API = include("src_eevee.EeveeApi")
---Current Version = 1.5.2
 
 local EeveeLuas = {
 	{"attacks", {
