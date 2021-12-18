@@ -8,7 +8,7 @@ end
 
 EEVEEMOD = include("src_eevee.EeveeEnums")
 EEVEEMOD.API = include("src_eevee.EeveeApi")
---Current Version = 1.5.1
+--Current Version = 1.5.2
 
 local EeveeLuas = {
 	{"attacks", {

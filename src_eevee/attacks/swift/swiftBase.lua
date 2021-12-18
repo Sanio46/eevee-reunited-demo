@@ -132,6 +132,7 @@ function swiftBase:AddSwiftTrail(weapon, player)
 					end
 				end
 				trail.Parent = weapon
+				trail:GetData().SwiftTrail = true
 				trail:GetData().TrailColor = tC
 				trail.Color = tC
 				trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 15, 1, true, false)

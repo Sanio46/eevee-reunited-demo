@@ -731,6 +731,10 @@ function swiftAttack:SwiftTrailUpdate(trail)
 			end
 			trail.Position = Vector(weapon.Position.X, weapon.Position.Y + weapon.PositionOffset.Y - heightDif)
 		end
+	else
+		if trail:GetData().SwiftTrail then
+			trail:Remove()
+		end
 	end
 end
 
