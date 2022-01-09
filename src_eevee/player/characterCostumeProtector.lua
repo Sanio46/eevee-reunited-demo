@@ -799,8 +799,9 @@ end
 function ccp:ResetPlayerCostumes(player)
 	local data = player:GetData()
 	local playerEffects = player:GetEffects()
-	
+
 	for playerType, _ in pairs(data.CCP.HasCostumeInitialized) do --Triggers once, just used to grab the playerType inside their player data
+
 		local basePath = playerCostume[playerType]
 		
 		for itemID, costumePath in pairs(ItemToCostume) do
@@ -1230,7 +1231,9 @@ function ccp:OnPeffectUpdate(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 	
-	ccp:DeinitPlayerCostume(player)
+	if EEVEEMOD.game:GetFrameCount() > 1 then
+		ccp:DeinitPlayerCostume(player)
+	end
 	
 	if playerToProtect[playerType] == true and data.CCP then
 		ccp:MiscCostumeResets(player)

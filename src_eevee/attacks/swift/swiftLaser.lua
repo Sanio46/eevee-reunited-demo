@@ -84,15 +84,20 @@ function swiftLaser:SpawnSwiftLasers(player, degreeOfLaserSpawns, offset)
 	end
 end
 
-function swiftLaser:TechXRadiusScaling(player)
+function swiftLaser:TechXRadiusScaling(effect, player)
 	local dataPlayer = player:GetData()
+	local dataEffect = effect:GetData()
 	local radius = 15
 	
 	if dataPlayer.Swift
 	and dataPlayer.Swift.AttackDuration > 0
 	and dataPlayer.Swift.AttackDurationSet then
 		radius = 15 + (45 * (dataPlayer.Swift.AttackDurationSet - dataPlayer.Swift.AttackDuration) / dataPlayer.Swift.AttackDurationSet)
+		if dataEffect.Swift then
+			dataEffect.Swift.TechXRadius = radius
+		end
 	end
+	
 	return radius
 end
 
@@ -121,8 +126,8 @@ function swiftLaser:FireTechXLaser(parent, player, direction, knifeOverride)
 	local dataPlayer = player:GetData()
 	local dataParent = parent:GetData()
 	local damageMult = knifeOverride and player.Damage * 0.25 or parent.CollisionDamage / player.Damage
-	local radius = knifeOverride and 25 or swiftLaser:TechXRadiusScaling(player)
-	
+	local radius = knifeOverride and 25 or dataParent.Swift.TechXRadius or 15
+
 	if damageMult == 0 then
 		damageMult = 0.25
 	end
@@ -214,7 +219,8 @@ function swiftLaser:SwiftLaserEffectUpdate(effect)
 		if dataEffect.Swift and dataEffect.Swift.IsSwiftWeapon then
 		
 			if SwiftLaserType(player) == "techX" then
-				swiftLaser:TechXDamageScaling(weapon, player)
+				swiftLaser:TechXDamageScaling(effect, player)
+				swiftLaser:TechXRadiusScaling(effect, player)
 			elseif not player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then
 				effect.CollisionDamage = player.Damage
 			end

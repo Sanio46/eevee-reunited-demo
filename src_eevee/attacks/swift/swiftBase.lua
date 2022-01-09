@@ -114,7 +114,7 @@ function swiftBase:AddSwiftTrail(weapon, player)
 				
 				if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then	
 					if weapon.Type == EntityType.ENTITY_TEAR then
-						if not swiftBase:AreColorsDifferent(wC, Color.Default) then
+						if not swiftBase:AreColorsDifferent(wC, Color.Default) and not dataWeapon.Swift.IsFakeKnife then
 							if weapon:GetSprite():GetFilename() == "gfx/tear_swift_blood.anm2" then
 								tC = EEVEEMOD.TrailColor.Blood
 							elseif EEVEEMOD.TrailColor[weapon.Variant] ~= nil then
