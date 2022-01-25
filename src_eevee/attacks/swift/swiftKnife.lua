@@ -96,7 +96,7 @@ function swiftKnife:SpawnSwiftKnives(player, degreeOfKnifeSpawns, offset)
 			
 			dataMultiTear.MultiSwiftTear = tearKnife
 			dataMultiTear.MultiSwiftOrbitDistance = orbit
-			AssignSwiftFakeKnifeData(player, tearKnifeMulti, anglePos)
+			AssignSwiftFakeKnifeData(player, tearKnifeMulti, knifeMulti, anglePos)
 			AssignSwiftKnifeData(knifeMulti, tearKnifeMulti, true)
 			knifeMulti:GetSprite().Scale = Vector(0.5,0.5)
 		end
