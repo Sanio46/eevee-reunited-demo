@@ -5,6 +5,8 @@
     <id>2653691445</id>
     <description>[img]https://imgur.com/nvTka55.png[/img]
 
+[h1]Updates (for now) have stopped for the demo and the rest of the features are now in the works! Thank you all for your feedback and bug reports. Join the Discord or follow the Dev Twitter to watch development![/h1]
+
 (Be sure to uninstall the old AB+ Eevee! There will obviously be compatibility issues)
 
 Eevee: Reunited is an overhaul project of the original [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1809450880]Eevee Mod for Afterbirth+[/url]. This aims to reunite every Eeveelution back to Eevee as the original mod always meant to do, all with unique attacks, many unique Pokémon-themed items, and much more. This is a demo release that only contains Eevee, for the purpose of gaining support for the project and putting forward the quality you can expect for the full release. If you would like to follow development or directly contribute to the mod, join the Discord Server linked below. We're looking for spriters and artists, but coders are also welcome. Enjoy the mod!
@@ -60,7 +62,7 @@ Ilias – Assisted in Eevee’s sprite redesign
 Seb135, lambchop_is_ok, fly_6, ChemicatGamingYT – Playtesters
 Special thanks to JSG, Agent Cucco, siraxtas, wofsauge, Sentinel, Im_tem, everyone above and many others for their continued support!
 You - Checked out this workshop page! You're cool! Thank you!</description>
-    <version>1.13</version>
+    <version>1.15</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>
