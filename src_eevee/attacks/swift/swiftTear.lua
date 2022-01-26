@@ -36,7 +36,8 @@ local function AssignSwiftSprite(tear)
 	
 	for i = 1, maxSizes do
 		local foundNum = string.find(animationToPlay, tostring(i))
-		if foundNum ~= nil then
+
+		if foundNum ~= nil and foundNum == i then
 			animationToPlay = i
 			break
 		end
@@ -44,7 +45,7 @@ local function AssignSwiftSprite(tear)
 			animationToPlay = 6
 		end
 	end
-	
+
 	if (dataTear.ForceBlood and dataTear.ForceBlood == true)
 	or (isBlood ~= 0 
 	and (

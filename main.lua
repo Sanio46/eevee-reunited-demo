@@ -1,4 +1,4 @@
---Current Version = 1.5.6
+--Current Version = 1.5.7
 
 local EeveeReunited = RegisterMod("Eevee: Reunited - Character Demo", 1)
 

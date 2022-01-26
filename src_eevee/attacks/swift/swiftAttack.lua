@@ -638,9 +638,8 @@ function swiftAttack:SwiftAttackTimers(player)
 
 	if EEVEEMOD.API.PlayerCanControl(player)
 	and dataPlayer.Swift
-	and renderMode == RenderMode.RENDER_NORMAL
-	or renderMode == RenderMode.RENDER_WATER_ABOVE then
-		
+	and (renderMode == RenderMode.RENDER_NORMAL
+	or renderMode == RenderMode.RENDER_WATER_ABOVE) then
 		SwiftShotDelayTimer(player)
 		SwiftDurationHandle(player)
 		SwiftRateOfRotation(player)
