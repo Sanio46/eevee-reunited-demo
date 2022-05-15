@@ -9,11 +9,28 @@ local statsEevee = {
 	[CacheFlag.CACHE_LUCK] = 0,
 }
 
-local statsEeveelutions = {
-	[EEVEEMOD.PlayerType.EEVEE] = statsEevee,
+local statsDefault = {
+	[CacheFlag.CACHE_SPEED] = 0,
+	[CacheFlag.CACHE_FIREDELAY] = 1,
+	[CacheFlag.CACHE_DAMAGE] = 1,
+	[CacheFlag.CACHE_RANGE] = 0,
+	[CacheFlag.CACHE_SHOTSPEED] = 0,
+	[CacheFlag.CACHE_LUCK] = 0,
 }
 
-function eeveeStats:onCache(player, cacheFlag)
+local statsEeveelutions = {
+	[EEVEEMOD.PlayerType.EEVEE] = statsEevee,
+	--[[ [EEVEEMOD.PlayerType.FLAREON] = statsDefault,
+	[EEVEEMOD.PlayerType.JOLTEON] = statsDefault,
+	[EEVEEMOD.PlayerType.VAPOREON] = statsDefault,
+	[EEVEEMOD.PlayerType.ESPEON] = statsDefault,
+	[EEVEEMOD.PlayerType.UMBREON] = statsDefault,
+	[EEVEEMOD.PlayerType.GLACEON] = statsDefault,
+	[EEVEEMOD.PlayerType.LEAFEON] = statsDefault,
+	[EEVEEMOD.PlayerType.SYLVEON] = statsDefault, ]]
+}
+
+function eeveeStats:OnCache(player, cacheFlag)
 	local playerType = player:GetPlayerType()
 	if EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] then
 		if cacheFlag == CacheFlag.CACHE_SPEED then
@@ -27,7 +44,9 @@ function eeveeStats:onCache(player, cacheFlag)
 		end
 		if cacheFlag == CacheFlag.CACHE_RANGE then
 			player.TearRange = player.TearRange + (statsEeveelutions[playerType][cacheFlag] * 40)
-			player.TearFallingAcceleration = 0
+			if playerType == EEVEEMOD.PlayerType.EEVEE then
+				player.TearFallingAcceleration = 0
+			end
 		end
 		if cacheFlag == CacheFlag.CACHE_SHOTSPEED then
 			player.ShotSpeed = player.ShotSpeed + statsEeveelutions[playerType][cacheFlag]
@@ -37,7 +56,7 @@ function eeveeStats:onCache(player, cacheFlag)
 		end
 		if cacheFlag == CacheFlag.CACHE_TEARFLAG then
 			if player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
-			or player:HasWeaponType(WeaponType.WEAPON_LASER) then
+				or player:HasWeaponType(WeaponType.WEAPON_LASER) then
 				player.TearFlags = player.TearFlags | TearFlags.TEAR_HOMING | TearFlags.TEAR_SPECTRAL
 			end
 		end

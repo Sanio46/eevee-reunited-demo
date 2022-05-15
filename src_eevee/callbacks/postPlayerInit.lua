@@ -1,12 +1,23 @@
-local playerInit = {}
+local postPlayerInit = {}
 
-local ccp = EEVEEMOD.Src["player"]["characterCostumeProtector"]
-local eeveeBasics = EEVEEMOD.Src["player"]["eeveeBasics"]
+local ccp = require("src_eevee.player.characterCostumeProtector")
+local eeveeBasics = require("src_eevee.player.eeveeBasics")
+local unlockManager = require("src_eevee.misc.unlockManager")
+local pokeyMans = require("src_eevee.challenges.pokeyMansCrystal")
 
-function playerInit:main(player)
+function postPlayerInit:main(player)
+	local seed = EEVEEMOD.game:GetSeeds():GetStartSeed()
+	EEVEEMOD.RunSeededRNG:SetSeed(seed, 1)
+
 	eeveeBasics:NoTainted(player)
-	eeveeBasics:OnPlayerInit(player)
+	eeveeBasics:TryInitEevee(player)
 	ccp:OnPlayerInit(player)
+	unlockManager.postPlayerInit(player)
+	pokeyMans:OnChallengeInit(player)
 end
 
-return playerInit
+function postPlayerInit:init(EeveeReunited)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, postPlayerInit.main)
+end
+
+return postPlayerInit

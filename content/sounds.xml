@@ -4,21 +4,65 @@
 		<sample weight="1" path="player/eevee_hurt_2.wav" />
 		<sample weight="1" path="player/eevee_hurt_3.wav" />
 	</sound>
+	<sound name="Eevee Hurt Classic">
+		<sample weight="1" path="player/eevee_hurt_1_classic.wav" />
+		<sample weight="1" path="player/eevee_hurt_2_classic.wav" />
+		<sample weight="1" path="player/eevee_hurt_3_classic.wav" />
+	</sound>
 	<sound name="Eevee Death">
 		<sample weight="1" path="player/eevee_death.wav" />
 	</sound>
+	<sound name="Eevee Death Classic">
+		<sample weight="1" path="player/eevee_death_classic.wav" />
+	</sound>
 	<sound name="Eevee Roar">
 		<sample weight="1" path="player/eevee_roar.wav" />
+	</sound>
+	<sound name="Eevee Roar Classic">
+		<sample weight="1" path="player/eevee_roar_classic.wav" />
 	</sound>
 	<sound name="Eevee Scream Low">
 		<sample weight="1" path="player/eevee_scream_low_1.wav" />
 		<sample weight="1" path="player/eevee_scream_low_2.wav" />
 	</sound>
+	<sound name="Eevee Scream Low Classic">
+		<sample weight="1" path="player/eevee_scream_low_classic.wav" />
+	</sound>
 	<sound name="Eevee Scream Med">
 		<sample weight="1" path="player/eevee_scream_med.wav" />
+	</sound>
+	<sound name="Eevee Scream Med Classic">
+		<sample weight="1" path="player/eevee_scream_med_classic.wav" />
 	</sound>
 	<sound name="Eevee Scream High">
 		<sample weight="1" path="player/eevee_scream_high_1.wav" />
 		<sample weight="1" path="player/eevee_scream_high_2.wav" />
+	</sound>
+	<sound name="Eevee Scream High Classic">
+		<sample weight="1" path="player/eevee_scream_high_classic.wav" />
+	</sound>
+	<sound name="Swift Fire">
+		<sample weight="1" path="tears/swift_fire.wav" />
+	</sound>
+	<sound name="Swift Hit">
+		<sample weight="1" path="tears/swift_hit.wav" />
+	</sound>
+	<sound name="Poke Ball Roll">
+		<sample weight="1" path="pokeballRoll.wav" />
+	</sound>
+	<sound name="Poke Ball Click">
+		<sample weight="1" path="pokeballClick.wav" />
+	</sound>
+	<sound name="Poke Ball Open">
+		<sample weight="1" path="pokeballOpen.wav" />
+	</sound>
+	<sound name="EXP Gain">
+		<sample weight="1" path="expGain.wav" />
+	</sound>
+	<sound name="EXP Level Up">
+		<sample weight="1" path="levelUp.wav" />
+	</sound>
+	<sound name="Shiny Appear">
+		<sample weight="1" path="shinyAppear.wav" />
 	</sound>
 </sounds>

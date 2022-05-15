@@ -1,38 +1,26 @@
 local postEffectUpdate = {}
 
-local swiftAttack = EEVEEMOD.Src["attacks"]["swift.swiftAttack"]
-local swiftBase = EEVEEMOD.Src["attacks"]["swift.swiftBase"]
-local eeveeBirthright = EEVEEMOD.Src["items"]["collectibles.eeveeBirthright"]
-local eeveeSFX = EEVEEMOD.Src["player"]["eeveeSFX"]
+local eeveeBirthright = require("src_eevee.attacks.eevee.birthright_tailwhip")
+local eeveeGhost = require("src_eevee.player.eeveeGhost")
+local eeveeSFX = require("src_eevee.player.eeveeSFX")
+local pokeball = require("src_eevee.items.pickups.pokeball")
+local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
+local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
+local wonderousLauncher = require("src_eevee.items.collectibles.wonderousLauncher")
+local triggerOnFire = require("src_eevee.items.triggerOnFire")
+local lockOnSpecs = require("src_eevee.items.trinkets.lockOnSpecs")
+local badEgg = require("src_eevee.items.collectibles.badEgg")
+local shinyCharm = require("src_eevee.items.collectibles.shinyCharm")
 
 function postEffectUpdate:main(effect)
 
-	if effect.Variant == EffectVariant.SPRITE_TRAIL then
-		swiftAttack:SwiftTrailUpdate(effect)
-	end
-	
-	if effect.Variant == EEVEEMOD.EffectVariant.TAIL_WHIP then
-		eeveeBirthright:OnEffectUpdate(effect)
-	end
-	
-	if effect.Variant == EffectVariant.DEVIL then
-		eeveeSFX:FindDeadPlayerEffect(effect)
-	end
-
 	if swiftBase:IsSwiftLaserEffect(effect)
-	or effect.Variant == EffectVariant.EVIL_EYE then
-		
+		or effect.Variant == EffectVariant.EVIL_EYE then
 		if effect.Variant == EffectVariant.EVIL_EYE then
 			swiftAttack:InitSwiftEvilEye(effect)
 		end
 
 		swiftAttack:SwiftAttackUpdate(effect)
-		
-		if swiftBase:IsSwiftLaserEffect(effect) == "brim" then
-			postEffectUpdate:BrimstoneSwirlAnimation(effect)
-		elseif swiftBase:IsSwiftLaserEffect(effect) == "tech" then
-			postEffectUpdate:TechDotAnimation(effect)
-		end
 	end
 end
 
@@ -57,6 +45,22 @@ function postEffectUpdate:TechDotAnimation(effect)
 	if sprite:IsFinished("Disappear") then
 		effect:Remove()
 	end
+end
+
+function postEffectUpdate:init(EeveeReunited)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, postEffectUpdate.main)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, swiftAttack.SwiftTrailUpdate, EffectVariant.SPRITE_TRAIL)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, pokeball.PokeballEffectUpdate, EEVEEMOD.EffectVariant.POKEBALL)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeGhost.KillOnVadeRetro, EEVEEMOD.EffectVariant.EEVEE_GHOST)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeBirthright.OnEffectUpdate, EEVEEMOD.EffectVariant.TAIL_WHIP)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeSFX.FindDeadPlayerEffect, EffectVariant.DEVIL)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, wonderousLauncher.FireHandling, EEVEEMOD.EffectVariant.WONDEROUS_LAUNCHER)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, postEffectUpdate.TechDotAnimation, EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, postEffectUpdate.BrimstoneSwirlAnimation, EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, lockOnSpecs.DestroySpecsPickup, EEVEEMOD.EffectVariant.LOCKON_SPECS_DROP)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, triggerOnFire.OnTargetEffectUpdate, EffectVariant.TARGET)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, badEgg.RemoveGlitchOnAnimEnd, EEVEEMOD.EffectVariant.BAD_EGG_GLITCH)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, shinyCharm.ShinyParticleEffectUpdate, EEVEEMOD.EffectVariant.SHINY_SPARKLE)
 end
 
 return postEffectUpdate

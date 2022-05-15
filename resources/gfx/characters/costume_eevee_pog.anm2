@@ -1,14 +1,14 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="7/30/2021 3:39:38 PM" Version="108" Fps="30"/>
+	<Info CreatedBy="robot" CreatedOn="5/9/2022 5:49:20 PM" Version="109" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="costumes_eevee\costume_pog.png" Id="0"/>
-			<Spritesheet Path="costumes_eevee\costume_pog.png" Id="1"/>
-			<Spritesheet Path="costumes_eevee\costume_pog.png" Id="2"/>
-			<Spritesheet Path="costumes_eevee\costume_pog.png" Id="3"/>
-			<Spritesheet Path="costumes_eevee\costume_pog.png" Id="4"/>
-			<Spritesheet Path="costumes_eevee\costume_pog.png" Id="5"/>
-			<Spritesheet Path="costumes_eevee\costume_pog.png" Id="6"/>
+			<Spritesheet Path="costumes_eevee\costume_pog_white.png" Id="1"/>
+			<Spritesheet Path="costumes_eevee\costume_pog_black.png" Id="2"/>
+			<Spritesheet Path="costumes_eevee\costume_pog_blue.png" Id="3"/>
+			<Spritesheet Path="costumes_eevee\costume_pog_red.png" Id="4"/>
+			<Spritesheet Path="costumes_eevee\costume_pog_green.png" Id="5"/>
+			<Spritesheet Path="costumes_eevee\costume_pog_grey.png" Id="6"/>
 		</Spritesheets>
 		<Layers>
 			<Layer Name="head" Id="0" SpritesheetId="0"/>

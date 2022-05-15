@@ -1,0 +1,5 @@
+<pocketitems>
+	<card type="object" name="Poke Ball"  description="You already know the catchphrase" hud="Poke Ball" pickup="151" />
+	<card type="object" name="Great Ball" description="For the above average" hud="Great Ball" pickup="152" />
+	<card type="object" name="Ultra Ball" description="'Ol reliable" hud="Ultra Ball" pickup="153" />
+</pocketitems>

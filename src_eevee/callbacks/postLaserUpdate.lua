@@ -1,11 +1,16 @@
 local postLaserUpdate = {}
 
-local swiftAttack = EEVEEMOD.Src["attacks"]["swift.swiftAttack"]
-local itemEffectOnFire = EEVEEMOD.Src["player"]["itemEffectOnFire"]
+local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
+local triggerOnFire = require("src_eevee.items.triggerOnFire")
 
 function postLaserUpdate:main(laser)
 	swiftAttack:SwiftAttackUpdate(laser)
-	itemEffectOnFire:Tech05StayOnPlayer(laser)
+	triggerOnFire:OnLaserUpdate(laser)
+	triggerOnFire:Tech05StayOnPlayer(laser)
+end
+
+function postLaserUpdate:init(EeveeReunited)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE, postLaserUpdate.main)
 end
 
 return postLaserUpdate

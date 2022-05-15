@@ -1,0 +1,6 @@
+<data>
+	<room Name="Kecleon Shop" Icon="eevee/kecleon_shop_floor.png" ShowInMenu="1">
+		<Gfx BGPrefix="eevee/kecleon_shop_bg" />
+		<Entity ID="1000" Image="eevee/rocks_kecleonshop.png" />
+	</room>
+</data>

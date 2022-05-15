@@ -1,12 +1,15 @@
 local postKnifeInit = {}
 
-local customSpiritSword = EEVEEMOD.Src["modsupport"]["customSpiritSword"]
+local customSpiritSword = require("src_eevee.modsupport.customSpiritSword")
+local triggerOnFire = require("src_eevee.items.triggerOnFire")
 
 function postKnifeInit:main(knife)
-	if knife.Variant == EEVEEMOD.KnifeVariant.SPIRIT_SWORD
-	or knife.Variant == EEVEEMOD.KnifeVariant.TECH_SWORD then
-		customSpiritSword:ReplaceSpiritSwordOnInit(knife)
-	end
+	customSpiritSword:ReplaceSpiritSwordOnInit(knife)
+	triggerOnFire:OnWeaponInit(knife)
+end
+
+function postKnifeInit:init(EeveeReunited)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_KNIFE_INIT, postKnifeInit.main)
 end
 
 return postKnifeInit

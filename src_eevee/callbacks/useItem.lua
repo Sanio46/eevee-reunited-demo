@@ -1,21 +1,40 @@
 local useItem = {}
 
-local ccp = EEVEEMOD.Src["player"]["characterCostumeProtector"]
-local eeveeBirthright = EEVEEMOD.Src["items"]["collectibles.eeveeBirthright"]
-local eeveeBasics = EEVEEMOD.Src["player"]["eeveeBasics"]
-local eeveeSFX = EEVEEMOD.Src["player"]["eeveeSFX"]
+local ccp = require("src_eevee.player.characterCostumeProtector")
+local cookieJar = require("src_eevee.items.collectibles.cookieJar")
+local dive = require("src_eevee.attacks.vaporeon.birthright_dive")
+local eeveeBirthright = require("src_eevee.attacks.eevee.birthright_tailwhip")
+local eeveeBasics = require("src_eevee.player.eeveeBasics")
+local eeveeSFX = require("src_eevee.player.eeveeSFX")
+local leafBlade = require("src_eevee.attacks.leafeon.leafBlade")
+local pokeball = require("src_eevee.items.pickups.pokeball")
+local strangeEgg = require("src_eevee.items.collectibles.strangeEgg")
+local wonderousLauncher = require("src_eevee.items.collectibles.wonderousLauncher")
 
-function useItem:main(itemID, itemRNG, player, flags, slot, vardata)
+function useItem:main(itemID, itemRNG, player, flags, slot, varData)
 	local useItemFunctions = {
-		eeveeBasics:OnEsauJr(itemID, itemRNG, player, flags, slot, vardata),
-		eeveeSFX:OnLarynxOrBerserk(itemID, itemRNG, player, flags, slot, vardata),
-		ccp:ResetCostumeOnItem(itemID, itemRNG, player, flags, slot, vardata),
-		eeveeBirthright:OnUse(itemID, itemRNG, player, flags, slot, vardata)
+		cookieJar:onUse(itemID, itemRNG, player, flags, slot, varData),
+		ccp:ResetCostumeOnItem(itemID, itemRNG, player, flags, slot, varData),
+		pokeball:OnMasterBallUse(itemID, itemRNG, player, flags, slot, varData)
 	}
-	
-	for i = 1, #useItemFunctions do
-		if useItemFunctions[i] ~= nil then return useItemFunctions end
+
+	for _, func in pairs(useItemFunctions) do
+		if func ~= nil then return func end
 	end
+end
+
+function useItem:init(EeveeReunited)
+	EeveeReunited:AddCallback(ModCallbacks.MC_USE_ITEM, useItem.main)
+	EeveeReunited:AddCallback(ModCallbacks.MC_USE_ITEM, dive.OnUse, EEVEEMOD.Birthright.DIVE)
+	EeveeReunited:AddCallback(ModCallbacks.MC_USE_ITEM, eeveeBasics.OnEsauJr, CollectibleType.COLLECTIBLE_ESAU_JR)
+	EeveeReunited:AddCallback(ModCallbacks.MC_USE_ITEM, eeveeSFX.OnLarynxOrBerserk, CollectibleType.COLLECTIBLE_BERSERK)
+	EeveeReunited:AddCallback(ModCallbacks.MC_USE_ITEM, eeveeSFX.OnLarynxOrBerserk, CollectibleType.COLLECTIBLE_LARYNX)
+	EeveeReunited:AddCallback(ModCallbacks.MC_USE_ITEM, eeveeBirthright.OnUse, EEVEEMOD.Birthright.TAIL_WHIP)
+	EeveeReunited:AddCallback(ModCallbacks.MC_USE_ITEM, strangeEgg.onUse, EEVEEMOD.CollectibleType.STRANGE_EGG)
+	EeveeReunited:AddCallback(ModCallbacks.MC_USE_ITEM, wonderousLauncher.OnUse, EEVEEMOD.CollectibleType.WONDEROUS_LAUNCHER)
+	EeveeReunited:AddCallback(ModCallbacks.MC_USE_ITEM, leafBlade.OnUse, EEVEEMOD.Birthright.LEAF_BLADE)
+	EeveeReunited:AddCallback(ModCallbacks.MC_USE_ITEM, ccp.OnShoop, CollectibleType.COLLECTIBLE_SHOOP_DA_WHOOP)
+	EeveeReunited:AddCallback(ModCallbacks.MC_USE_ITEM, ccp.OnBoomerang, CollectibleType.COLLECTIBLE_BOOMERANG)
 end
 
 return useItem

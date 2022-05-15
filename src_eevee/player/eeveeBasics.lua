@@ -1,56 +1,51 @@
 local eeveeBasics = {}
 
-local costumeProtector = EEVEEMOD.Src["player"]["eeveeCustomCostumes"]
-local miscMods = EEVEEMOD.Src["modsupport"]["miscModsOnPlayerInit"]
+local costumeProtector = require("src_eevee.player.characterCostumeProtector")
+local miscMods = require("src_eevee.modsupport.miscModsOnPlayerInit")
 
-function eeveeBasics:OnPlayerInit(player)
-	local dataPlayer = player:GetData()
+function eeveeBasics:TryInitEevee(player)
+	local data = player:GetData()
 	local playerType = player:GetPlayerType()
-	
-	if not dataPlayer.IsEevee and EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] and not player:IsCoopGhost() then
 
-		dataPlayer.IsEevee = true
+	if not data.IsEevee and EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] and not player:IsCoopGhost() then
+
+		data.IsEevee = true
 
 		if EEVEEMOD.game.TimeCounter == 0 or EEVEEMOD.isNewGame then
-			local eeveeCostume = Isaac.GetCostumeIdByPath("gfx/characters/costume_eevee.anm2")
-			player:AddNullCostume(eeveeCostume)
+
 		end
 
 		miscMods:addPogCompatibility()
 		miscMods:addCoopGhostCompatibility()
 		miscMods:addNoCostumesCompatibility()
-		EEVEEMOD.API.SetCanShoot(player, false)
-		dataPlayer.Swift = {}
-		dataPlayer.CCP = {}
+		VeeHelper.SetCanShoot(player, false)
 		player:AddCacheFlags(CacheFlag.CACHE_ALL)
 		player:EvaluateItems()
-		
-	end	
+
+	end
 end
 
 local EeveeToEsauJr = {}
 
 function eeveeBasics:OnEsauJr(itemID, itemRNG, player, flags, slot, vardata)
-	local dataPlayer = player:GetData()
+	local data = player:GetData()
 	local playerType = player:GetPlayerType()
-	
-	if itemID == CollectibleType.COLLECTIBLE_ESAU_JR 
-	and EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] then
-		table.insert(EeveeToEsauJr, player.Index)
+
+	if EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] then
+		table.insert(EeveeToEsauJr, data.Identifier)
 	end
 end
 
 function eeveeBasics:GiveEsauJrEeveeData(player)
-	local dataPlayer = player:GetData()
+	local data = player:GetData()
 	local playerType = player:GetPlayerType()
 
 	if #EeveeToEsauJr > 0 and EeveeToEsauJr[1] ~= nil then
-		if EeveeToEsauJr == player.Index
-		and not dataPlayer.IsEevee 
-		and EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] then
-			EEVEEMOD.API.SetCanShoot(player, false)
-			dataPlayer.IsEevee = true
-			dataPlayer.Swift = {}
+		if EeveeToEsauJr == data.Identifier
+			and not data.IsEevee
+			and EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] then
+			VeeHelper.SetCanShoot(player, false)
+			data.IsEevee = true
 			player:AddCacheFlags(CacheFlag.CACHE_ALL)
 			player:EvaluateItems()
 			costumeProtector:InitPlayerCostume(player)
@@ -61,23 +56,27 @@ end
 
 function eeveeBasics:NoTainted(player)
 	local playerType = player:GetPlayerType()
-	
+
 	if playerType == EEVEEMOD.PlayerType.EEVEE_B then
 		player:ChangePlayerType(EEVEEMOD.PlayerType.EEVEE)
-		eeveeBasics:OnPlayerInit(player)
+		eeveeBasics:TryInitEevee(player)
 	end
 end
 
 function eeveeBasics:TryDeinitEevee(player)
-	local dataPlayer = player:GetData()
+	local data = player:GetData()
 	local playerType = player:GetPlayerType()
-	
-	if dataPlayer.IsEevee and not EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] then
-		dataPlayer.IsEevee = false
-		dataPlayer.Swift = nil
+
+	if data.IsEevee and not EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] then
+		data.IsEevee = false
 		player:AddCacheFlags(CacheFlag.CACHE_ALL)
 		player:EvaluateItems()
 	end
+end
+
+function eeveeBasics:TrackFireDirection(player)
+	local playerType = player:GetPlayerType()
+	VeeHelper.GetIsaacShootingDirection(player, player.Position)
 end
 
 return eeveeBasics

@@ -1,9 +1,9 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="10/14/2021 5:26:45 PM" Version="136" Fps="30"/>
+	<Info CreatedBy="robot" CreatedOn="5/15/2022 2:25:54 AM" Version="138" Fps="30"/>
 	<Content>
 		<Spritesheets>
-			<Spritesheet Path="costumes_eevee\costume_510_delirious_head_hair.png" Id="0"/>
-			<Spritesheet Path="costumes_eevee\costume_510_delirious_body.png" Id="1"/>
+			<Spritesheet Path="costumes_eevee\costume_510_delirious_hair.png" Id="0"/>
+			<Spritesheet Path="costumes_eevee\costume_510_delirious body.png" Id="1"/>
 		</Spritesheets>
 		<Layers>
 			<Layer Name="body" Id="0" SpritesheetId="1"/>

@@ -1,0 +1,5 @@
+--How to do funny:
+--Create an effect variant that serves as the entire room's backdrop
+--Create a Kecleon Shopkeeper that exists in all rooms via Basement Renovator
+--In here, detect if you're in a shop with the shopkeeper. If so, spawn the backdrop.
+--Probably do other things like a custom entity with a custom variant for the stones

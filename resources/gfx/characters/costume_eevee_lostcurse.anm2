@@ -1,8 +1,8 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="11/6/2021 3:49:20 PM" Version="137" Fps="30"/>
+	<Info CreatedBy="robot" CreatedOn="5/9/2022 5:48:11 PM" Version="138" Fps="30"/>
 	<Content>
 		<Spritesheets>
-			<Spritesheet Path="costumes_eevee\n_lost_curse_hair.png" Id="0"/>
+			<Spritesheet Path="costumes_eevee\character_012_thelost_hair.png" Id="0"/>
 		</Spritesheets>
 		<Layers>
 			<Layer Name="head0" Id="0" SpritesheetId="0"/>

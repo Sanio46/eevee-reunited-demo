@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-    <name>Eevee: Reunited - Character Demo</name>
+    <name>Eevee: Reunited - Demo</name>
     <directory>eevee_reunited_demo</directory>
     <id>2653691445</id>
     <description>[img]https://imgur.com/nvTka55.png[/img]
@@ -62,7 +62,7 @@ Ilias – Assisted in Eevee’s sprite redesign
 Seb135, lambchop_is_ok, fly_6, ChemicatGamingYT – Playtesters
 Special thanks to JSG, Agent Cucco, siraxtas, wofsauge, Sentinel, Im_tem, everyone above and many others for their continued support!
 You - Checked out this workshop page! You're cool! Thank you!</description>
-    <version>1.16</version>
+    <version>1.13</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>
