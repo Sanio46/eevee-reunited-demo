@@ -533,7 +533,7 @@ function swiftAttack:SwiftInit(player)
 	elseif playerType ~= EEVEEMOD.PlayerType.EEVEE then
 		if swiftPlayer then
 			TriggerSwiftCooldown(player)
-			swiftPlayer = nil
+			swiftBase.Player[ptrHashPlayer] = nil
 		end
 	end
 end
@@ -636,8 +636,6 @@ function swiftAttack:OnSwiftLudoUpdate(tear)
 	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
 	if (not swiftWeapon or not tear:GetData().BasicSwift) or not tear.SpawnerEntity or not tear.SpawnerEntity:ToPlayer() or not tear:HasTearFlags(TearFlags.TEAR_LUDOVICO) then return end
 	local player = tear.SpawnerEntity:ToPlayer()
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
 
 	if math.floor(tear.FrameCount / player.MaxFireDelay) ~= math.floor((tear.FrameCount - 1) / player.MaxFireDelay) then
 		swiftAttack:postLudoTearReset(tear)

@@ -34,7 +34,7 @@ local function AssignSwiftKnifeData(player, knife, tearKnife, invis)
 	sprite:Play("Idle", true)
 	sprite.Offset = Vector(0, -4)
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
-		swiftBase:PlaydoughRandomColor(knife)
+		knife.Color = swiftBase:PlaydoughRandomColor()
 	else
 		knife:SetColor(Color(fKC.R, fKC.G, fKC.B, 1, fKC.RO, fKC.GO, fKC.BO), -1, 1, true, false)
 	end
@@ -109,6 +109,7 @@ function swiftKnife:SwiftKnifeUpdate(knife)
 	if not VeeHelper.EntitySpawnedByPlayer(knife, true) then return end
 
 	local tearKnife = knife.Parent
+	if not knife.Parent then knife:Remove() return end
 	local ptrHashTearKnife = tostring(GetPtrHash(tearKnife))
 	local swiftTearKnife = swiftBase.Weapon[ptrHashTearKnife]
 

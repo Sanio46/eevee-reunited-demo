@@ -5,6 +5,7 @@ local triggerOnFire = require("src_eevee.items.triggerOnFire")
 local strangeEggRender = require("src_eevee.items.collectibles.strangeEggRender")
 local ccp = require("src_eevee.player.characterCostumeProtector")
 local badEgg = require("src_eevee.items.collectibles.badEgg")
+local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 
 function postGameStarted:main(wasRunContinued)
 	if not wasRunContinued then
@@ -16,6 +17,7 @@ function postGameStarted:main(wasRunContinued)
 	triggerOnFire:ResetOnGameStart()
 	pokeyMans:SpawnStarters()
 	badEgg:GetFamiliarItemsOnGameStart()
+	swiftBase:ResetData()
 end
 
 function postGameStarted:init(EeveeReunited)

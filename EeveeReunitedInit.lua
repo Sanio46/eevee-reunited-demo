@@ -1,8 +1,10 @@
 local EeveeReunited = RegisterMod("Eevee: Reunited - Demo", 1)
 
---VERSION: 2.0.0
+--VERSION: 2.0.2
 
 local json = nil
+
+local SaveDataVer = 2.0
 
 EeveeReunited.SavedData = {
 	CustomDolly = false,
@@ -36,8 +38,9 @@ function EeveeReunited:init(j)
 	json = j
 
 	if not REPENTANCE then
-		Isaac.DebugString("Eevee: Reunited was disabled! This is a Repentance-only mod.")
-		print("Eevee: Reunited was disabled! This is a Repentance-only mod.")
+		local str = "[Eevee: Reunited] Mod was disabled! This is a Repentance-only mod."
+		Isaac.DebugString(str)
+		print(str)
 		return EeveeReunited
 	end
 
@@ -73,6 +76,7 @@ function EeveeReunited:init(j)
 		"preGameExit",
 		"postNewLevel",
 		"postNewRoom",
+		"executeCmd",
 		"postNpcInit",
 		"preNpcCollision",
 		"postPlayerUpdate",
@@ -123,6 +127,7 @@ function EeveeReunited:SaveEeveeData()
 	EeveeReunited.SavedData.UnlockData_Eevee_B = EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B
 	EeveeReunited.SavedData.UnlockData_PokeyMansCrystal = EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal
 	EeveeReunited.SavedData.LilEeveeData = EEVEEMOD.PERSISTENT_DATA.LilEeveeData
+	EeveeReunited.SavedData.SaveDataVer = SaveDataVer
 
 	EeveeReunited:SaveData(json.encode(EeveeReunited.SavedData))
 end
@@ -162,17 +167,23 @@ end
 
 function EeveeReunited:LoadEeveeData()
 	if EeveeReunited:HasData() then
-		EeveeReunited.SavedData = json.decode(EeveeReunited:LoadData())
-
-		EEVEEMOD.PERSISTENT_DATA.CustomDolly = EeveeReunited.SavedData.CustomDolly or false
-		EEVEEMOD.PERSISTENT_DATA.ClassicVoice = EeveeReunited.SavedData.ClassicVoice or false
-		EEVEEMOD.PERSISTENT_DATA.PassiveShiny = EeveeReunited.SavedData.PassiveShiny or true
-		EEVEEMOD.PERSISTENT_DATA.PlayerData = EeveeReunited.SavedData.PlayerData or EEVEEMOD.PERSISTENT_DATA.PlayerData
-		EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee = EeveeReunited.SavedData.UnlockData_Eevee or EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee
-		EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B = EeveeReunited.SavedData.UnlockData_Eevee_B or EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B
-		EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal = EeveeReunited.SavedData.UnlockData_PokeyMansCrystal or EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal
-		EEVEEMOD.PERSISTENT_DATA.LilEeveeData = EeveeReunited.SavedData.LilEeveeData or EEVEEMOD.PERSISTENT_DATA.LilEeveeData
-	end
+		local newData = json.decode(EeveeReunited:LoadData())
+		if not newData.SaveDataVer or newData.SaveDataVer ~= SaveDataVer then
+			EeveeReunited.SavedData.SaveDataVer = SaveDataVer
+			EeveeReunited:SaveData(json.encode(EeveeReunited.SavedData))
+		else
+			EeveeReunited.SavedData = newData
+			EEVEEMOD.PERSISTENT_DATA.CustomDolly = EeveeReunited.SavedData.CustomDolly or false
+			EEVEEMOD.PERSISTENT_DATA.ClassicVoice = EeveeReunited.SavedData.ClassicVoice or false
+			EEVEEMOD.PERSISTENT_DATA.PassiveShiny = EeveeReunited.SavedData.PassiveShiny or true
+			EEVEEMOD.PERSISTENT_DATA.UniqueBirthright = EeveeReunited.SavedData.UniqueBirthright or false
+			EEVEEMOD.PERSISTENT_DATA.PlayerData = EeveeReunited.SavedData.PlayerData or EEVEEMOD.PERSISTENT_DATA.PlayerData
+			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee = EeveeReunited.SavedData.UnlockData_Eevee or EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee
+			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B = EeveeReunited.SavedData.UnlockData_Eevee_B or EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B
+			EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal = EeveeReunited.SavedData.UnlockData_PokeyMansCrystal or EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal
+			EEVEEMOD.PERSISTENT_DATA.LilEeveeData = EeveeReunited.SavedData.LilEeveeData or EEVEEMOD.PERSISTENT_DATA.LilEeveeData
+		end
+	end	
 end
 
 --[[ local tearsFired = 0

@@ -104,6 +104,20 @@ function swiftBase:InitSwiftWeapon(weapon)
 	end
 end
 
+function swiftBase:ResetData()
+	swiftBase.Player = {}
+	swiftBase.Weapon = {}
+end
+
+function swiftBase:RemoveWeaponOnPostEntRemove(ent)
+	local ptrHashWeapon = tostring(GetPtrHash(ent))
+	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
+
+	if swiftWeapon then
+		swiftBase.Weapon[ptrHashWeapon] = nil
+	end
+end
+
 function swiftBase:AssignSwiftSprite(tear)
 
 	if VeeHelper.TearVariantBlacklist[tear.Variant]

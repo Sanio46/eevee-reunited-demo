@@ -12,10 +12,10 @@ local itemToUnlock = {
 	[EEVEEMOD.CollectibleType.BAG_OF_POKEBALLS] = { Unlock = "Mother" },
 	[EEVEEMOD.CollectibleType.MASTER_BALL] = { Unlock = "Beast" },
 	[EEVEEMOD.CollectibleType.WONDEROUS_LAUNCHER] = { Special = function()
-		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.GreedMode.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.GreedMode.Hard)
+		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.GreedMode.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.GreedMode.Hard)
 	end },
 	[EEVEEMOD.Birthright.TAIL_WHIP] = { Special = function()
-		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
+		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.FullCompletion.Hard)
 	end },
 	[EEVEEMOD.CollectibleType.POKE_STOP] = { Special = function()
 		return EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal
