@@ -3,7 +3,7 @@ EEVEEMOD = EEVEEMOD or {}
 EEVEEMOD.game = Game()
 EEVEEMOD.ItemConfig = Isaac.GetItemConfig()
 EEVEEMOD.sfx = SFXManager()
-EEVEEMOD.isNewGame = false
+EEVEEMOD.shouldSaveData = false
 EEVEEMOD.Name = "Eevee: Reunited - Demo"
 
 EEVEEMOD.RandomRNG = RNG()
@@ -222,7 +222,7 @@ EEVEEMOD.RGB = {
 }
 
 function EEVEEMOD.GetRBG(entColor)
-	return Color(EEVEEMOD.RGB.R/255,EEVEEMOD.RGB.G/255,EEVEEMOD.RGB.B/255,entColor.A,0,0,0)
+	return Color(EEVEEMOD.RGB.R / 255, EEVEEMOD.RGB.G / 255, EEVEEMOD.RGB.B / 255, entColor.A, 0, 0, 0)
 end
 
 EEVEEMOD.SlotVariant = {

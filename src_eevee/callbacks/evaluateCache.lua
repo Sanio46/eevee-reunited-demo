@@ -10,6 +10,7 @@ local cookieJar = require("src_eevee.items.collectibles.cookieJar")
 local sneakScarf = require("src_eevee.items.collectibles.sneakScarf")
 local addItemStats = require("src_eevee.items.addItemStats")
 local familiarBasics = require("src_eevee.misc.familiarBasics")
+local shinyCharm = require("src_eevee.items.collectibles.shinyCharm")
 
 function evaluateCache:main(player, cacheFlag)
 	local itemStats = {
@@ -30,6 +31,7 @@ function evaluateCache:main(player, cacheFlag)
 	blackGlasses:Stats(player, itemStats)
 	sneakScarf:Stats(player, itemStats)
 	cookieJar:Stats(player, itemStats)
+	shinyCharm:Stats(player, itemStats)
 
 	--Put together all item stats
 	addItemStats:OnCache(player, cacheFlag, itemStats)

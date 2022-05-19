@@ -110,7 +110,8 @@ function swiftTear:RemoveSpiritProjectile(tear)
 	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
 
 	if not swiftPlayer then return end
-
+	local multi = swiftSynergies:MultiShotCountInit(player)
+	if multi then return end
 	if (
 		tear.Variant == TearVariant.SWORD_BEAM
 			or tear.Variant == TearVariant.TECH_SWORD_BEAM
@@ -169,6 +170,15 @@ function swiftTear:SwiftTearUpdate(tear)
 
 	BasicSwiftRotation(tear)
 
+	if tear.Variant == EEVEEMOD.TearVariant.SWIFT or tear.Variant == EEVEEMOD.TearVariant.SWIFT_BLOOD then
+		local anim = tear.Variant == EEVEEMOD.TearVariant.SWIFT_BLOOD and "BloodTear" or "RegularTear"
+		local animToPlay = anim .. VeeHelper.TearScaleToSizeAnim(tear)
+
+		if tear.FrameCount > 1 and sprite:GetAnimation() ~= animToPlay then
+			sprite:Play(anim .. VeeHelper.TearScaleToSizeAnim(tear), true)
+		end
+	end
+
 	if not swiftTearWeapon then return end
 
 	if not swiftTearWeapon.HasFired then
@@ -188,7 +198,7 @@ function swiftTear:SwiftTearUpdate(tear)
 				sprite.Rotation = swiftTearWeapon.AntiGravDir:GetAngleDegrees()
 			end
 		end
-	else
+	elseif tear.Variant ~= TearVariant.BELIAL then
 		if not swiftTearWeapon.HasFired then
 			sprite.Rotation = (swiftPlayer.RateOfOrbitRotation * -2)
 		else
@@ -204,17 +214,20 @@ end
 
 function swiftTear:OnSwiftStarDestroy(tear, splashType)
 	if tear.Variant ~= EEVEEMOD.TearVariant.SWIFT and tear.Variant ~= EEVEEMOD.TearVariant.SWIFT_BLOOD then return end
+
+	if splashType == "Wall" then return end
+	
 	EEVEEMOD.sfx:Play(EEVEEMOD.SoundEffect.SWIFT_HIT)
 	local splashPos = -15
 	local poofToPlay = EffectVariant.TEAR_POOF_B
 	if tear.Height < -4 and tear.Height > -5 then
 		splashPos = 0
 	end
-	if tear.CollisionDamage > 3 then
+	if tear.Scale > 0.55 then
 		if splashType == "Collision" then
 			poofToPlay = EffectVariant.TEAR_POOF_A
 		end
-	elseif tear.CollisionDamage < 0.9 then
+	elseif tear.Scale < 0.3 then
 		poofToPlay = EffectVariant.TEAR_POOF_SMALL
 	else
 		poofToPlay = EffectVariant.TEAR_POOF_VERYSMALL
@@ -222,6 +235,7 @@ function swiftTear:OnSwiftStarDestroy(tear, splashType)
 	local splash = Isaac.Spawn(EntityType.ENTITY_EFFECT, poofToPlay, 0, tear.Position, Vector.Zero, nil)
 	local sprite = splash:GetSprite()
 	sprite.Offset = Vector(0, splashPos)
+	sprite.Scale = Vector(tear.Scale, tear.Scale)
 	local color = Color.Default
 	if not swiftBase:AreColorsDifferent(tear.Color, Color.Default) then
 		if tear.Variant == EEVEEMOD.TearVariant.SWIFT then

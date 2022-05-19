@@ -8,8 +8,8 @@ local badEgg = require("src_eevee.items.collectibles.badEgg")
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 
 function postGameStarted:main(wasRunContinued)
+	EEVEEMOD.shouldSaveData = true
 	if not wasRunContinued then
-		EEVEEMOD.isNewGame = true
 		strangeEggRender:ResetOnGameStart()
 	else
 		ccp:GnawedOnLoad()

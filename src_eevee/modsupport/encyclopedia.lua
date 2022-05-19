@@ -391,6 +391,7 @@ local ItemsWiki = {
 	ShinyCharm = {
 		{ -- Effects
 			{ str = "Effects", fsize = 2, clr = 3, halign = 0 },
+			{str = "+2 Luck"},
 			{ str = "Gives enemies a 1/2048 to become 'shiny'." },
 			{ str = "Shiny enemies have a unique color per enemy type, 5 times their regular health, have the fear status effect, and will disappear after 10 seconds." },
 			{ str = "Shiny enemies will drop a random Golden Trinket on death." },

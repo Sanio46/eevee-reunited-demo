@@ -1,6 +1,6 @@
 local postPickupInit = {}
 
-local customCollectibleSprites = require("src_eevee.modsupport.customCollectibleSprites")
+local customCollectibleSprites = require("src_eevee.modsupport.uniqueCharacterItems")
 local unlockManager = require("src_eevee.misc.unlockManager")
 local pokeyMans = require("src_eevee.challenges.pokeyMansCrystal")
 

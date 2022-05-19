@@ -38,7 +38,7 @@ function blackGlasses:Stats(player, itemStats)
 	if not player:HasCollectible(EEVEEMOD.CollectibleType.BLACK_GLASSES) then return end
 	local effectNum = player:GetEffects():GetCollectibleEffectNum(EEVEEMOD.CollectibleType.BLACK_GLASSES)
 
-	itemStats.DAMAGE_FLAT = itemStats.DAMAGE_FLAT + 0.5
+	itemStats.DAMAGE_FLAT = itemStats.DAMAGE_FLAT + (0.5 * player:GetCollectibleNum(EEVEEMOD.CollectibleType.BLACK_GLASSES))
 	itemStats.DAMAGE_MULT = itemStats.DAMAGE_MULT + (0.1 * effectNum)
 end
 

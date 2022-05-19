@@ -16,9 +16,11 @@ function familiarUpdate:main(familiar)
 	end
 	if familiar.Variant == EEVEEMOD.FamiliarVariant.LIL_EEVEE then
 		lilEevee:OnFamiliarUpdate(familiar)
-		sewingMachine:OnUpgradedFamiliarUpdate(familiar)
+		if Sewn_API then
+			sewingMachine:OnUpgradedFamiliarUpdate(familiar)
+			sewingMachine:OnStateChange(familiar)
+		end
 		lilithbr:OnFamiliarUpdate(familiar)
-		sewingMachine:OnStateChange(familiar)
 	elseif familiar.Variant == EEVEEMOD.FamiliarVariant.BAG_OF_POKEBALLS then
 		bagOfPokeballs:SpawnPokeball(familiar)
 	elseif familiar.Variant == EEVEEMOD.FamiliarVariant.VINE then

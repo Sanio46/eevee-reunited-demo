@@ -245,7 +245,7 @@ local function LeadPencil(player, direction, weaponFireData)
 		local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, EEVEEMOD.TearVariant.SWIFT_BLOOD, 0, player.Position, angledDir, player):ToTear()
 		tear.FallingSpeed = (EEVEEMOD.RandomNum(-9, 2) * 1) - EEVEEMOD.RandomFloat()
 		tear.FallingAcceleration = 0.5
-		tear:GetSprite():Play("BloodTear" .. VeeHelper.TearDamageToSizeAnim(tear), true)
+		tear:GetSprite():Play("BloodTear" .. VeeHelper.TearScaleToSizeAnim(tear), true)
 	end
 end
 

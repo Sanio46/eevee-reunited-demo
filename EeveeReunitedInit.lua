@@ -1,10 +1,10 @@
 local EeveeReunited = RegisterMod("Eevee: Reunited - Demo", 1)
 
---VERSION: 2.0.2
+--VERSION: 2.0.3
 
 local json = nil
 
-local SaveDataVer = 2.0
+local SaveDataVer = 2.1
 
 EeveeReunited.SavedData = {
 	CustomDolly = false,
@@ -52,6 +52,8 @@ function EeveeReunited:init(j)
 	require(mods .. "eid")
 	require(mods .. "modConfigMenu")
 	require(mods .. "sewingMachine")
+	--require(mods .. "uniqueCharacterItems")
+
 	if Encyclopedia then
 		local encyclopedia = require(mods .. "encyclopedia")
 		encyclopedia.Init(EeveeReunited)
@@ -105,7 +107,7 @@ function EeveeReunited:init(j)
 
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, EeveeReunited.LoadEeveeData)
 	EeveeReunited:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, EeveeReunited.SaveEeveeData)
-	--EeveeReunited:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, EeveeReunited.SaveEeveeData)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, EeveeReunited.SaveEeveeData)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, EeveeReunited.CreatePersistentData)
 	EeveeReunited:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, EeveeReunited.CreatePersistentLilEeveeData, EEVEEMOD.FamiliarVariant.LIL_EEVEE)
 
@@ -118,18 +120,20 @@ function EeveeReunited:init(j)
 end
 
 function EeveeReunited:SaveEeveeData()
-	EeveeReunited.SavedData.CustomDolly = EEVEEMOD.PERSISTENT_DATA.CustomDolly
-	EeveeReunited.SavedData.ClassicVoice = EEVEEMOD.PERSISTENT_DATA.ClassicVoice
-	EeveeReunited.SavedData.PassiveShiny = EEVEEMOD.PERSISTENT_DATA.PassiveShiny
-	EeveeReunited.SavedData.UniqueBirthright = EEVEEMOD.PERSISTENT_DATA.UniqueBirthright
-	EeveeReunited.SavedData.PlayerData = EEVEEMOD.PERSISTENT_DATA.PlayerData
-	EeveeReunited.SavedData.UnlockData_Eevee = EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee
-	EeveeReunited.SavedData.UnlockData_Eevee_B = EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B
-	EeveeReunited.SavedData.UnlockData_PokeyMansCrystal = EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal
-	EeveeReunited.SavedData.LilEeveeData = EEVEEMOD.PERSISTENT_DATA.LilEeveeData
-	EeveeReunited.SavedData.SaveDataVer = SaveDataVer
+	if EEVEEMOD.shouldSaveData == true then
+		EeveeReunited.SavedData.CustomDolly = EEVEEMOD.PERSISTENT_DATA.CustomDolly
+		EeveeReunited.SavedData.ClassicVoice = EEVEEMOD.PERSISTENT_DATA.ClassicVoice
+		EeveeReunited.SavedData.PassiveShiny = EEVEEMOD.PERSISTENT_DATA.PassiveShiny
+		EeveeReunited.SavedData.UniqueBirthright = EEVEEMOD.PERSISTENT_DATA.UniqueBirthright
+		EeveeReunited.SavedData.PlayerData = EEVEEMOD.PERSISTENT_DATA.PlayerData
+		EeveeReunited.SavedData.UnlockData_Eevee = EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee
+		EeveeReunited.SavedData.UnlockData_Eevee_B = EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B
+		EeveeReunited.SavedData.UnlockData_PokeyMansCrystal = EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal
+		EeveeReunited.SavedData.LilEeveeData = EEVEEMOD.PERSISTENT_DATA.LilEeveeData
+		EeveeReunited.SavedData.SaveDataVer = SaveDataVer
 
-	EeveeReunited:SaveData(json.encode(EeveeReunited.SavedData))
+		EeveeReunited:SaveData(json.encode(EeveeReunited.SavedData))
+	end
 end
 
 function EeveeReunited:CreatePersistentData(player)
@@ -169,6 +173,11 @@ function EeveeReunited:LoadEeveeData()
 	if EeveeReunited:HasData() then
 		local newData = json.decode(EeveeReunited:LoadData())
 		if not newData.SaveDataVer or newData.SaveDataVer ~= SaveDataVer then
+			if newData.SaveDataVer and newData.SaveDataVer ~= SaveDataVer then
+				local msg = "[Eevee: Reunited] !!SAVE DATA HAS BEEN RESET!! as result of a save data update. If you had unlocks, please use the 'eeveemod unlock' command!"
+				Isaac.DebugString(msg)
+				print(msg)
+			end
 			EeveeReunited.SavedData.SaveDataVer = SaveDataVer
 			EeveeReunited:SaveData(json.encode(EeveeReunited.SavedData))
 		else
@@ -183,7 +192,7 @@ function EeveeReunited:LoadEeveeData()
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal = EeveeReunited.SavedData.UnlockData_PokeyMansCrystal or EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal
 			EEVEEMOD.PERSISTENT_DATA.LilEeveeData = EeveeReunited.SavedData.LilEeveeData or EEVEEMOD.PERSISTENT_DATA.LilEeveeData
 		end
-	end	
+	end
 end
 
 --[[ local tearsFired = 0

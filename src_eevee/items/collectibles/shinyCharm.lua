@@ -105,8 +105,10 @@ function shinyCharm:PostShinyKill(npc)
 	end
 end
 
-function shinyCharm:LuckCache(player, itemStats)
-	itemStats.LUCK = itemStats.LUCK + 1
+function shinyCharm:Stats(player, itemStats)
+	if player:HasCollectible(EEVEEMOD.CollectibleType.SHINY_CHARM) then
+		itemStats.LUCK = itemStats.LUCK + (2 * player:GetCollectibleNum(EEVEEMOD.CollectibleType.SHINY_CHARM))
+	end
 end
 
 function shinyCharm:ShinyParticleEffectUpdate(effect)

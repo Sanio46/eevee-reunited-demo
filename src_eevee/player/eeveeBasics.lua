@@ -2,6 +2,7 @@ local eeveeBasics = {}
 
 local costumeProtector = require("src_eevee.player.characterCostumeProtector")
 local miscMods = require("src_eevee.modsupport.miscModsOnPlayerInit")
+--local uniqueCharacterItems = require("src_eevee.modsupport.uniqueCharacterItems")
 
 function eeveeBasics:TryInitEevee(player)
 	local data = player:GetData()
@@ -10,14 +11,12 @@ function eeveeBasics:TryInitEevee(player)
 	if not data.IsEevee and EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] and not player:IsCoopGhost() then
 
 		data.IsEevee = true
-
-		if EEVEEMOD.game.TimeCounter == 0 or EEVEEMOD.isNewGame then
-
-		end
-
 		miscMods:addPogCompatibility()
 		miscMods:addCoopGhostCompatibility()
 		miscMods:addNoCostumesCompatibility()
+		--[[ if UniqueCharacterItemsAPI then
+			uniqueCharacterItems:OnPlayerInit(player)
+		end ]]
 		VeeHelper.SetCanShoot(player, false)
 		player:AddCacheFlags(CacheFlag.CACHE_ALL)
 		player:EvaluateItems()

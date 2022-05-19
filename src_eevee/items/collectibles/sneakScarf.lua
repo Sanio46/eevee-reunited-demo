@@ -18,7 +18,7 @@ end
 
 function sneakScarf:Stats(player, itemStats)
 	if player:HasCollectible(EEVEEMOD.CollectibleType.SNEAK_SCARF) then
-		itemStats.SPEED = itemStats.SPEED + 0.3
+		itemStats.SPEED = itemStats.SPEED + (0.3 * player:GetCollectibleNum(EEVEEMOD.CollectibleType.SNEAK_SCARF))
 	end
 end
 

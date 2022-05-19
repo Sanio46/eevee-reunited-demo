@@ -1,5 +1,7 @@
 local pokeyMans = {}
 
+--TODO: Spawn Brother Bobby as a temporary helper when you have no friends :(
+
 function pokeyMans:OnChallengeInit(player)
 	local challenge = Isaac.GetChallenge()
 
@@ -115,12 +117,15 @@ function pokeyMans:ReplaceItemsOnInit(collectible)
 end
 
 function pokeyMans:PrePickupCollision(pickup, collider)
-	if collider.Type ~= EntityType.ENTITY_PLAYER then return end
-
-	if not EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal then
-		EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal = true
-		CCO.AchievementDisplayAPI.PlayAchievement("gfx/ui/achieeveements/" .. EEVEEMOD.AchievementGraphics.PokeyMansCrystal .. ".png", 35)
+	local challenge = Isaac.GetChallenge()
+	if challenge ~= EEVEEMOD.Challenge.POKEY_MANS_CRYSTAL
+		or collider.Type ~= EntityType.ENTITY_PLAYER
+		or EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal == true then
+		return
 	end
+
+	CCO.AchievementDisplayAPI.PlayAchievement("gfx/ui/achieeveements/" .. EEVEEMOD.AchievementGraphics.PokeyMansCrystal .. ".png")
+	EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal = true
 end
 
 return pokeyMans

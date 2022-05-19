@@ -27,7 +27,7 @@ function eeveeGhost:KillOnVadeRetro(effect)
 		local sprite = effect:GetSprite()
 		local playerType = player:GetPlayerType()
 
-		sprite:SetAnimation(sprite:GetAnimation(), true) --For like a really specific instance if the death animation changes mid-animation that i saw thanks to a twitter video 
+		sprite:SetAnimation(sprite:GetAnimation(), false) --For like a really specific instance if the death animation changes mid-animation that i saw thanks to a twitter video 
 
 		if EEVEEMOD.IsPlayerEeveeOrEvolved[playerType]
 			and player:IsDead()

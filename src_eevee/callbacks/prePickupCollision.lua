@@ -1,7 +1,7 @@
 local prePickupCollision = {}
 
 local blackGlasses = require("src_eevee.items.collectibles.blackGlasses")
-local customCollectibleSprites = require("src_eevee.modsupport.customCollectibleSprites")
+local pokeyMansCrystal = require("src_eevee.challenges.pokeyMansCrystal")
 
 function prePickupCollision:main(item, collider, low)
 	if collider:ToPlayer() then
@@ -12,6 +12,7 @@ end
 
 function prePickupCollision:init(EeveeReunited)
 	EeveeReunited:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, prePickupCollision.main, PickupVariant.PICKUP_COLLECTIBLE)
+	EeveeReunited:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, pokeyMansCrystal.PrePickupCollision, PickupVariant.PICKUP_TROPHY)
 end
 
 return prePickupCollision

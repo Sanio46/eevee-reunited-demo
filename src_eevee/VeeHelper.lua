@@ -649,32 +649,32 @@ function VeeHelper.IsTearFromFamiliar(tear)
 end
 
 --Taken directly from the source! Shoutouts to the modders who decompiled the Switch port.
-function VeeHelper.TearDamageToSizeAnim(tear)
-	local dmg = tear.CollisionDamage
+function VeeHelper.TearScaleToSizeAnim(tear)
+	local scale = tear.Scale
 	local anim = "8"
 
-	if dmg <= 0.3 then
+	if scale <= 0.3 then
 		anim = "1"
-	elseif dmg <= 0.55 then
+	elseif scale <= 0.55 then
 		anim = "2"
-	elseif dmg <= 0.675 then
+	elseif scale <= 0.675 then
 		anim = "3"
-	elseif dmg <= 0.8 then
+	elseif scale <= 0.8 then
 		anim = "4"
-	elseif dmg <= 0.925 then
+	elseif scale <= 0.925 then
 		anim = "5"
-	elseif dmg <= 1.05 then
+	elseif scale <= 1.05 then
 		anim = "6"
-	elseif dmg <= 1.175 then
+	elseif scale <= 1.175 then
 		anim = "7"
-	elseif 1.425 < dmg then
-		if dmg <= 1.675 then
+	elseif 1.425 < scale then
+		if scale <= 1.675 then
 			anim = "9"
-		elseif dmg <= 1.925 then
+		elseif scale <= 1.925 then
 			anim = "10"
-		elseif dmg <= 2.175 then
+		elseif scale <= 2.175 then
 			anim = "11"
-		elseif 2.55 < dmg then
+		elseif 2.55 < scale then
 			anim = "12"
 		end
 		anim = "13"
@@ -705,7 +705,7 @@ end
 function VeeHelper.IsNewRunAndNotJustContinued()
 	local shouldApply = false
 	if (EEVEEMOD.game:GetFrameCount() > 0 and EEVEEMOD.game:GetRoom():GetFrameCount() > 0) --Doesn't apply when continuing
-	or game:GetFrameCount() == 0 --Applies when starting a new run
+		or game:GetFrameCount() == 0 --Applies when starting a new run
 	then
 		shouldApply = true
 	end

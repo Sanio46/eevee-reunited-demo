@@ -1,4 +1,41 @@
-local customCollectibleSprites = {}
+--[[ local uniqueCharacterItems = {}
+
+local baseItemPath = "gfx/items/collectibles_unique/collectibles_"
+local baseCostumePath = "gfx/characters/costumes_unique/costume_"
+
+local itemPaths = {
+	[CollectibleType.COLLECTIBLE_BIRTHRIGHT] = "birthright_eevee",
+	[CollectibleType.COLLECTIBLE_MR_DOLLY] = "mrdolly_eevee"
+}
+
+local hasCostume = {
+	[CollectibleType.COLLECTIBLE_BIRTHRIGHT] = false,
+	[CollectibleType.COLLECTIBLE_MR_DOLLY] = true
+}
+
+if not UniqueCharacterItemsAPI then return uniqueCharacterItems end
+
+UniqueCharacterItemsAPI.RegisterMod(EEVEEMOD.Name)
+UniqueCharacterItemsAPI.RegisterCharacter("Eevee", false)
+
+function uniqueCharacterItems:OnPlayerInit(_)
+	for itemID, spritePath in pairs(itemPaths) do
+		UniqueCharacterItemsAPI.RegisterItem(itemID)
+		if UniqueCharacterItemsAPI.IsItemRegistered(itemID) then
+			UniqueCharacterItemsAPI.AddCharacterItem({
+				PlayerType = EEVEEMOD.PlayerType.EEVEE,
+				ItemID = itemID,
+				ItemSpritePath = baseItemPath .. spritePath .. ".png",
+				CostumeSpritePath = hasCostume[itemID] and baseCostumePath .. spritePath .. ".png" or nil,
+			})
+		end
+	end
+end
+
+return uniqueCharacterItems
+ ]]
+
+ local customCollectibleSprites = {}
 
 --Credit to stewart, creator of the "Custom Mr. Dollys" mod for the base of the code: https://steamcommunity.com/sharedfiles/filedetails/?id=2489635144
 --I edited it further to be more flexible in accepting any itemID and replacing the sprite with Curse of the Blind after picking it up.

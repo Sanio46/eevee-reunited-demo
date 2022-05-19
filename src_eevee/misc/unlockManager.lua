@@ -104,6 +104,7 @@ function Manager.postPickupInit(pickup)
 	if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE
 		or pickup.Variant == PickupVariant.PICKUP_TRINKET
 	then
+
 		local tab
 		if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then
 			tab = itemToUnlock[pickup.SubType]
@@ -121,7 +122,7 @@ function Manager.postPickupInit(pickup)
 		else
 			Unlocked = EEVEEMOD.PERSISTENT_DATA.UnlockData["Eevee" .. Suffix][tab.Unlock].Unlock
 		end
-
+		
 		if not Unlocked then
 			if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then
 				local roomPool = EEVEEMOD.game:GetItemPool():GetPoolForRoom(EEVEEMOD.game:GetRoom():GetType(), EEVEEMOD.game:GetLevel():GetCurrentRoomDesc().SpawnSeed)

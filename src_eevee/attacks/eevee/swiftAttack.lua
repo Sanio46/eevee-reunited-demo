@@ -31,6 +31,7 @@ local function CalculateSwiftStats(player)
 	if swiftBase:SwiftShouldBeConstant(player) then
 		isConstant = true
 	end
+
 	swiftPlayer.Constant = isConstant
 
 	if isConstant then
@@ -250,9 +251,7 @@ function swiftAttack:FireExtraWeapon(parent, player, direction, rotationOffset)
 		elseif player:HasWeaponType(WeaponType.WEAPON_LASER)
 			or player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
 			or player:HasWeaponType(WeaponType.WEAPON_TECH_X) then
-			local ptrHashParent = tostring(GetPtrHash(parent))
-			local swiftParent = swiftBase.Weapon[ptrHashParent]
-			swiftLaser:FireSwiftLaser(parent, player, VeeHelper.AddTearVelocity(swiftParent.ShotDir, player.ShotSpeed * 10, player, false), rotationOffset)
+			swiftLaser:FireSwiftLaser(parent, player, direction, rotationOffset)
 		elseif player:HasWeaponType(WeaponType.WEAPON_TEARS)
 			or player:HasWeaponType(WeaponType.WEAPON_MONSTROS_LUNGS) then
 			swiftTear:FireSwiftTear(parent, player, direction)
@@ -266,15 +265,15 @@ function swiftAttack:ShouldFireExtraWeapons(weapon, player, direction)
 	then
 		for i = 1, 3 do
 			local rotationOffset = 90 * i
-			direction = direction:Rotated(rotationOffset)
-			swiftAttack:FireExtraWeapon(weapon, player, direction, rotationOffset)
+			local newdirection = direction:Rotated(rotationOffset)
+			swiftAttack:FireExtraWeapon(weapon, player, newdirection, rotationOffset)
 		end
 	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_EYE)
-		and swiftSynergies:ShouldFireExtraShot(player, CollectibleType.COLLECTIBLE_MOMS_EYE) == true
+	and swiftSynergies:ShouldFireExtraShot(player, CollectibleType.COLLECTIBLE_MOMS_EYE) == true
 	then
 		local rotationOffset = 180
-		direction = direction:Rotated(rotationOffset)
-		swiftAttack:FireExtraWeapon(weapon, player, direction, rotationOffset)
+		local newdirection = direction:Rotated(rotationOffset)
+		swiftAttack:FireExtraWeapon(weapon, player, newdirection, rotationOffset)
 	end
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_MONSTROS_LUNG) then
 		local WeaponTypeShotDegrees = {
@@ -288,8 +287,8 @@ function swiftAttack:ShouldFireExtraWeapons(weapon, player, direction)
 			if player:HasWeaponType(weaponType) then
 				for i = 1, EEVEEMOD.RandomNum(3, 5) do
 					local rotationOffset = EEVEEMOD.RandomNum((degrees / -2), (degrees / 2))
-					direction = direction:Rotated(rotationOffset)
-					swiftAttack:FireExtraWeapon(weapon, player, direction, rotationOffset)
+					local newdirection = direction:Rotated(rotationOffset)
+					swiftAttack:FireExtraWeapon(weapon, player, newdirection, rotationOffset)
 				end
 			end
 		end
@@ -508,9 +507,12 @@ function swiftAttack:SwiftInit(player)
 				TriggerSwiftCooldownIfPlayerStopsShooting(player)
 				swiftAttack:ShouldRestoreWeapon(player)
 
-				--Updating Kidney Stone's Constant Fire Override
-				if swiftBase:SwiftShouldBeConstant(player) == false
-					and swiftPlayer.Constant
+				if swiftBase:SwiftShouldBeConstant(player) == true
+				and swiftPlayer.Constant == false then
+					swiftPlayer.Constant = true
+					TriggerSwiftCooldown(player)
+				elseif swiftBase:SwiftShouldBeConstant(player) == false
+					and swiftPlayer.Constant == true
 					and not swiftPlayer.KidneyTimer then
 					swiftPlayer.Constant = false
 				end
@@ -579,27 +581,32 @@ function swiftAttack:SpiritSword(knife)
 		end
 	elseif swiftPlayer.StarSword.Entity.InitSeed == knife.InitSeed then
 		if not swiftPlayer.AttackInit then
+			local multi = swiftSynergies:MultiShotCountInit(player)
+			if multi > 0 then return end
+			local dur = 14
 			swiftPlayer.AttackInit = true
-			swiftPlayer.MultiShots = swiftSynergies:MultiShotCountInit(player)
-			swiftPlayer.AttackDuration = 13
-			swiftPlayer.AttackDurationSet = 13
+			swiftPlayer.MultiShots = multi
+			swiftPlayer.AttackDuration = dur
+			swiftPlayer.AttackDurationSet = dur
 			swiftPlayer.RateOfOrbitRotation = 0
 			swiftPlayer.Constant = false
 		end
+	end
+	if swiftPlayer.StarSword and swiftPlayer.AttackInit and swiftPlayer.AttackDuration > 0 then
 		local degreeOfWeaponSpawns = 72 --(360/5)
 		local offset = swiftPlayer.StarSword.Dir:Rotated(-1 * degreeOfWeaponSpawns):GetAngleDegrees()
 		local spawnAtFrame = {
-			3,
-			6,
-			9,
 			11,
-			13
+			8,
+			5,
+			3,
+			1
 		}
 		for i = 1, #spawnAtFrame do
-			if sprite:GetFrame() == spawnAtFrame[i] then
+			if swiftPlayer.AttackDuration == spawnAtFrame[i] then
 				swiftPlayer.NumWeaponsSpawned = i
 				swiftTear:SpawnSwiftTears(player, degreeOfWeaponSpawns, offset)
-				if i == 5 then
+				if spawnAtFrame[i] == 1 then
 					swiftPlayer.StarSword.Entity = nil
 				end
 			end
@@ -614,9 +621,9 @@ function swiftAttack:ActivateConstantOnKidneyStone(tear)
 	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
 	if not swiftPlayer then return end
 
-	if swiftSynergies:IsKidneyStoneActive(tear, player) then
+	if (swiftSynergies:IsKidneyStoneActive(tear, player))
+	and swiftPlayer.Constant == false then
 		swiftPlayer.Constant = true
-		swiftPlayer.KidneyTimer = 345
 		TriggerSwiftCooldown(player)
 	end
 end
@@ -1048,8 +1055,8 @@ function swiftAttack:onRender()
 		Isaac.RenderText("Duration: " .. duration, 50, 70, 1, 1, 1, 1)
 		Isaac.RenderText("Rotation: " .. rotation, 50, 90, 1, 1, 1, 1)
 		Isaac.RenderText("Tear Spawn: " .. delaybetweenshots, 50, 110, 1, 1, 1, 1)
-		Isaac.RenderText("Num Tears Spawned: " .. numtears, 50, 130, 1, 1, 1, 1)
-		Isaac.RenderText("Kidney: " .. kidney, 50, 30, 1, 1, 1, 1) ]]
+		Isaac.RenderText("Num Tears Spawned: " .. numtears, 50, 130, 1, 1, 1, 1) ]]
+		--Isaac.RenderText("Kidney: " .. kidney, 50, 30, 1, 1, 1, 1)
 	end
 end
 

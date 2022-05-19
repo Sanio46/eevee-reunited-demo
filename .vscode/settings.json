@@ -185,7 +185,8 @@
 		"NoCostumes",
 		"ModConfigMenu",
 		"DeadSeaScrollsMenu",
-		"Sewn_API"
+		"Sewn_API",
+		"UniqueCharacterItemsAPI"
 	],
 	"prettier.useTabs": true,
 	"prettier.tabWidth": 4

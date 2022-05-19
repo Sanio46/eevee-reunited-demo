@@ -125,23 +125,11 @@ function swiftBase:AssignSwiftSprite(tear)
 		return
 	end
 
-	local maxSizes = 13
 	local tearSprite = tear:GetSprite()
 	local dataTear = tear:GetData()
-	local animationToPlay = tearSprite:GetAnimation()
+	local animationToPlay = VeeHelper.TearScaleToSizeAnim(tear)
 	local variantToUse = tear:HasTearFlags(TearFlags.TEAR_LUDOVICO) and "gfx/tear_swift.anm2" or EEVEEMOD.TearVariant.SWIFT
 	local _, isBlood = string.gsub(animationToPlay, "BloodTear", "")
-
-	for i = 1, maxSizes do
-		local foundNum = string.find(animationToPlay, tostring(i))
-		if foundNum ~= nil then
-			animationToPlay = i
-			break
-		end
-		if i == maxSizes and foundNum == nil then
-			animationToPlay = 6
-		end
-	end
 
 	if (dataTear.ForceBlood and dataTear.ForceBlood == true)
 		or (isBlood ~= 0
@@ -163,6 +151,7 @@ function swiftBase:AssignSwiftSprite(tear)
 	else
 		tear:ChangeVariant(variantToUse)
 	end
+
 	tearSprite:Play(animationToPlay, true)
 end
 
@@ -400,7 +389,8 @@ function swiftBase:AssignSwiftBasicData(weapon, player, anglePos)
 	if weapon.Type == EntityType.ENTITY_TEAR then
 		if player:HasCollectible(CollectibleType.COLLECTIBLE_KIDNEY_STONE) then
 			weapon.Height = weapon.Height - 16
-		elseif player:HasCollectible(CollectibleType.COLLECTIBLE_NUMBER_ONE) then
+		elseif player:HasCollectible(CollectibleType.COLLECTIBLE_NUMBER_ONE)
+		or player:HasCollectible(CollectibleType.COLLECTIBLE_PLUTO) then
 			weapon.Height = weapon.Height - 8
 		end
 		swiftWeapon.HoldTearHeight = weapon.Height
@@ -473,11 +463,10 @@ function swiftBase:IsSwiftLaserEffect(effect)
 end
 
 function swiftBase:SwiftShouldBeConstant(player)
-	local playerEffects = player:GetEffects()
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_SOY_MILK)
 		or player:HasCollectible(CollectibleType.COLLECTIBLE_ALMOND_MILK)
 		or player:HasCollectible(CollectibleType.COLLECTIBLE_TINY_PLANET)
-		or swiftBase:SwiftFireDelay(player) <= 1
+		or swiftBase:SwiftFireDelay(player) <= 3
 	then
 		return true
 	else

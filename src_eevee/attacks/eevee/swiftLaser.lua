@@ -144,7 +144,9 @@ function swiftLaser:FireTechXLaser(parent, player, direction, knifeOverride)
 	swiftBase:InitSwiftWeapon(techX)
 	local ptrHashLaser = tostring(GetPtrHash(techX))
 	local swiftLaser = swiftBase.Weapon[ptrHashLaser]
-
+	
+	swiftLaser.HasFired = true
+	
 	if knifeOverride then
 		techX.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
 	end
@@ -164,7 +166,8 @@ function swiftLaser:FireBrimLaser(parent, player, direction, rotationOffset)
 	swiftBase:InitSwiftWeapon(brim)
 	local ptrHashLaser = tostring(GetPtrHash(brim))
 	local swiftLaser = swiftBase.Weapon[ptrHashLaser]
-
+	
+	swiftLaser.HasFired = true
 	brim.Parent = parent
 	brim.PositionOffset = Vector(0, -23)
 	swiftLaser.Player = player
@@ -191,7 +194,8 @@ function swiftLaser:FireTechLaser(parent, player, direction, isTech2)
 	swiftBase:InitSwiftWeapon(laser)
 	local ptrHashLaser = tostring(GetPtrHash(laser))
 	local swiftLaser = swiftBase.Weapon[ptrHashLaser]
-
+	
+	swiftLaser.HasFired = true
 	swiftLaser.Player = player
 	laser.Parent = parent
 	laser.PositionOffset = Vector(0, -23)

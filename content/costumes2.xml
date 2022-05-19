@@ -27,6 +27,7 @@
 	<costume anm2path="edited_375_hosthat.anm2" type="none" />
 	<costume anm2path="edited_420_blackpowder.anm2" type="none" />
 	<costume anm2path="edited_428_pjs.anm2" type="none" hasSkinAlt="true" />
+	<costume anm2path="edited_497_camoundies.anm2" type="none" hasSkinAlt="true" />
 	<costume anm2path="edited_039x_terra.anm2" type="none" priority="1" skinColor="5" overwriteColor="true" />
 	<costume anm2path="edited_040x_mars.anm2" type="none" priority="1" skinColor="3" overwriteColor="true" />
 	<costume anm2path="edited_043x_uranus.anm2" type="none" priority="1" skinColor="0" overwriteColor="true" />

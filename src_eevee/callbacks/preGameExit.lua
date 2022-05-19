@@ -4,7 +4,7 @@ local pokeStop = require("src_eevee.items.collectibles.pokeStop")
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 
 function preGameExit:main()
-	EEVEEMOD.isNewGame = false
+	EEVEEMOD.shouldSaveData = false
 	swiftBase:ResetData()
 	local players = VeeHelper.GetAllPlayers()
 	for i = 1, #players do

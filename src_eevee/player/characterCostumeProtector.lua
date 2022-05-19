@@ -386,7 +386,7 @@ local costumeList = {
 	[CollectibleType.COLLECTIBLE_JUPITER] = true,
 	[CollectibleType.COLLECTIBLE_URANUS] = true,
 	[CollectibleType.COLLECTIBLE_NEPTUNUS] = true,
-	[CollectibleType.COLLECTIBLE_PLUTO] = true,
+	[CollectibleType.COLLECTIBLE_PLUTO] = false,
 	[CollectibleType.COLLECTIBLE_VOODOO_HEAD] = true,
 	[CollectibleType.COLLECTIBLE_EYE_DROPS] = false,
 	[CollectibleType.COLLECTIBLE_ACT_OF_CONTRITION] = true,
@@ -425,7 +425,7 @@ local costumeList = {
 	[CollectibleType.COLLECTIBLE_SPIRIT_SHACKLES] = true,
 	[CollectibleType.COLLECTIBLE_CRACKED_ORB] = true,
 	[CollectibleType.COLLECTIBLE_ASTRAL_PROJECTION] = true,
-	[CollectibleType.COLLECTIBLE_C_SECTION] = true,
+	[CollectibleType.COLLECTIBLE_C_SECTION] = false,
 	[CollectibleType.COLLECTIBLE_MONTEZUMAS_REVENGE] = false,
 	[CollectibleType.COLLECTIBLE_SOUL_LOCKET] = true,
 	[CollectibleType.COLLECTIBLE_INNER_CHILD] = true,
@@ -600,6 +600,7 @@ local allModCostumes = {
 	"edited_375_hosthat",
 	"edited_420_blackpowder",
 	"edited_428_pjs",
+	"edited_497_camoundies",
 	"edited_039x_terra",
 	"edited_040x_mars",
 	"edited_043x_uranus",
@@ -655,7 +656,7 @@ local function RemoveBlacklistedCostumes(player)
 			player:RemoveCostume(itemCostume)
 		end
 		if playerEffects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_D4) then
-			ccp:ReAddBaseCosutme(player)
+			ccp:ReapplyBaseCostume(player)
 		end
 	end
 
@@ -715,7 +716,6 @@ local UniqueHairCostumes = {
 	[CollectibleType.COLLECTIBLE_TERRA] = "terra",
 	[CollectibleType.COLLECTIBLE_URANUS] = "uranus",
 	[CollectibleType.COLLECTIBLE_NEPTUNUS] = "neptunus",
-	[CollectibleType.COLLECTIBLE_WHORE_OF_BABYLON] = "whoreofbabylon",
 	[CollectibleType.COLLECTIBLE_BRIMSTONE] = "brimstone",
 }
 
@@ -734,10 +734,11 @@ local EditedCostumes = {
 	[CollectibleType.COLLECTIBLE_HOST_HAT] = true,
 	[CollectibleType.COLLECTIBLE_BLACK_POWDER] = true,
 	[CollectibleType.COLLECTIBLE_PJS] = true,
+	[CollectibleType.COLLECTIBLE_CAMO_UNDIES] = true,
 	[CollectibleType.COLLECTIBLE_TERRA] = true,
 	[CollectibleType.COLLECTIBLE_MARS] = true,
 	[CollectibleType.COLLECTIBLE_URANUS] = true,
-	[CollectibleType.COLLECTIBLE_PLUTO] = true,
+	--[CollectibleType.COLLECTIBLE_PLUTO] = true,
 }
 
 local function AddItemSpecificCostumes(player)
@@ -773,12 +774,9 @@ local function AddItemSpecificCostumes(player)
 
 				if player:HasCollectible(itemID) and data.CCP.EditedCostumesActive[itemID] == false then
 					data.CCP.EditedCostumesActive[itemID] = true
-					if (EEVEEMOD.game:GetFrameCount() > 0 and EEVEEMOD.game:GetRoom():GetFrameCount() > 0) --Doesn't apply when continuing
-						or EEVEEMOD.game:GetFrameCount() == 0 --Applies when starting a new run
-					then
+					if VeeHelper.IsNewRunAndNotJustContinued() then
 						player:RemoveCostume(itemConfig)
 						ccp:TryAddNullCostume(player, itemCostume, costumePath)
-						--player:ReplaceCostumeSprite(itemConfig, , 0) --As replacing costumes sprites replaces all layers, some costumes with head&body have been merged into one spritesheet
 					end
 				elseif not player:HasCollectible(itemID) and data.CCP.EditedCostumesActive[itemID] == true then
 					player:TryRemoveNullCostume(itemCostume)
@@ -809,6 +807,15 @@ local function AddItemSpecificCostumes(player)
 		player:TryRemoveNullCostume(deliCustomCostume)
 	end
 
+	--Whore of Babylon
+	local babylonPath = basePath .. "whoreofbabylon.anm2"
+	local babylonCustomCostume = Isaac.GetCostumeIdByPath(babylonPath)
+	if playerEffects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_WHORE_OF_BABYLON) then
+		ccp:TryAddNullCostume(player, babylonCustomCostume, babylonPath)
+	else
+		player:TryRemoveNullCostume(babylonCustomCostume)
+	end
+
 	--Berserk
 	local berserkPath = basePath .. "berserk.anm2"
 	local berserkCustomCostume = Isaac.GetCostumeIdByPath(berserkPath)
@@ -818,7 +825,7 @@ local function AddItemSpecificCostumes(player)
 		player:TryRemoveNullCostume(berserkCustomCostume)
 	end
 
-	--Brimstone 2 (Might make cool horns later)
+	--Brimstone 2
 	local brim2Path = basePath .. "brimstone2.anm2"
 	local brim2CustomCostume = Isaac.GetCostumeIdByPath(brim2Path)
 	if player:GetCollectibleNum(CollectibleType.COLLECTIBLE_BRIMSTONE) >= 2 then
@@ -906,7 +913,7 @@ function ccp:UpdatePlayerSpritesheet(player, sprite, spritesheetPath)
 	sprite:LoadGraphics()
 end
 
-function ccp:ReAddBaseCosutme(player)
+function ccp:ReapplyBaseCostume(player)
 	local playerType = player:GetPlayerType()
 
 	if playerToProtect[playerType] == true
@@ -1235,13 +1242,14 @@ function ccp:ReapplyHairOnCoopRevive(player)
 	if player:IsCoopGhost() and not data.CCP.WaitOnCoopRevive then
 		data.CCP.WaitOnCoopRevive = true
 	elseif not player:IsCoopGhost() and data.CCP.WaitOnCoopRevive then
-		ccp:ReAddBaseCosutme(player)
+		ccp:ReapplyBaseCostume(player)
 		data.CCP.WaitOnCoopRevive = false
 	end
 end
 
 local function LoadPlayerAndCostumeSprites(player)
 	local playerType = player:GetPlayerType()
+	local pSprite = player:GetSprite():GetFilename()
 	local data = player:GetData()
 	local spritesheetPath = playerSpritesheet[playerType] .. ".png"
 	local costumePath = playerCostume[playerType] .. ".anm2"
@@ -1250,16 +1258,16 @@ local function LoadPlayerAndCostumeSprites(player)
 	data.CCP.MineshaftBodyCostume = Sprite()
 	data.CCP.MineshaftHead = Sprite()
 	data.CCP.MineshaftBody = Sprite()
-	data.CCP.MineshaftHead:Load(spritesheetPath, true)
-	data.CCP.MineshaftBody:Load(spritesheetPath, true)
+	data.CCP.MineshaftHead:Load(pSprite, true)
+	data.CCP.MineshaftBody:Load(pSprite, true)
 	data.CCP.MineshaftHeadCostume:Load(costumePath, true)
 	data.CCP.MineshaftBodyCostume:Load(costumePath, true)
 	data.CCP.MineshaftHead:Play("HeadUp", true)
 	data.CCP.MineshaftBody:Play("WalkUp", true)
 	data.CCP.MineshaftHeadCostume:Play("HeadUp", true)
 	data.CCP.MineshaftBodyCostume:Play("WalkUp", true)
-	ccp:UpdatePlayerSpritesheet(player, spritesheetPath, data.CCP.MineshaftHead)
-	ccp:UpdatePlayerSpritesheet(player, spritesheetPath, data.CCP.MineshaftBody)
+	ccp:UpdatePlayerSpritesheet(player, data.CCP.MineshaftHead, spritesheetPath)
+	ccp:UpdatePlayerSpritesheet(player, data.CCP.MineshaftBody, spritesheetPath)
 end
 
 function ccp:RestoreCostumeInMineshaft(player)
@@ -1269,11 +1277,10 @@ function ccp:RestoreCostumeInMineshaft(player)
 	local room = EEVEEMOD.game:GetRoom()
 
 	if playerToProtect[playerType] == true and data.CCP then
-		if room:HasCurseMist() and playerCostume[playerType]["Extra"] then
-			if not data.CCP.MineshaftHeadCostume
-				and not data.CCP.MineshaftBodyCostume then
+		if room:HasCurseMist() and playerCostume[playerType] then
+			if not data.CCP.MineshaftHeadCostume then
 				LoadPlayerAndCostumeSprites(player)
-			else
+			elseif data.CCP.MineshaftHeadCostume:IsLoaded() then
 				local screenpos = EEVEEMOD.game:GetRoom():WorldToScreenPosition(player.Position)
 
 				if VeeHelper.IsSpritePlayingAnims(player:GetSprite(), VeeHelper.WalkAnimations) then
@@ -1309,12 +1316,11 @@ end
 function ccp:ResetOnMissingNoNewFloor(player)
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_MISSING_NO) then
 		ccp:MainResetPlayerCostumes(player)
-		ccp:ReAddBaseCosutme(player)
+		ccp:ReapplyBaseCostume(player)
 	end
 end
 
 function ccp:ModelingClay(player)
-	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 	local itemID = player:GetModelingClayEffect()
 
@@ -1330,7 +1336,6 @@ function ccp:ModelingClay(player)
 end
 
 function ccp:DelayInCostumeReset(player)
-	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 
 	if data.CCP.DelayCostumeReset then
@@ -1340,7 +1345,7 @@ function ccp:DelayInCostumeReset(player)
 
 	if data.CCP.DelayRunReroll then
 		ccp:MainResetPlayerCostumes(player)
-		ccp:ReAddBaseCosutme(player)
+		ccp:ReapplyBaseCostume(player)
 		data.CCP.DelayRunReroll = nil
 	end
 
@@ -1369,11 +1374,19 @@ function ccp:DelayInCostumeReset(player)
 
 	if data.CCP.DelaySpritesheetChange then
 		if data.CCP.DelaySpritesheetChange == "" then
-			ccp:UpdatePlayerSpritesheet(player)
+			ccp:UpdatePlayerSpritesheet(player, player:GetSprite())
 		else
-			ccp:UpdatePlayerSpritesheet(player, data.CCP.DelaySpritesheetChange)
+			ccp:UpdatePlayerSpritesheet(player, player:GetSprite(), data.CCP.DelaySpritesheetChange)
 		end
 		data.CCP.DelaySpritesheetChange = nil
+	end
+
+	if data.CCP.DelayBabylonCheck then
+		local effects = player:GetEffects()
+		if effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_WHORE_OF_BABYLON) then
+			ccp:MainResetPlayerCostumes(player)
+			data.CCP.DelayBabylonCheck = false
+		end
 	end
 end
 
@@ -1516,6 +1529,14 @@ function ccp:StopBoomerangShoopOnNewRoom(player)
 	end
 end
 
+function ccp:ReapplyBabylonBodyOnNewRoom(player)
+	local data = player:GetData()
+	
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_WHORE_OF_BABYLON) then
+		data.CCP.DelayBabylonCheck = true
+	end
+end
+
 ----------------------------
 --  INITIATING CALLBACKS  --
 ----------------------------
@@ -1531,7 +1552,9 @@ function ccp:OnPeffectUpdate(player)
 	if EEVEEMOD.game:GetFrameCount() > 1 then
 		ccp:DeinitPlayerCostume(player)
 	end
-
+	if playerToProtect[playerType] and not data.CCP then
+		ccp:InitPlayerCostume(player)
+	end
 	if playerToProtect[playerType] ~= true or not data.CCP then return end
 
 	ccp:MiscCostumeResets(player)
@@ -1559,9 +1582,10 @@ function ccp:OnNewRoom(player)
 	local data = player:GetData()
 
 	if playerToProtect[playerType] ~= true or not data.CCP then return end
-
+	
 	ccp:CanAstralProjectionTrigger(player)
 	ccp:StopBoomerangShoopOnNewRoom(player)
+	ccp:ReapplyBabylonBodyOnNewRoom(player)
 
 	if player:HasTrinket(TrinketType.TRINKET_MODELING_CLAY) then
 		local data = player:GetData()
