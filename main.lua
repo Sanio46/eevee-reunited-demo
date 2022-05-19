@@ -1,5 +1,9 @@
 --funny require() hack so it can be used with luamod. Go to the init file for start stuff.
 
+--TODO:
+--Black Candle edited ver for Eevee
+--Detect golden trinkets that drop for unlock manager
+
 local json = require("json")
 
 local function isLuaDebugEnabled()

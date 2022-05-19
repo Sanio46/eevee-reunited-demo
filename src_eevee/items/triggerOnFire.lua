@@ -266,18 +266,35 @@ end
 local function GhostPepperBirdsEye(player, direction)
 	local hasBirdsEye = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRDS_EYE)
 	local hasGhostPepper = player:HasCollectible(CollectibleType.COLLECTIBLE_GHOST_PEPPER)
+	local hasBoth = hasBirdsEye and hasGhostPepper
+
 	if hasBirdsEye
 		or hasGhostPepper
 	then
 		local rng = hasBirdsEye and player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_BIRDS_EYE) or player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_GHOST_PEPPER)
 		local fireToShoot = hasBirdsEye and EffectVariant.RED_CANDLE_FLAME or EffectVariant.BLUE_FLAME
-		local baseChance = (hasBirdsEye and hasGhostPepper) and 8 or 12
-		local luckChance = 1 / (baseChance - player.Luck)
+		if hasBoth then
+			if rng:RandomInt(2) == 1 then
+				fireToShoot = EffectVariant.BLUE_FLAME
+			end
+		end
+		local baseChance = hasBoth and 8 or 12
+		local procRate = baseChance - player.Luck
+		if procRate < 0 then procRate = 1 end
+		local luckChance = 1 / procRate
 		local luckCap = baseChance == 8 and 7 or 10
-		luckChance = math.abs(player.Luck) <= luckCap and luckChance or (luckChance / math.abs(luckChance)) * luckCap
-		luckChance = luckChance * 100
-		if rng:RandomInt(100) <= luckChance then
-			Isaac.Spawn(EntityType.ENTITY_EFFECT, fireToShoot, 0, player.Position, direction, player)
+
+		luckChance = math.abs(player.Luck) <= luckCap and luckChance or 1 / (baseChance - luckCap)
+
+		if rng:RandomFloat() <= luckChance then
+			local fire = Isaac.Spawn(EntityType.ENTITY_EFFECT, fireToShoot, 0, player.Position, direction, player):ToEffect()
+			if fireToShoot == EffectVariant.BLUE_FLAME then
+				fire:SetTimeout(60)
+				fire.LifeSpan = 60
+				fire.CollisionDamage = player.Damage * 6
+			elseif fireToShoot == EffectVariant.RED_CANDLE_FLAME then
+				fire.CollisionDamage = player.Damage * 4
+			end
 		end
 	end
 end
@@ -291,7 +308,7 @@ function triggerOnFire:PostShotItems(weaponFireData)
 end
 
 function triggerOnFire:PostFireItems(weaponFireData)
-	local player = weaponFireData.Parent:ToFamiliar() and weaponFireData.Parent.Player or weaponFireData.Parent
+	local player = weaponFireData.Parent:ToFamiliar() and weaponFireData.Parent.Player or weaponFireData.Parent:ToPlayer()
 	local direction = VeeHelper.GetIsaacShootingDirection(player, player.Position):Resized(10)
 	if player:GetPlayerType() ~= EEVEEMOD.PlayerType.EEVEE then return end
 	ImmaculateHeart(player, direction)

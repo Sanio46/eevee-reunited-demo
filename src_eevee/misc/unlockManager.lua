@@ -152,6 +152,10 @@ function Manager.postPickupInit(pickup)
 	end
 end
 
+local function IsPocketBirthright(player, itemID)
+	return player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and player:GetPlayerType() == EEVEEMOD.BirthrightToPlayerType[itemID] and player:GetActiveItem(ActiveSlot.SLOT_POCKET) == itemID
+end
+
 function Manager.postPlayerUpdate(player)
 	for item, tab in pairs(itemToUnlock) do
 		local HasIt = player:HasCollectible(item)
@@ -166,7 +170,7 @@ function Manager.postPlayerUpdate(player)
 				Unlocked = EEVEEMOD.PERSISTENT_DATA.UnlockData["Eevee" .. Suffix][tab.Unlock].Unlock
 			end
 
-			if not Unlocked then
+			if not Unlocked and not IsPocketBirthright(player, item) then
 				local targetItem = EEVEEMOD.game:GetItemPool():GetCollectible(ItemPoolType.POOL_TREASURE, true, player.InitSeed)
 				player:RemoveCollectible(item)
 				player:AddCollectible(targetItem, EEVEEMOD.ItemConfig:GetCollectible(targetItem).MaxCharges)

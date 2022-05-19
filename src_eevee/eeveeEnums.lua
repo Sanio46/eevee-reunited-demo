@@ -179,6 +179,10 @@ EEVEEMOD.PlayerTypeToString = {
 	[EEVEEMOD.PlayerType.SYLVEON] = "sylveon", ]]
 }
 
+EEVEEMOD.BirthrightToPlayerType = {
+	[EEVEEMOD.Birthright.TAIL_WHIP] = EEVEEMOD.PlayerType.EEVEE
+}
+
 EEVEEMOD.PlayerSounds = {
 	[EEVEEMOD.PlayerType.EEVEE] = {
 		[SoundEffect.SOUND_ISAAC_HURT_GRUNT] = Isaac.GetSoundIdByName("Eevee Hurt"),
