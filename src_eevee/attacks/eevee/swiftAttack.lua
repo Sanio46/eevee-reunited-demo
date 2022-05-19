@@ -628,6 +628,11 @@ function swiftAttack:ActivateConstantOnKidneyStone(tear)
 	end
 end
 
+function swiftAttack:postFireTear(tear, player)
+	swiftBase:AssignSwiftSprite(tear)
+	swiftBase:AddSwiftTrail(tear, player)
+end
+
 function swiftAttack:postLudoTearReset(tear)
 	local ptrHashWeapon = tostring(GetPtrHash(tear))
 	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
