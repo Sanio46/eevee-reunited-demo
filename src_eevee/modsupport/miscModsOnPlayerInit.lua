@@ -14,12 +14,11 @@ function miscMods:addPogCompatibility()
 	end
 end
 
+--Might need to re-evaluate what costumes should be kept
 function miscMods:addNoCostumesCompatibility()
 	if NoCostumes then
 		addCostumeToIgnoreList("gfx/characters/costume_eevee.anm2") --Main costume
 		addCostumeToIgnoreList("gfx/characters/costume_eevee_pog.anm2") --cuz pog
-		addCostumeToIgnoreList("gfx/characters/costume_eevee_gnawedleaf_statue.anm2") --These 2 hold important information
-		addCostumeToIgnoreList("gfx/characters/costume_eevee_toothandnail.anm2")
 	end
 end
 
