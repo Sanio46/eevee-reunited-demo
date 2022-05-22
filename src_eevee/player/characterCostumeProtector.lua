@@ -755,7 +755,7 @@ local function AddItemSpecificCostumes(player)
 
 			if player:HasCollectible(itemID) and data.CCP.UniqueHairCostumesActive[itemID] == false then
 				data.CCP.UniqueHairCostumesActive[itemID] = true
-				if VeeHelper.IsNewRunAndNotJustContinued() then
+				if not EEVEEMOD.RunJustContinued() then
 					ccp:TryAddNullCostume(player, itemCostume, basePath .. costumePath .. ".anm2")
 				end
 			elseif not player:HasCollectible(itemID) and data.CCP.UniqueHairCostumesActive[itemID] == true then
@@ -774,7 +774,7 @@ local function AddItemSpecificCostumes(player)
 
 				if player:HasCollectible(itemID) and data.CCP.EditedCostumesActive[itemID] == false then
 					data.CCP.EditedCostumesActive[itemID] = true
-					if VeeHelper.IsNewRunAndNotJustContinued() then
+					if not EEVEEMOD.RunJustContinued() then
 						player:RemoveCostume(itemConfig)
 						ccp:TryAddNullCostume(player, itemCostume, costumePath)
 					end
@@ -856,7 +856,7 @@ local function AddItemSpecificCostumes(player)
 	local mushroomPath = basePath .. "mushroomhat.anm2"
 	local mushroomCustomCostume = Isaac.GetCostumeIdByPath(mushroomPath)
 	if player:HasPlayerForm(PlayerForm.PLAYERFORM_MUSHROOM) and not data.CCP.MushroomCostume then
-		if VeeHelper.IsNewRunAndNotJustContinued() then
+		if not EEVEEMOD.RunJustContinued() then
 			ccp:TryAddNullCostume(player, mushroomCustomCostume, mushroomPath)
 			data.CCP.MushroomCostume = true
 		end
@@ -1531,7 +1531,7 @@ end
 
 function ccp:ReapplyBabylonBodyOnNewRoom(player)
 	local data = player:GetData()
-	
+
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_WHORE_OF_BABYLON) then
 		data.CCP.DelayBabylonCheck = true
 	end
@@ -1582,7 +1582,7 @@ function ccp:OnNewRoom(player)
 	local data = player:GetData()
 
 	if playerToProtect[playerType] ~= true or not data.CCP then return end
-	
+
 	ccp:CanAstralProjectionTrigger(player)
 	ccp:StopBoomerangShoopOnNewRoom(player)
 	ccp:ReapplyBabylonBodyOnNewRoom(player)

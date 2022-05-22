@@ -20,6 +20,9 @@ function postPlayerUpdate:main(player)
 	ccp:OnPlayerUpdate(player)
 	customCollectibleSprites:ReplaceItemCostume(player)
 	customCollectibleSprites:ReplaceCollectibleOnItemQueue(player)
+	if EEVEEMOD.game:GetRoom():GetFrameCount() > 0 and EEVEEMOD.WasRunJustContinued == true then
+		EEVEEMOD.WasRunJustContinued = false
+	end
 end
 
 function postPlayerUpdate:init(EeveeReunited)

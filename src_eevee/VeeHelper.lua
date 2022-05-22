@@ -702,16 +702,6 @@ function VeeHelper.IsJudasBirthrightActive(player)
 	return (playerType == PlayerType.PLAYER_JUDAS or playerType == PlayerType.PLAYER_BLACKJUDAS) and player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 end
 
-function VeeHelper.IsNewRunAndNotJustContinued()
-	local shouldApply = false
-	if (EEVEEMOD.game:GetFrameCount() > 0 and EEVEEMOD.game:GetRoom():GetFrameCount() > 0) --Doesn't apply when continuing
-		or game:GetFrameCount() == 0 --Applies when starting a new run
-	then
-		shouldApply = true
-	end
-	return shouldApply
-end
-
 function VeeHelper.IsTrinketOwned(trinketType)
 	local hasTrinket = false
 	local players = VeeHelper.GetAllPlayers()

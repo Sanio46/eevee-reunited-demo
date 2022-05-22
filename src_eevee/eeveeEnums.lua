@@ -4,6 +4,7 @@ EEVEEMOD.game = Game()
 EEVEEMOD.ItemConfig = Isaac.GetItemConfig()
 EEVEEMOD.sfx = SFXManager()
 EEVEEMOD.shouldSaveData = false
+EEVEEMOD.WasRunJustContinued = false
 EEVEEMOD.Name = "Eevee: Reunited - Demo"
 
 EEVEEMOD.RandomRNG = RNG()
@@ -17,6 +18,16 @@ function EEVEEMOD.RandomNum(lower, upper)
 	else
 		return EEVEEMOD.RandomRNG:RandomFloat()
 	end
+end
+
+function EEVEEMOD.RunJustContinued()
+	local shouldApply = false
+	if (EEVEEMOD.game:GetFrameCount() > 0 and EEVEEMOD.WasRunJustContinued == false) --Doesn't apply when continuing
+		or EEVEEMOD.game:GetFrameCount() == 0 --Applies when starting a new run
+	then
+		shouldApply = true
+	end
+	return shouldApply
 end
 
 EEVEEMOD.PERSISTENT_DATA = EEVEEMOD.PERSISTENT_DATA or { --As to not reset while I'm testing lol

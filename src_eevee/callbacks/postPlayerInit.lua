@@ -14,6 +14,9 @@ function postPlayerInit:main(player)
 	ccp:OnPlayerInit(player)
 	unlockManager.postPlayerInit(player)
 	pokeyMans:OnChallengeInit(player)
+	if EEVEEMOD.game:GetFrameCount() > 0 then
+		EEVEEMOD.WasRunJustContinued = true
+	end
 end
 
 function postPlayerInit:init(EeveeReunited)
