@@ -82,12 +82,13 @@ function swiftSynergies:ChocolateMilkDamageScaling(weapon, player)
 
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK)
 		and not player:HasWeaponType(WeaponType.WEAPON_TECH_X)
-		and swiftWeapon.IsFakeKnife == false
+		and not swiftWeapon.IsFakeKnife
 		and swiftPlayer.AttackDuration > 0
 		and swiftPlayer.AttackDurationSet
 		and swiftWeapon.HasFired == false then
 		local damageMult = 0.5 + (1.5 * (swiftPlayer.AttackDurationSet - swiftPlayer.AttackDuration) / swiftPlayer.AttackDurationSet)
 		local damageCalc = player.Damage * damageMult
+
 		if damageCalc < 0.1 then
 			weapon.CollisionDamage = 0.1
 		elseif damageCalc > (player.Damage * 2) then

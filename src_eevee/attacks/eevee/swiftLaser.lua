@@ -35,9 +35,9 @@ local function AssignSwiftLaserEffectData(player, effect, anglePos)
 	--As theres a small delay on the manual Chocolate Milk synergy affecting the fired laser's collision damage,
 	--If you fire fast enough you could potentially just fire a normal 3.5 damage attack. This prevents that.
 	if SwiftLaserType(player) == "techX" then
-		effect.CollisionDamage = effect.CollisionDamage * 0.25
+		effect.CollisionDamage = player.Damage * 0.25
 	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then
-		effect.CollisionDamage = effect.CollisionDamage * 0.1
+		effect.CollisionDamage = player.Damage * 0.5
 	else
 		effect.CollisionDamage = player.Damage
 		if swiftBase:IsSwiftLaserEffect(effect) == "brim" then
