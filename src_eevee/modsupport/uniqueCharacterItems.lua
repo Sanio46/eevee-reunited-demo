@@ -18,22 +18,19 @@ if not UniqueCharacterItemsAPI then return uniqueCharacterItems end
 UniqueCharacterItemsAPI.RegisterMod(EEVEEMOD.Name)
 UniqueCharacterItemsAPI.RegisterCharacter("Eevee", false)
 
-function uniqueCharacterItems:OnPlayerInit(_)
-	for itemID, spritePath in pairs(itemPaths) do
-		UniqueCharacterItemsAPI.RegisterItem(itemID)
-		if UniqueCharacterItemsAPI.IsItemRegistered(itemID) then
-			UniqueCharacterItemsAPI.AddCharacterItem({
-				PlayerType = EEVEEMOD.PlayerType.EEVEE,
-				ItemID = itemID,
-				ItemSpritePath = baseItemPath .. spritePath .. ".png",
-				CostumeSpritePath = hasCostume[itemID] and baseCostumePath .. spritePath .. ".png" or nil,
-			})
-		end
-	end
+for itemID, spritePath in pairs(itemPaths) do
+	UniqueCharacterItemsAPI.RegisterItem(itemID) --This is only for testing. Ideally only to be used by mods that add these packs to be enabled by default, otherwise disabled by default.
+	UniqueCharacterItemsAPI.AddCharacterItem({
+		PlayerType = EEVEEMOD.PlayerType.EEVEE,
+		ItemID = itemID,
+		ItemSpritePath = baseItemPath .. spritePath .. ".png",
+		CostumeSpritePath = hasCostume[itemID] and baseCostumePath .. spritePath .. ".png" or nil,
+	})
 end
 
-return uniqueCharacterItems
- ]]
+return uniqueCharacterItems ]]
+
+--Old code, in case we push an update before this code is properly finished.
 
  local customCollectibleSprites = {}
 

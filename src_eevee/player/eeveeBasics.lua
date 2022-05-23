@@ -14,9 +14,6 @@ function eeveeBasics:TryInitEevee(player)
 		miscMods:addPogCompatibility()
 		miscMods:addCoopGhostCompatibility()
 		miscMods:addNoCostumesCompatibility()
-		--[[ if UniqueCharacterItemsAPI then
-			uniqueCharacterItems:OnPlayerInit(player)
-		end ]]
 		VeeHelper.SetCanShoot(player, false)
 		player:AddCacheFlags(CacheFlag.CACHE_ALL)
 		player:EvaluateItems()
