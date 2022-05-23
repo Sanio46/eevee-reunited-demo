@@ -856,9 +856,9 @@ local function AddItemSpecificCostumes(player)
 	local mushroomPath = basePath .. "mushroomhat.anm2"
 	local mushroomCustomCostume = Isaac.GetCostumeIdByPath(mushroomPath)
 	if player:HasPlayerForm(PlayerForm.PLAYERFORM_MUSHROOM) and not data.CCP.MushroomCostume then
+		data.CCP.MushroomCostume = true
 		if not EEVEEMOD.RunJustContinued() then
 			ccp:TryAddNullCostume(player, mushroomCustomCostume, mushroomPath)
-			data.CCP.MushroomCostume = true
 		end
 	elseif not player:HasPlayerForm(PlayerForm.PLAYERFORM_MUSHROOM) and data.CCP.MushroomCostume then
 		player:TryRemoveNullCostume(mushroomCustomCostume)

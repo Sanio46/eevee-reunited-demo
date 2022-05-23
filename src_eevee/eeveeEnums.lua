@@ -21,13 +21,15 @@ function EEVEEMOD.RandomNum(lower, upper)
 end
 
 function EEVEEMOD.RunJustContinued()
-	local shouldApply = false
+	local wasContinued = true
+	
 	if (EEVEEMOD.game:GetFrameCount() > 0 and EEVEEMOD.WasRunJustContinued == false) --Doesn't apply when continuing
 		or EEVEEMOD.game:GetFrameCount() == 0 --Applies when starting a new run
 	then
-		shouldApply = true
+		wasContinued = false
 	end
-	return shouldApply
+
+	return wasContinued
 end
 
 EEVEEMOD.PERSISTENT_DATA = EEVEEMOD.PERSISTENT_DATA or { --As to not reset while I'm testing lol
