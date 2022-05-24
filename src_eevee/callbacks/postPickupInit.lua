@@ -9,7 +9,7 @@ function postPickupInit:main(pickup)
 end
 
 function postPickupInit:CollectibleInit(collectible)
-	customCollectibleSprites:ReplaceCollectibleOnInit(collectible)
+	--customCollectibleSprites:ReplaceCollectibleOnInit(collectible)
 	pokeyMans:ReplaceItemsOnInit(collectible)
 end
 

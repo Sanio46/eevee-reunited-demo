@@ -1,7 +1,7 @@
---[[ local uniqueCharacterItems = {}
+local uniqueCharacterItems = {}
 
-local baseItemPath = "gfx/items/collectibles_unique/collectibles_"
-local baseCostumePath = "gfx/characters/costumes_unique/costume_"
+local baseItemPath = "gfx/unique_items_eeveemod/collectibles_"
+local baseCostumePath = "gfx/unique_items_eeveemod/costume_"
 
 local itemPaths = {
 	[CollectibleType.COLLECTIBLE_BIRTHRIGHT] = "birthright_eevee",
@@ -19,7 +19,7 @@ UniqueCharacterItemsAPI.RegisterMod(EEVEEMOD.Name)
 UniqueCharacterItemsAPI.RegisterCharacter("Eevee", false)
 
 for itemID, spritePath in pairs(itemPaths) do
-	UniqueCharacterItemsAPI.RegisterItem(itemID) --This is only for testing. Ideally only to be used by mods that add these packs to be enabled by default, otherwise disabled by default.
+	--UniqueCharacterItemsAPI.RegisterItem(itemID) --This is only for testing. Ideally only to be used by mods that add these packs to be enabled by default, otherwise disabled by default.
 	UniqueCharacterItemsAPI.AddCharacterItem({
 		PlayerType = EEVEEMOD.PlayerType.EEVEE,
 		ItemID = itemID,
@@ -28,11 +28,11 @@ for itemID, spritePath in pairs(itemPaths) do
 	})
 end
 
-return uniqueCharacterItems ]]
+return uniqueCharacterItems
 
 --Old code, in case we push an update before this code is properly finished.
 
- local customCollectibleSprites = {}
+--[[  local customCollectibleSprites = {}
 
 --Credit to stewart, creator of the "Custom Mr. Dollys" mod for the base of the code: https://steamcommunity.com/sharedfiles/filedetails/?id=2489635144
 --I edited it further to be more flexible in accepting any itemID and replacing the sprite with Curse of the Blind after picking it up.
@@ -140,4 +140,4 @@ function customCollectibleSprites:ReplaceCollectibleOnItemQueue(player)
 	end
 end
 
-return customCollectibleSprites
+return customCollectibleSprites ]]

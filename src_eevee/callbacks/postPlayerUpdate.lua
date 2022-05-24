@@ -18,8 +18,8 @@ function postPlayerUpdate:main(player)
 	swiftAttack:SwiftSpecialAttackKillSwitch(player)
 	swiftAttack:SwiftAttackTimers(player)
 	ccp:OnPlayerUpdate(player)
-	customCollectibleSprites:ReplaceItemCostume(player)
-	customCollectibleSprites:ReplaceCollectibleOnItemQueue(player)
+	--[[ customCollectibleSprites:ReplaceItemCostume(player)
+	customCollectibleSprites:ReplaceCollectibleOnItemQueue(player) ]]
 	if EEVEEMOD.game:GetRoom():GetFrameCount() > 0 and EEVEEMOD.WasRunJustContinued == true then
 		EEVEEMOD.WasRunJustContinued = false
 	end
