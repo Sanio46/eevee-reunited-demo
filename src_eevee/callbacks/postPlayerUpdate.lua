@@ -8,6 +8,7 @@ local wonderousLauncher = require("src_eevee.items.collectibles.wonderousLaunche
 local eeveeSFX = require("src_eevee.player.eeveeSFX")
 local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
 local ccp = require("src_eevee.player.characterCostumeProtector")
+local strangeEgg = require("src_eevee.items.collectibles.strangeEgg")
 
 function postPlayerUpdate:main(player)
 	earbuds:LoadVolumeBar(player)
@@ -20,9 +21,7 @@ function postPlayerUpdate:main(player)
 	ccp:OnPlayerUpdate(player)
 	--[[ customCollectibleSprites:ReplaceItemCostume(player)
 	customCollectibleSprites:ReplaceCollectibleOnItemQueue(player) ]]
-	if EEVEEMOD.game:GetRoom():GetFrameCount() > 0 and EEVEEMOD.WasRunJustContinued == true then
-		EEVEEMOD.WasRunJustContinued = false
-	end
+	strangeEgg:ForceItemUse(player)
 end
 
 function postPlayerUpdate:init(EeveeReunited)

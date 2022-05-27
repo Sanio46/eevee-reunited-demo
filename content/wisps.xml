@@ -85,7 +85,7 @@
 	<color name="tear_vengeful" r="380" g="380" b="380" or="200"/>
 
 	<!-- Cookie Jar-->
-	<wisp id="3" hp="2" layer="2" damage="3" fireDelay="45" shotSpeed="1" tearFlags="3" flameColor="flame_orange" coreColor="core_orange" tearColor="tear_white" coreGfx="cookie.png" count="0"/>
+	<wisp id="3" hp="2" layer="2" damage="3" fireDelay="45" shotSpeed="1" tearFlags="3" flameColor="flame_orange" coreColor="core_orange" tearColor="tear_white" coreGfx="cookie.png" count="1"/>
 	<!-- Strange Egg-->
 	<wisp id="4" hp="4" layer="1" damage="3.5" fireDelay="30" shotSpeed="1" tearFlags2="13" procChance="0.1" tearColor2="tear_pink" flameColor="flame_white" coreColor="core_green" tearColor="tear_green" coreGfx="strangeegg.png" count="0"/>
 	<!-- Wonderous Launcher (Entry so it doesnt spawn wisps on its own)-->

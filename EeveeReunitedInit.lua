@@ -78,6 +78,7 @@ function EeveeReunited:init(j)
 		"preGameExit",
 		"postNewLevel",
 		"postNewRoom",
+		"getShaderParams",
 		"executeCmd",
 		"postNpcInit",
 		"preNpcCollision",
@@ -150,7 +151,7 @@ function EeveeReunited:CreatePersistentData(player)
 		EEVEEMOD.PERSISTENT_DATA.PlayerData[data.Identifier] = {}
 
 		for variable, value in pairs(Template_PlayerData) do
-			EEVEEMOD.PERSISTENT_DATA.PlayerData[data.Identifier][tostring(variable)] = value
+			EEVEEMOD.PERSISTENT_DATA.PlayerData[data.Identifier][variable] = value
 		end
 	end
 end
@@ -163,8 +164,8 @@ function EeveeReunited:CreatePersistentLilEeveeData(familiar)
 		EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed].Ultra = {}
 
 		for variable, value in pairs(Template_LilEeveeData) do
-			EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed].Super[tostring(variable)] = value
-			EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed].Ultra[tostring(variable)] = value
+			EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed].Super[variable] = value
+			EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed].Ultra[variable] = value
 		end
 	end
 end
@@ -187,10 +188,10 @@ function EeveeReunited:LoadEeveeData()
 			EEVEEMOD.PERSISTENT_DATA.PassiveShiny = EeveeReunited.SavedData.PassiveShiny or true
 			EEVEEMOD.PERSISTENT_DATA.UniqueBirthright = EeveeReunited.SavedData.UniqueBirthright or false
 			EEVEEMOD.PERSISTENT_DATA.PlayerData = EeveeReunited.SavedData.PlayerData or EEVEEMOD.PERSISTENT_DATA.PlayerData
+			EEVEEMOD.PERSISTENT_DATA.LilEeveeData = EeveeReunited.SavedData.LilEeveeData or EEVEEMOD.PERSISTENT_DATA.LilEeveeData
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee = EeveeReunited.SavedData.UnlockData_Eevee or EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B = EeveeReunited.SavedData.UnlockData_Eevee_B or EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal = EeveeReunited.SavedData.UnlockData_PokeyMansCrystal or EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal
-			EEVEEMOD.PERSISTENT_DATA.LilEeveeData = EeveeReunited.SavedData.LilEeveeData or EEVEEMOD.PERSISTENT_DATA.LilEeveeData
 		end
 	end
 end

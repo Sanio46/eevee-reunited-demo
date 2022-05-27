@@ -3,7 +3,7 @@ local eid = {}
 if not EID then return eid end
 
 local eeveeIcons = Sprite()
-eeveeIcons:Load("gfx/ui/eid_eevee_icons.anm2")
+eeveeIcons:Load("gfx/ui/eid_eevee_icons.anm2", true)
 local Player = {
 	Eevee = "Player" .. EEVEEMOD.PlayerType.EEVEE,
 	--[[ Flareon = "Player"..EEVEEMOD.PlayerType.FLAREON,
@@ -40,7 +40,7 @@ local CollectibleDescs_EN = {
 	[EEVEEMOD.CollectibleType.SNEAK_SCARF] = { "Sneak Scarf", "{{ArrowUp}} +0.3 {{Speed}} Speed up#All enemies in the room are permanently confused#Coming within close proximity of a confused enemy this way clears it of its confusion status. Getting out of range will not re-confuse it#Does not affect bosses" },
 	[EEVEEMOD.CollectibleType.SHINY_CHARM] = { "Shiny Charm", "{{ArrowUp}} +2 {{Luck}} Luck up#Highly increases the chance for normal enemies to become shiny#Shiny enemies have increased health, will run away from the player, and disappear after some time#Shiny enemies drop a Golden Trinket on death" },
 	[EEVEEMOD.CollectibleType.BLACK_GLASSES] = { "Black Glasses", "{{ArrowUp}} +0.5 Flat Damage up#{{Damage}} Gain a small Damage multiplier for each Devil Deal taken based on the cost of the item without modifiers#Works retroactively with deals taken before picking up the item" },
-	[EEVEEMOD.CollectibleType.COOKIE_JAR[6]] = { "Cookie Jar", "Upon use, heals 1 full {{Heart}} Red Heart, up to 6 times#{{ArrowDown}} -0.2 {{Speed}} Speed down on every use, but goes away slowly over time#{{ArrowUp}} On the final use, is consumed and grants +2 {{Heart}} Red Heart containers" },
+	[EEVEEMOD.CollectibleType.COOKIE_JAR] = { "Cookie Jar", "Upon use, heals 1 full {{Heart}} Red Heart, up to 6 times#{{Speed}} -0.2 Speed down on every use, but goes away slowly over time#{{Heart}} On the final use, is consumed and grants +2 Red Heart containers" },
 	[EEVEEMOD.CollectibleType.STRANGE_EGG] = { "Strange Egg", "Charges +1 bar per floor#Can be used when not fully charged, with different effects based on its charge:#{{Battery}} {{ColorYellow}}1{{ColorWhite}}: Heals 3 {{Heart}} Red Hearts#{{Battery}} {{ColorYellow}}2{{ColorWhite}}: Spawns {{Collectible" .. CollectibleType.COLLECTIBLE_BREAKFAST .. "}} Breakfast and 2 {{Heart}} Red Hearts#{{Battery}} {{ColorYellow}}3{{ColorWhite}}: Spawns {{Collectible" .. EEVEEMOD.CollectibleType.LIL_EEVEE .. "}} Lil Eevee and 2 {{Heart}} Red Hearts" },
 	[EEVEEMOD.CollectibleType.LIL_EEVEE] = { "Lil Eevee", "Normal tear familiar#The familiar's form changes randomly when Isaac uses a rune, having different tears for each form#Possible tears are similar to that of {{" .. Player.Eevee .. "}} Eevee and their Eeveelutions" },
 	[EEVEEMOD.CollectibleType.BAD_EGG] = { "Bad EGG", "Blocks projectiles, up to 32 before breaking#{{Warning}} Upon breaking, replaces a random owned famliiar with a duplicate {{Collectible" .. EEVEEMOD.CollectibleType.BAD_EGG_DUPE .. "}} Bad EGG, and restores Bad EGG#Duplicates block less projectiles and disappear when breaking, respawning when Bad EGG breaks#If no other familiars are owned when broken, outside of duped Bad EGGs, removes Bad EGG and Spawns {{Collectible" .. EEVEEMOD.CollectibleType.STRANGE_EGG .. "}} Strange Egg" },
@@ -112,7 +112,7 @@ local CollectibleDescs_SPA = {
 	[EEVEEMOD.CollectibleType.SNEAK_SCARF] = { "Bufanda de escape", "{{ArrowUp}} {{Speed}} Velocidad +0.3#{{Confusion}} Todos los enemigos en la sala quedarán confundidos#Acercarse a un anemigo revertirá su estado de confusión. Alejarse no lo volverá a confundir#No afecta a los jefes" },
 	[EEVEEMOD.CollectibleType.SHINY_CHARM] = { "Amuleto Iris", "{{ArrowUp}} {{Luck}} Suerte +2#Aumenta demasiado la posibilidad de que los enemigos sean {{ColorRainbow}}Variocolor{{CR}}#Estos enemigos tienen más salud, correrán lejos del jugador y desaparecerán tras un tiempo#Estos pueden soltar una baratija dorada al morir" },
 	[EEVEEMOD.CollectibleType.BLACK_GLASSES] = { "Lentes oscuros", "{{ArrowUp}} Daño +0.5{{Damage}}#{{DevilRoom}} Recibes un pequeño multiplicador de daño por cada trato con el Diablo que hayas hecho#Trabaja de forma retroactiva con los tratos hechos antes de tomar el objeto" },
-	[EEVEEMOD.CollectibleType.COOKIE_JAR[6]] = { "Tarro de galletas", "{{Heart}} Cura un corazón rojo en cada uso hasta 6 veces#{{ArrowDown}} {{Speed}} Velocidad -0.2 por cada uso, pero se reestablece tras un tiempo#{{Heart}} Tras su último uso, es consumido y otorga 2 contenedores de corazón" },
+	[EEVEEMOD.CollectibleType.COOKIE_JAR] = { "Tarro de galletas", "{{Heart}} Cura un corazón rojo en cada uso hasta 6 veces#{{Speed}} Velocidad -0.2 por cada uso, pero se reestablece tras un tiempo#{{Heart}} Tras su último uso, es consumido y otorga 2 contenedores de corazón" },
 	[EEVEEMOD.CollectibleType.BAD_EGG] = { "Huevo malo", "Bloquea hasta 32 proyectiles antes de romperse#{{Warning}} al momento de romperse, reemplaza uno de tus familiares con {{Collectible" .. EEVEEMOD.CollectibleType.BAD_EGG_DUPE .. "}} un Huevo Malo#Los duplicados bloquean menos proyectiles y desaparecen al romperse, reapareciendo cuando el huevo malo se rompe#Si no hay otro familiar al romperse, a parte de los huevos malos duplicados, remueve un Huevo Malo y lo reemplaza con un {{Collectible" .. EEVEEMOD.CollectibleType.STRANGE_EGG .. "}} Huevo extraño" },
 	[EEVEEMOD.CollectibleType.BAD_EGG_DUPE] = { "Huevo malo duplicado", "Bloquea hasta 8 proyectiles antes de desaparecer#{{Warning}} Sólo se puede regenerar si es que se tiene al {{Collectible" .. EEVEEMOD.CollectibleType.BAD_EGG .. "}} Huevo Malo y ese familiar se 'rompe'" },
 	[EEVEEMOD.CollectibleType.STRANGE_EGG] = { "Strange Egg", "Recibe +1 carga por piso#Puede ser usado sin estar completamente cargado, con distintos efectos en base a sus cargas:#{{Battery}} {{ColorYellow}}1{{ColorWhite}}: {{Heart}} Cura 3 corazones rojos#{{Battery}} {{ColorYellow}}2{{ColorWhite}}: Genera {{Collectible" .. CollectibleType.COLLECTIBLE_BREAKFAST .. "}} Desayuno y {{Heart}} 2 corazones rojos#{{Battery}} {{ColorYellow}}3{{ColorWhite}}: Spawns {{Collectible" .. EEVEEMOD.CollectibleType.LIL_EEVEE .. "}} Lil Eevee and 2 {{Heart}} Red Hearts" },
@@ -204,22 +204,19 @@ local function EIDDesc()
 	return Descriptions[EID:getLanguage()] or Descriptions["en_us"]
 end
 
-for itemID, desc in pairs(EIDDesc().Collectibles) do
-	EID:addCollectible(itemID, desc[2], desc[1], "en_us")
-	if itemID == EEVEEMOD.CollectibleType.COOKIE_JAR[6] then
-		for i = 1, 5 do
-			EID:addCollectible(EEVEEMOD.CollectibleType.COOKIE_JAR[i], desc[2], desc[1], "en_us")
-		end
+for language, descs in pairs(Descriptions) do
+	for itemID, desc in pairs(descs.Collectibles) do
+		EID:addCollectible(itemID, desc[2], desc[1], language)
 	end
-end
-for trinketID, desc in pairs(EIDDesc().Trinkets) do
-	EID:addTrinket(trinketID, desc[2], desc[1], "en_us")
-end
-for cardID, desc in pairs(EIDDesc().Cards) do
-	EID:addCard(cardID, desc[2], desc[1], "en_us")
-end
-for playerType, desc in pairs(EIDDesc().Birthrights) do
-	EID:addBirthright(playerType, desc[2], desc[1], "en_us")
+	for trinketID, desc in pairs(descs.Trinkets) do
+		EID:addTrinket(trinketID, desc[2], desc[1], language)
+	end
+	for cardID, desc in pairs(descs.Cards) do
+		EID:addCard(cardID, desc[2], desc[1], language)
+	end
+	for playerType, desc in pairs(descs.Birthrights) do
+		EID:addBirthright(playerType, desc[2], desc[1], language)
+	end
 end
 
 --Unique descriptions for Eevee

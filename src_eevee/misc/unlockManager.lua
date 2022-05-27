@@ -4,7 +4,7 @@ local Manager = {}
 
 local itemToUnlock = {
 	[EEVEEMOD.CollectibleType.SHINY_CHARM] = { Unlock = "Isaac" },
-	[EEVEEMOD.CollectibleType.COOKIE_JAR[6]] = { Unlock = "BlueBaby" },
+	[EEVEEMOD.CollectibleType.COOKIE_JAR] = { Unlock = "BlueBaby" },
 	[EEVEEMOD.CollectibleType.BLACK_GLASSES] = { Unlock = "Satan" },
 	[EEVEEMOD.CollectibleType.SNEAK_SCARF] = { Unlock = "BossRush" },
 	[EEVEEMOD.CollectibleType.STRANGE_EGG] = { Unlock = "MegaSatan" },

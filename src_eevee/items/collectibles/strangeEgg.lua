@@ -90,21 +90,17 @@ local function strangeEggReward(player, charge)
 end
 
 function strangeEgg:onUse(itemID, _, player, _, _, _)
-
-	if itemID == EEVEEMOD.CollectibleType.STRANGE_EGG and player:GetActiveItem() == EEVEEMOD.CollectibleType.STRANGE_EGG then
-
-		if player:GetActiveCharge() > 0 then
-			strangeEggReward(player, player:GetActiveCharge())
-		end
-
-		if player:GetBatteryCharge() > 0 then
-			strangeEggReward(player, player:GetBatteryCharge())
-		end
-
-		EEVEEMOD.sfx:Play(SoundEffect.SOUND_FORTUNE_COOKIE)
-		player:RemoveCollectible(EEVEEMOD.CollectibleType.STRANGE_EGG, false, ActiveSlot.SLOT_PRIMARY, true)
-		return true
+	if player:GetActiveCharge() > 0 then
+		strangeEggReward(player, player:GetActiveCharge())
 	end
+
+	if player:GetBatteryCharge() > 0 then
+		strangeEggReward(player, player:GetBatteryCharge())
+	end
+
+	EEVEEMOD.sfx:Play(SoundEffect.SOUND_FORTUNE_COOKIE)
+	player:RemoveCollectible(EEVEEMOD.CollectibleType.STRANGE_EGG, false, ActiveSlot.SLOT_PRIMARY, true)
+	return true
 end
 
 function strangeEgg:ChargeOnlyOnRoomClear(player)
@@ -157,13 +153,10 @@ function strangeEgg:ChargeOnlyOnNewLevel(player)
 	end
 end
 
-function strangeEgg:ForceItemUse(player, inputHook, buttonAction)
+function strangeEgg:ForceItemUse(player)
 
-	if inputHook == InputHook.IS_ACTION_TRIGGERED
-		and buttonAction == ButtonAction.ACTION_ITEM
-		and player:HasCollectible(EEVEEMOD.CollectibleType.STRANGE_EGG)
-		and VeeHelper.GetActiveSlots(player, EEVEEMOD.CollectibleType.STRANGE_EGG)[1] == ActiveSlot.SLOT_PRIMARY
-		and VeeHelper.GetActiveItemCharges(player, EEVEEMOD.CollectibleType.STRANGE_EGG)[1] > 0
+	if player:GetActiveItem(ActiveSlot.SLOT_PRIMARY) == EEVEEMOD.CollectibleType.STRANGE_EGG
+		and player:GetActiveCharge(ActiveSlot.SLOT_PRIMARY) > 0
 		and Input.IsActionTriggered(ButtonAction.ACTION_ITEM, player.ControllerIndex)
 	then
 		local useFlags = UseFlag.USE_OWNED | UseFlag.USE_REMOVEACTIVE

@@ -6,7 +6,6 @@
 --Isaac's Tears charing? I guess? lol.
 --Figure out what to do for postTearSplash and spectral tears on collision.
 --Spirit Sword still breaks when transitions rooms apparently
---"VeeHelper.IsNewRunAndNotJustContinued" doesn't work fully. Returns false if transtioning rooms due to the Game():GetFrameCount == 0 check. Don't want to update data on POST_GAME_STARTED and then after I'm done detecting things as I could potentially use the function elsewhere. Needs a different method.
 --Brim laser is invisible with Chocolate Milk?
 
 local json = require("json")
