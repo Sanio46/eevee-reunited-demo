@@ -8,9 +8,9 @@ local wonderousLauncher = require("src_eevee.items.collectibles.wonderousLaunche
 local lilEevee = require("src_eevee.items.collectibles.lilEevee")
 local pokeStop = require("src_eevee.items.collectibles.pokeStop")
 
-
 function postNewRoom:main()
 	local players = VeeHelper.GetAllPlayers()
+	
 	for i = 1, #players do
 		local player = players[i]
 		pokeball:ResetBallsOnNewRoom(player)

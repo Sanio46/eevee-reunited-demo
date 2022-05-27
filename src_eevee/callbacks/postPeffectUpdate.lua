@@ -15,6 +15,7 @@ local strangeEgg = require("src_eevee.items.collectibles.strangeEgg")
 local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 
+---@param player EntityPlayer
 function postPeffectUpdate:main(player)
 	eeveeBasics:TrackFireDirection(player)
 

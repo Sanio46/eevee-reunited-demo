@@ -2,6 +2,7 @@ local postBombUpdate = {}
 
 local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
 
+---@param bomb EntityBomb
 function postBombUpdate:main(bomb)
 	swiftAttack:SwiftAttackUpdate(bomb)
 end

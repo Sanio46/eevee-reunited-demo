@@ -12,6 +12,8 @@ local addItemStats = require("src_eevee.items.addItemStats")
 local familiarBasics = require("src_eevee.misc.familiarBasics")
 local shinyCharm = require("src_eevee.items.collectibles.shinyCharm")
 
+---@param player EntityPlayer
+---@param cacheFlag CacheFlag
 function evaluateCache:main(player, cacheFlag)
 	local itemStats = {
 		SPEED = 0,

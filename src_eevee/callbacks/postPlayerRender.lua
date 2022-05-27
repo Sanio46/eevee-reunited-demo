@@ -3,6 +3,7 @@ local postPlayerRender = {}
 local ccp = require("src_eevee.player.characterCostumeProtector")
 local wonderousLauncher = require("src_eevee.items.collectibles.wonderousLauncher")
 
+---@param player EntityPlayer
 function postPlayerRender:main(player)
 	wonderousLauncher:StopPoopAnimation(player)
 	ccp:RestoreCostumeInMineshaft(player)

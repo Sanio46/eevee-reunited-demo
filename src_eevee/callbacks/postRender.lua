@@ -2,14 +2,14 @@ local postRender = {}
 
 local earbuds = require("src_eevee.items.collectibles.hiTechEarbuds")
 local rgbCycle = require("src_eevee.misc.rgbCycle")
-local strangeEggRender = require("src_eevee.items.collectibles.strangeEggRender")
+local activeItemRender = require("src_eevee.items.activeItemRender")
 local sewingMachine = require("src_eevee.modsupport.sewingMachine")
 local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
 
 function postRender:main()
 	rgbCycle:onRender()
 	earbuds:RenderVolumeBar()
-	strangeEggRender:OnRender()
+	activeItemRender:OnRender()
 	swiftAttack:onRender()
 	--postRender:ItemSwap()
 	if Sewn_API then

@@ -1,5 +1,7 @@
 local executeCmd = {}
 
+---@param cmd string
+---@param params string
 function executeCmd:main(cmd, params)
 	if cmd == "eeveemod" then
 		local unlockType = ""

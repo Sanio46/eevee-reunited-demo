@@ -1,5 +1,6 @@
 local postPickupUpdate = {}
 
+---@param pickup EntityPickup
 function postPickupUpdate:main(pickup)
 
 end

@@ -2,15 +2,16 @@ local postGameStarted = {}
 
 local pokeyMans = require("src_eevee.challenges.pokeyMansCrystal")
 local triggerOnFire = require("src_eevee.items.triggerOnFire")
-local strangeEggRender = require("src_eevee.items.collectibles.strangeEggRender")
+local activeItemRender = require("src_eevee.items.activeItemRender")
 local ccp = require("src_eevee.player.characterCostumeProtector")
 local badEgg = require("src_eevee.items.collectibles.badEgg")
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 
+---@param wasRunContinued boolean
 function postGameStarted:main(wasRunContinued)
 	EEVEEMOD.shouldSaveData = true
 	if not wasRunContinued then
-		strangeEggRender:ResetOnGameStart()
+		activeItemRender:ResetOnGameStart()
 	else
 		ccp:GnawedOnLoad()
 	end

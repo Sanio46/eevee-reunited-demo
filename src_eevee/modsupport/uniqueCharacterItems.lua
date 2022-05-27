@@ -13,14 +13,14 @@ local hasCostume = {
 	[CollectibleType.COLLECTIBLE_MR_DOLLY] = true
 }
 
-if not UniqueCharacterItemsAPI then return uniqueCharacterItems end
+if not UniqueItemsAPI then return uniqueCharacterItems end
 
-UniqueCharacterItemsAPI.RegisterMod(EEVEEMOD.Name)
-UniqueCharacterItemsAPI.RegisterCharacter("Eevee", false)
+UniqueItemsAPI.RegisterMod(EEVEEMOD.Name)
+UniqueItemsAPI.RegisterCharacter("Eevee", false)
 
 for itemID, spritePath in pairs(itemPaths) do
-	--UniqueCharacterItemsAPI.RegisterItem(itemID) --This is only for testing. Ideally only to be used by mods that add these packs to be enabled by default, otherwise disabled by default.
-	UniqueCharacterItemsAPI.AddCharacterItem({
+	
+	UniqueItemsAPI.AddCharacterItem({
 		PlayerType = EEVEEMOD.PlayerType.EEVEE,
 		ItemID = itemID,
 		ItemSpritePath = baseItemPath .. spritePath .. ".png",

@@ -3,6 +3,7 @@ local postFireTear = {}
 local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
 local triggerOnFire = require("src_eevee.items.triggerOnFire")
 
+---@param tear EntityTear
 function postFireTear:main(tear)
 	swiftAttack:ActivateConstantOnKidneyStone(tear)
 	triggerOnFire:OnWeaponInit(tear)

@@ -5,6 +5,11 @@ local ccp = require("src_eevee.player.characterCostumeProtector")
 local leafBlade = require("src_eevee.attacks.leafeon.leafBlade")
 local lockOnSpecs = require("src_eevee.items.trinkets.lockOnSpecs")
 
+---@param ent Entity
+---@param amount number
+---@param flags integer
+---@param source EntityRef
+---@param countdown integer
 function entityTakeDamage:main(ent, amount, flags, source, countdown)
 	ent = ent:ToPlayer()
 	local entTakeDamageFunctions = {
