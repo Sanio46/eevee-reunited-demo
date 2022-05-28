@@ -13,6 +13,7 @@ function postEntityRemove:OnFamiliarDeath(familiar)
 	wonderousLauncher:RemoveDeadLauncherWisps(familiar)
 end
 
+---@param ent Entity
 function postEntityRemove:main(ent)
 	swiftBase:RemoveWeaponOnPostEntRemove(ent)
 	if ent:ToTear() then

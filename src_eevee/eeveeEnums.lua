@@ -241,6 +241,7 @@ EEVEEMOD.RGB = {
 	B = 0,
 }
 
+---@param entColor Color
 function EEVEEMOD.GetRBG(entColor)
 	return Color(EEVEEMOD.RGB.R / 255, EEVEEMOD.RGB.G / 255, EEVEEMOD.RGB.B / 255, entColor.A, 0, 0, 0)
 end
@@ -278,15 +279,6 @@ EEVEEMOD.KeepTearVariants = {
 	[VeeHelper.TearVariant.FETUS] = true,
 }
 
-EEVEEMOD.TrailColor = {
-	Normal = Color(1, 1, 0.5, 1, 0.176, 0.05, 0),
-	Blood = Color(1, 0, 0, 1, 0, 0, 0),
-	[TearVariant.BELIAL] = Color(1, 0, 0, 1, 0, 0, 0),
-	[TearVariant.ROCK] = Color(0.5, 0.5, 0.5, 1, 0, 0, 0),
-	[TearVariant.ICE] = Color(0.4, 0.5, 0.9, 1, 0, 0.3, 0),
-	[VeeHelper.TearVariant.FETUS] = Color(1, 1, 1, 1, 0, 0, 0),
-}
-
 ---@type TrinketType[]
 EEVEEMOD.TrinketType = {
 	ALERT_SPECS = Isaac.GetTrinketIdByName("Alert Specs"),
@@ -310,6 +302,16 @@ EEVEEMOD.TearVariant = {
 	SWIFT_BLOOD = Isaac.GetEntityVariantByName("Swift Blood Tear"),
 	WONDERCOIN = Isaac.GetEntityVariantByName("Wonder Coin Tear"),
 	WONDERPOOP = Isaac.GetEntityVariantByName("Wonder Poop Tear"),
+}
+
+---@type table<TearVariant, Color>
+EEVEEMOD.TrailColor = {
+	[EEVEEMOD.TearVariant.SWIFT] = Color(1, 1, 0.5, 1, 0.176, 0.05, 0),
+	[EEVEEMOD.TearVariant.SWIFT_BLOOD] = Color(1, 0, 0, 1, 0, 0, 0),
+	[TearVariant.BELIAL] = Color(1, 0, 0, 1, 0, 0, 0),
+	[TearVariant.ROCK] = Color(0.5, 0.5, 0.5, 1, 0, 0, 0),
+	[TearVariant.ICE] = Color(0.4, 0.5, 0.9, 1, 0, 0.3, 0),
+	[VeeHelper.TearVariant.FETUS] = Color(1, 1, 1, 1, 0, 0, 0),
 }
 
 return EEVEEMOD

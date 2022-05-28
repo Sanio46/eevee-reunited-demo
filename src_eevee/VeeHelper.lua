@@ -10,7 +10,7 @@ VeeHelper.RoomCleared = false
 ---@class MajorBoss : Entity
 ---@class PlayerAnimations : string
 
----@type KnifeVariant
+---@type KnifeVariant[]
 VeeHelper.KnifeVariant = {
 	MOMS_KNIFE = 0,
 	BONE = 1,
@@ -23,7 +23,7 @@ VeeHelper.KnifeVariant = {
 	TECH_SWORD = 11,
 }
 
----@type LaserVariant
+---@type LaserVariant[]
 VeeHelper.LaserVariant = {
 	BRIMSTONE = 1,
 	TECHNOLOGY = 2,
@@ -40,7 +40,7 @@ VeeHelper.LaserVariant = {
 	BEAST = 13,
 }
 
----@type PoopVariant
+---@type PoopVariant[]
 VeeHelper.PoopVariant = {
 	POOP = 0,
 	GOLD = 1,
@@ -53,7 +53,7 @@ VeeHelper.PoopVariant = {
 	HOLY = 16
 }
 
----@type SlotVariant
+---@type SlotVariant[]
 VeeHelper.SlotVariant = {
 	SLOT_MACHINE = 1,
 	BLOOD_DONATION = 2,
@@ -84,7 +84,7 @@ VeeHelper.TearVariantBlacklist = {
 	[TearVariant.FIRE] = true,
 }
 
----@type TearVariant
+---@type TearVariant[]
 VeeHelper.TearVariant = {
 	FETUS = 50 --Funny missing enum
 }
@@ -117,7 +117,7 @@ VeeHelper.MajorBosses = {
 	[EntityType.ENTITY_BEAST] = true,
 }
 
----@type PlayerAnimations
+---@type PlayerAnimations[]
 VeeHelper.PlayerAnimations = {
 	"Appear",
 	"Pickup",
@@ -150,7 +150,7 @@ VeeHelper.PlayerAnimations = {
 	"ForgottenDeath"
 }
 
----@type PlayerAnimations
+---@type PlayerAnimations[]
 VeeHelper.PickupAnimations = {
 	"PickupWalkDown",
 	"PickupWalkLeft",
@@ -158,7 +158,7 @@ VeeHelper.PickupAnimations = {
 	"PickupWalkRight"
 }
 
----@type PlayerAnimations
+---@type PlayerAnimations[]
 VeeHelper.WalkAnimations = {
 	"WalkLeft",
 	"WalkUp",
@@ -166,7 +166,7 @@ VeeHelper.WalkAnimations = {
 	"WalkDown"
 }
 
----@type PlayerAnimations
+---@type PlayerAnimations[]
 VeeHelper.GamePauseAnimations = {
 	"Appear",
 	"LightTravel",
@@ -176,7 +176,7 @@ VeeHelper.GamePauseAnimations = {
 	"MinecartEnter"
 }
 
----@type PlayerAnimations
+---@type PlayerAnimations[]
 VeeHelper.SuplexAnimations = {
 	"LeapUp",
 	"SuperLeapUp",

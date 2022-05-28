@@ -20,7 +20,7 @@ function blackGlasses:DetectDeals(player)
 	end
 end
 
-function blackGlasses:OnCollectibleCollision(item, player, low)
+function blackGlasses:OnCollectibleCollision(item, player)
 	local data = player:GetData()
 
 	if item:IsShopItem()

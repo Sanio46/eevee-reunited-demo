@@ -137,6 +137,7 @@ function EeveeReunited:SaveEeveeData()
 	end
 end
 
+---@param player EntityPlayer
 function EeveeReunited:CreatePersistentData(player)
 	local data = player:GetData()
 
@@ -156,6 +157,7 @@ function EeveeReunited:CreatePersistentData(player)
 	end
 end
 
+---@param familiar EntityFamiliar
 function EeveeReunited:CreatePersistentLilEeveeData(familiar)
 	local initSeed = tostring(familiar.InitSeed)
 	if EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed] == nil then

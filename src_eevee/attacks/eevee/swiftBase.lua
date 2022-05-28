@@ -157,7 +157,7 @@ end
 
 function swiftBase:AddBasicSwiftTrail(weapon)
 	local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):ToEffect()
-	local tC = EEVEEMOD.TrailColor.Normal
+	local tC = EEVEEMOD.TrailColor[EEVEEMOD.TearVariant.SWIFT]
 	local data = weapon:GetData()
 	
 	data.BasicSwiftTrail = trail
@@ -305,12 +305,10 @@ function swiftBase:AddSwiftTrail(weapon, player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
 		if weapon.Type == EntityType.ENTITY_TEAR then
 			if not swiftBase:AreColorsDifferent(wC, Color.Default) and not swiftWeapon.IsFakeKnife then
-				if weapon:GetSprite():GetFilename() == "gfx/tear_swift_blood.anm2" then
-					tC = EEVEEMOD.TrailColor.Blood
-				elseif EEVEEMOD.TrailColor[weapon.Variant] ~= nil then
+				if EEVEEMOD.TrailColor[weapon.Variant] ~= nil then
 					tC = EEVEEMOD.TrailColor[weapon.Variant]
 				else
-					tC = EEVEEMOD.TrailColor.Normal
+					tC = EEVEEMOD.TrailColor[EEVEEMOD.TearVariant.SWIFT]
 				end
 			end
 		end

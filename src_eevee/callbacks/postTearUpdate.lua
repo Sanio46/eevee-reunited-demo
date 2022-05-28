@@ -6,6 +6,7 @@ local ember = require("src_eevee.attacks.flareon.ember")
 local wonderousLauncher = require("src_eevee.items.collectibles.wonderousLauncher")
 local customTearVariants = require("src_eevee.misc.customTearVariants")
 
+---@param tear EntityTear
 function postTearUpdate:main(tear)
 	swiftAttack:SwiftAttackUpdate(tear)
 	swiftAttack:SwiftLudovicoSpawn(tear)

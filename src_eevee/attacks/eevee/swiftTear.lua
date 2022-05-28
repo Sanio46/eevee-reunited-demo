@@ -238,11 +238,7 @@ function swiftTear:OnSwiftStarDestroy(tear, splashType)
 	sprite.Scale = Vector(tear.Scale, tear.Scale)
 	local color = Color.Default
 	if not swiftBase:AreColorsDifferent(tear.Color, Color.Default) then
-		if tear.Variant == EEVEEMOD.TearVariant.SWIFT then
-			color = EEVEEMOD.TrailColor.Normal
-		elseif tear.Variant == EEVEEMOD.TearVariant.SWIFT_BLOOD then
-			color = EEVEEMOD.TrailColor.Blood
-		end
+		color = EEVEEMOD.TrailColor[tear.Variant]
 	else
 		color = tear.Color
 	end

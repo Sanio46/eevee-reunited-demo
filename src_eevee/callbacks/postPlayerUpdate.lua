@@ -1,6 +1,7 @@
 local postPlayerUpdate = {}
 
 local customCollectibleSprites = require("src_eevee.modsupport.uniqueCharacterItems")
+local eeveeGhost = require("src_eevee.player.eeveeGhost")
 local earbuds = require("src_eevee.items.collectibles.hiTechEarbuds")
 local pokeball = require("src_eevee.items.pickups.pokeball")
 local unlockManager = require("src_eevee.misc.unlockManager")
@@ -10,7 +11,9 @@ local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
 local ccp = require("src_eevee.player.characterCostumeProtector")
 local strangeEgg = require("src_eevee.items.collectibles.strangeEgg")
 
+---@param player EntityPlayer
 function postPlayerUpdate:main(player)
+	eeveeGhost:SpawnGhostEffect(player)
 	earbuds:LoadVolumeBar(player)
 	pokeball:PlayerThrowPokeball(player)
 	unlockManager.postPlayerUpdate(player)
