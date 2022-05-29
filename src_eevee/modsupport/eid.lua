@@ -32,7 +32,7 @@ EID:addIcon("Card" .. EEVEEMOD.PokeballType.POKEBALL, "Poke Balls", 0, 9, 9, -1,
 EID:addIcon("Card" .. EEVEEMOD.PokeballType.GREATBALL, "Poke Balls", 1, 9, 9, -1, 0, eeveeIcons)
 EID:addIcon("Card" .. EEVEEMOD.PokeballType.ULTRABALL, "Poke Balls", 2, 9, 9, -1, 0, eeveeIcons)
 
-EID:setModIndicatorName(EEVEEMOD.Name)
+EID:setModIndicatorName(EEVEEMOD.Name.." ")
 EID:setModIndicatorIcon(Player.Eevee)
 
 --English descriptions
