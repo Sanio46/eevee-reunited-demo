@@ -1,3 +1,13 @@
+--[[ ---@class ModReference
+---@field AddCallback fun(callbackId: ModCallbacks, callbackFn: function, entityID?: integer)
+---@field HasData boolean
+---@field LoadData string
+---@field RemoveCallback fun(callbackId: ModCallbacks, callbackFn: function)
+---@field RemoveData nil
+---@field SaveData nil
+---@field Name string
+
+---@type ModReference ]]
 local EeveeReunited = RegisterMod("Eevee: Reunited - Demo", 1)
 
 --VERSION: 2.0.3
@@ -6,6 +16,7 @@ local json = nil
 
 local SaveDataVer = 2.1
 
+---@class SaveData
 EeveeReunited.SavedData = {
 	CustomDolly = false,
 	ClassicVoice = false,
@@ -18,11 +29,15 @@ EeveeReunited.SavedData = {
 	UnlockData_PokeyMansCrystal = false,
 }
 
+---@class PlayerSaveData
 local Template_PlayerData = {
 	CookieSpeed = 0,
 	WonderLauncherWisps = {}
 }
 
+---@class LilEeveeSaveData
+---@field Ultra LilEeveeSaveData
+---@field Super LilEeveeSaveData
 local Template_LilEeveeData = {
 	Level = 1,
 	Exp = {

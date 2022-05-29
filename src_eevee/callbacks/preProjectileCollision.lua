@@ -3,9 +3,12 @@ local preProjectileCollision = {}
 local alertSpecs = require("src_eevee.items.trinkets.alertSpecs")
 local badEgg = require("src_eevee.items.collectibles.badEgg")
 
+---@param proj EntityProjectile
+---@param collider Entity
 function preProjectileCollision:main(proj, collider)
-	if collider.Type == EntityType.ENTITY_PLAYER then
-		alertSpecs:OnCollisionGreedProjectile(proj, collider)
+	if collider:ToPlayer() then
+		local player = collider:ToPlayer()
+		alertSpecs:OnCollisionGreedProjectile(proj, player)
 	end
 	badEgg:BlockProjectile(proj, collider)
 end

@@ -36,6 +36,7 @@ local uniqueRoomReward = {
 	[RoomType.ROOM_PLANETARIUM] = { PickupVariant.PICKUP_TRINKET, TrinketType.TELESCOPE_LENS },
 	[RoomType.ROOM_ULTRASECRET] = { PickupVariant.PICKUP_REDCHEST, 0 }
 }
+---@type table<PickupVariant, CoinSubType | BombSubType | KeySubType>
 local pickupSpawnWeights = {
 	{ PickupVariant.PICKUP_COIN, CoinSubType.COIN_PENNY },
 	{ PickupVariant.PICKUP_COIN, CoinSubType.COIN_PENNY },
@@ -56,6 +57,7 @@ local pickupSpawnWeights = {
 local maxSpins = 6
 
 --Thank you budj for providing this old-ass hack I used in AB+ Eevee
+---@param pos Vector
 local function RemoveRecentRewards(pos)
 	for _, pickup in ipairs(Isaac.FindByType(5, -1, -1)) do
 		if pickup.FrameCount <= 1 and pickup.SpawnerType == 0
@@ -73,6 +75,7 @@ local function RemoveRecentRewards(pos)
 	end
 end
 
+---@param slot Entity
 local function OverrideExplosionHack(slot)
 	local bombed = slot.GridCollisionClass == EntityGridCollisionClass.GRIDCOLL_GROUND
 	if not bombed then return end
@@ -86,6 +89,7 @@ function pokeStop:ResetSpecialRooms()
 	specialRooms = {}
 end
 
+---@param player EntityPlayer
 function pokeStop:GetAllSpecialRooms(player)
 	if player:HasCollectible(EEVEEMOD.CollectibleType.POKE_STOP) then
 		local level = EEVEEMOD.game:GetLevel()
@@ -133,6 +137,7 @@ function pokeStop:SpawnPokeStopInSpecialRoom()
 	end
 end
 
+---@param stop Entity
 function pokeStop:IfTouchPokeStop(_, stop, _)
 	if stop.Type == EntityType.ENTITY_SLOT
 		and stop.Variant == EEVEEMOD.SlotVariant.POKE_STOP then
@@ -196,6 +201,7 @@ function pokeStop:SlotUpdate()
 	end
 end
 
+---@param player EntityPlayer
 function pokeStop:DropPokeStopOnFirstPickup(player)
 	local data = player:GetData()
 	
@@ -212,6 +218,7 @@ function pokeStop:DropPokeStopOnFirstPickup(player)
 	end
 end
 
+---@param player EntityPlayer
 function pokeStop:SpawnOnGameExit(player)
 	local data = player:GetData()
 

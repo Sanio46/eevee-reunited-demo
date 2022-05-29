@@ -15,6 +15,7 @@ local shinyCharm = require("src_eevee.items.collectibles.shinyCharm")
 ---@param player EntityPlayer
 ---@param cacheFlag CacheFlag
 function evaluateCache:main(player, cacheFlag)
+	---@class ItemStats
 	local itemStats = {
 		SPEED = 0,
 		FIREDELAY = 1,

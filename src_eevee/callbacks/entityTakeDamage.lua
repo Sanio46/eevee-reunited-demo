@@ -5,18 +5,18 @@ local ccp = require("src_eevee.player.characterCostumeProtector")
 local leafBlade = require("src_eevee.attacks.leafeon.leafBlade")
 local lockOnSpecs = require("src_eevee.items.trinkets.lockOnSpecs")
 
----@param ent Entity
+---@param player EntityPlayer
 ---@param amount number
 ---@param flags integer
 ---@param source EntityRef
 ---@param countdown integer
-function entityTakeDamage:main(ent, amount, flags, source, countdown)
-	ent = ent:ToPlayer()
+function entityTakeDamage:main(player, amount, flags, source, countdown)
+	player = player:ToPlayer()
 	local entTakeDamageFunctions = {
-		leafBlade:PreventDamageOnDash(ent, amount, flags, source, countdown),
-		eeveeSFX:EeveeOnHit(ent, amount, flags, source, countdown),
-		ccp:AstralProjectionOnHit(ent, amount, flags, source, countdown),
-		lockOnSpecs:DropChanceOnHit(ent, amount, flags, source, countdown),
+		leafBlade:PreventDamageOnDash(player, amount, flags, source, countdown),
+		eeveeSFX:EeveeOnHit(player, amount, flags, source, countdown),
+		ccp:AstralProjectionOnHit(player, amount, flags, source, countdown),
+		lockOnSpecs:DropChanceOnHit(player, amount, flags, source, countdown),
 	}
 
 	for _, func in pairs(entTakeDamageFunctions) do

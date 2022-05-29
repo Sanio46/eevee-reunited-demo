@@ -1,12 +1,13 @@
 local miniIsaac = {}
 
-function miniIsaac:onMiniInit(minivee)
-	local player = minivee.Player
+---@param familiar EntityFamiliar
+function miniIsaac:onMiniInit(familiar)
+	local player = familiar.Player
 	local playerType = player:GetPlayerType()
 
 	if EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] ~= nil then
 		local miniPath = "gfx/familiar/familiar_mini" .. EEVEEMOD.PlayerTypeToString[playerType] .. VeeHelper.SkinColor(player, true) .. ".png"
-		local sprite = minivee:GetSprite()
+		local sprite = familiar:GetSprite()
 		local currentAnim = sprite:GetAnimation()
 
 		sprite:Load("gfx/familiar_minieevee.anm2", true)

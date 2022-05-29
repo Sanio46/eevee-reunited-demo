@@ -1,5 +1,6 @@
 local eeveeSFX = {}
 
+---@param player EntityPlayer
 local function ShouldTriggerEeveeSFX(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
@@ -9,30 +10,35 @@ local function ShouldTriggerEeveeSFX(player)
 	end
 end
 
-function eeveeSFX:EeveeOnHit(ent, amount, flags, source, countdown)
-	local player = ent:ToPlayer()
+---@param player EntityPlayer
+function eeveeSFX:EeveeOnHit(player, _, _, _, _)
 	ShouldTriggerEeveeSFX(player)
 end
 
-function eeveeSFX:OnLarynxOrBerserk(itemID, itemRNG, player, flags, slot, vardata)
+---@param player EntityPlayer
+function eeveeSFX:OnLarynxOrBerserk(_, _, player, _, _, _)
 	ShouldTriggerEeveeSFX(player)
 end
 
-function eeveeSFX:OnSamsonSoul(card, player, useFlags)
+---@param player EntityPlayer
+function eeveeSFX:OnSamsonSoul(card, player, _)
 	if card == Card.CARD_SOUL_SAMSON then
 		ShouldTriggerEeveeSFX(player)
 	end
 end
 
+---@param effect EntityEffect
 function eeveeSFX:FindDeadPlayerEffect(effect)
 	local sprite = effect:GetSprite()
 	if sprite:GetFilename() == "gfx/001.000_Player.anm2"
 		and sprite:IsEventTriggered("DeathSound") then
+		---@type EntityPlayer
 		local player = effect.SpawnerEntity:ToPlayer()
 		ShouldTriggerEeveeSFX(player)
 	end
 end
 
+---@param player EntityPlayer
 function eeveeSFX:PlayHurtSFX(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()

@@ -9,15 +9,6 @@ local statsEevee = {
 	[CacheFlag.CACHE_LUCK] = 0,
 }
 
-local statsDefault = {
-	[CacheFlag.CACHE_SPEED] = 0,
-	[CacheFlag.CACHE_FIREDELAY] = 1,
-	[CacheFlag.CACHE_DAMAGE] = 1,
-	[CacheFlag.CACHE_RANGE] = 0,
-	[CacheFlag.CACHE_SHOTSPEED] = 0,
-	[CacheFlag.CACHE_LUCK] = 0,
-}
-
 local statsEeveelutions = {
 	[EEVEEMOD.PlayerType.EEVEE] = statsEevee,
 	--[[ [EEVEEMOD.PlayerType.FLAREON] = statsDefault,
@@ -30,6 +21,8 @@ local statsEeveelutions = {
 	[EEVEEMOD.PlayerType.SYLVEON] = statsDefault, ]]
 }
 
+---@param player EntityPlayer
+---@param cacheFlag CacheFlag
 function eeveeStats:OnCache(player, cacheFlag)
 	local playerType = player:GetPlayerType()
 	if EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] then

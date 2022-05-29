@@ -11,6 +11,12 @@ local pokeball = require("src_eevee.items.pickups.pokeball")
 local strangeEgg = require("src_eevee.items.collectibles.strangeEgg")
 local wonderousLauncher = require("src_eevee.items.collectibles.wonderousLauncher")
 
+---@param itemID CollectibleType
+---@param itemRNG RNG
+---@param player EntityPlayer
+---@param flags UseFlag
+---@param slot ActiveSlot
+---@param varData integer
 function useItem:main(itemID, itemRNG, player, flags, slot, varData)
 	local useItemFunctions = {
 		--cookieJar:onUse(itemID, itemRNG, player, flags, slot, varData),

@@ -1,5 +1,6 @@
 local cookieJar = {}
 
+---@param player EntityPlayer
 local function IsFat(player)
 	local fatty = false
 
@@ -18,6 +19,7 @@ local function IsFat(player)
 	return fatty
 end
 
+---@param player EntityPlayer
 local function UpdateCookieSpeedData(player)
 	local ID = player:GetData().Identifier
 	if EEVEEMOD.PERSISTENT_DATA.PlayerData[ID]
@@ -31,9 +33,9 @@ end
 
 local MAX_COOKIE_USES = 6
 
----@param itemID CollectibleType
 ---@param player EntityPlayer
-function cookieJar:onUse(itemID, _, player, _, _, _)
+---@return UseItemReturn
+function cookieJar:onUse(_, _, player, _, _, _)
 	local effects = player:GetEffects()
 	local shouldRemove = false
 
@@ -88,6 +90,8 @@ function cookieJar:onUse(itemID, _, player, _, _, _)
 	end ]]
 end
 
+---@param player EntityPlayer
+---@param itemStats ItemStats
 function cookieJar:Stats(player, itemStats)
 	local ID = player:GetData().Identifier
 
@@ -98,6 +102,7 @@ function cookieJar:Stats(player, itemStats)
 	end
 end
 
+---@param player EntityPlayer
 function cookieJar:SpeedUpdate(player)
 	local data = player:GetData()
 	local cookieSpeedDelay = 30

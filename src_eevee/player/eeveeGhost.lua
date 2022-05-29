@@ -1,5 +1,6 @@
 local eeveeGhost = {}
 
+---@param player EntityPlayer
 function eeveeGhost:SpawnGhostEffect(player)
 	local playerType = player:GetPlayerType()
 	local sprite = player:GetSprite()
@@ -14,13 +15,16 @@ function eeveeGhost:SpawnGhostEffect(player)
 		)
 	then
 		if not data.EeveeGhostSpawned then
-			local ghostEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.EEVEE_GHOST, 0, player.Position, Vector.Zero, player)
-			ghostEffect:GetSprite():Play(sprite:GetAnimation(), true)
+			---@type EntityEffect
+			local ghostEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.EEVEE_GHOST, 0, player.Position, Vector.Zero, player):ToEffect()
+			local sprite = ghostEffect:GetSprite()
+			sprite:Play(sprite:GetAnimation(), true)
 			data.EeveeGhostSpawned = true
 		end
 	end
 end
 
+---@param effect EntityEffect
 function eeveeGhost:KillOnVadeRetro(effect)
 	if VeeHelper.EntitySpawnedByPlayer(effect, false) then
 		local player = effect.SpawnerEntity:ToPlayer()

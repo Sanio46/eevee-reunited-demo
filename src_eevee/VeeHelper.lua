@@ -3,14 +3,14 @@ VeeHelper = {}
 local game = Game()
 VeeHelper.RoomCleared = false
 
----@class KnifeVariant : integer
----@class LaserVariant : integer
----@class PoopVariant : integer
----@class SlotVariant : integer
----@class MajorBoss : Entity
----@class PlayerAnimations : string
+---@class UseItemReturn
+---@field Discharge boolean
+---@field ShowAnim boolean
+---@field Remove boolean
 
----@type KnifeVariant[]
+---@alias Weapon EntityTear | EntityLaser | EntityKnife | EntityBomb
+
+---@class KnifeVariant
 VeeHelper.KnifeVariant = {
 	MOMS_KNIFE = 0,
 	BONE = 1,
@@ -23,7 +23,7 @@ VeeHelper.KnifeVariant = {
 	TECH_SWORD = 11,
 }
 
----@type LaserVariant[]
+---@class LaserVariant
 VeeHelper.LaserVariant = {
 	BRIMSTONE = 1,
 	TECHNOLOGY = 2,
@@ -40,7 +40,7 @@ VeeHelper.LaserVariant = {
 	BEAST = 13,
 }
 
----@type PoopVariant[]
+---@class PoopVariant
 VeeHelper.PoopVariant = {
 	POOP = 0,
 	GOLD = 1,
@@ -53,7 +53,7 @@ VeeHelper.PoopVariant = {
 	HOLY = 16
 }
 
----@type SlotVariant[]
+---@class SlotVariant
 VeeHelper.SlotVariant = {
 	SLOT_MACHINE = 1,
 	BLOOD_DONATION = 2,
@@ -102,6 +102,8 @@ VeeHelper.TearFlagsBlood = {
 	[TearVariant.BALLOON_BRIMSTONE] = true,
 }
 
+---@class MajorBoss : integer
+
 ---@type table<MajorBoss, boolean>
 VeeHelper.MajorBosses = {
 	[EntityType.ENTITY_MOM] = true,
@@ -117,7 +119,7 @@ VeeHelper.MajorBosses = {
 	[EntityType.ENTITY_BEAST] = true,
 }
 
----@type PlayerAnimations[]
+---@class PlayerAnimations
 VeeHelper.PlayerAnimations = {
 	"Appear",
 	"Pickup",
@@ -196,6 +198,7 @@ VeeHelper.SkinColorToString = {
 	[SkinColor.SKIN_SHADOW] = "_shadow"
 }
 
+---@type table<SeedEffect, boolean>
 VeeHelper.SeedDisablesAchievements = {
 	[SeedEffect.SEED_INFINITE_BASEMENT] = true,
 	[SeedEffect.SEED_PICKUPS_SLIDE] = true,
@@ -223,19 +226,51 @@ VeeHelper.SeedDisablesAchievements = {
 	[SeedEffect.SEED_SUPER_HOT] = true
 }
 
+---@class BookState
 VeeHelper.BookState = {
 	BOOK_NONE = 0,
 	BOOK_ACTIVE = 1,
 	BOOK_DOUBLE = 2
 }
 
+---@param player EntityPlayer
+---@return BookState bookstate
 function VeeHelper.GetBookState(player)
 	local hasVirtues = player:HasCollectible(CollectibleType.COLLECTIBLE_BOOK_OF_VIRTUES)
 	local hasBelial = VeeHelper.IsJudasBirthrightActive(player)
-	local verdict = (hasVirtues and hasBelial) and VeeHelper.BookState.BOOK_DOUBLE or (hasVirtues or hasBelial) and VeeHelper.BookState.BOOK_ACTIVE or VeeHelper.BookState.BOOK_NONE
+	local bookState = (hasVirtues and hasBelial) and VeeHelper.BookState.BOOK_DOUBLE or (hasVirtues or hasBelial) and VeeHelper.BookState.BOOK_ACTIVE or VeeHelper.BookState.BOOK_NONE
 
-	return verdict
+	return bookState
 end
+
+---@class Rune
+local runes = {
+	Card.RUNE_HAGALAZ,
+	Card.RUNE_JERA,
+	Card.RUNE_EHWAZ,
+	Card.RUNE_DAGAZ,
+	Card.RUNE_ANSUZ,
+	Card.RUNE_PERTHRO,
+	Card.RUNE_BLANK,
+	Card.RUNE_BLACK,
+	Card.CARD_SOUL_ISAAC,
+	Card.CARD_SOUL_MAGDALENE,
+	Card.CARD_SOUL_CAIN,
+	Card.CARD_SOUL_JUDAS,
+	Card.CARD_SOUL_BLUEBABY,
+	Card.CARD_SOUL_EVE,
+	Card.CARD_SOUL_SAMSON,
+	Card.CARD_SOUL_AZAZEL,
+	Card.CARD_SOUL_LAZARUS,
+	Card.CARD_SOUL_EDEN,
+	Card.CARD_SOUL_LOST,
+	Card.CARD_SOUL_LILITH,
+	Card.CARD_SOUL_KEEPER,
+	Card.CARD_SOUL_APOLLYON,
+	Card.CARD_SOUL_FORGOTTEN,
+	Card.CARD_SOUL_BETHANY,
+	Card.CARD_SOUL_JACOB
+}
 
 ---@param card Card
 ---@return boolean
@@ -309,6 +344,7 @@ function VeeHelper.GetAllMainPlayers()
 end
 
 --Credit: tem for blindfold toggle
+
 ---@param player EntityPlayer
 ---@param canShoot boolean
 function VeeHelper.SetCanShoot(player, canShoot)
@@ -319,6 +355,7 @@ function VeeHelper.SetCanShoot(player, canShoot)
 end
 
 ---@param player EntityPlayer
+---@return boolean canControl
 function VeeHelper.PlayerCanControl(player)
 	local canControl = false
 
@@ -334,6 +371,7 @@ end
 
 ---@param sprite Sprite
 ---@param anims string[]
+---@return boolean isPlaying
 function VeeHelper.IsSpritePlayingAnims(sprite, anims)
 	local playing = false
 
@@ -346,6 +384,9 @@ function VeeHelper.IsSpritePlayingAnims(sprite, anims)
 end
 
 --Thank you piber!
+---@param ent Entity
+---@param range number
+---@return EntityNPC | nil
 function VeeHelper.DetectNearestEnemy(ent, range)
 	local closestEnemy = nil --placeholder variable we'll put the closest enemy in
 	local closestDistance = nil --placeholder variable we'll put the distance in
@@ -367,6 +408,7 @@ end
 ---@param ent EntityNPC
 ---@param range integer
 ---@param direction Vector
+---@return Vector direction
 function VeeHelper.TryFireToNearestEnemy(ent, range, direction)
 	local closestEnemy = VeeHelper.DetectNearestEnemy(ent, range)
 
@@ -390,6 +432,7 @@ function VeeHelper.PlayerStandingStill(player)
 end
 
 --Yet again more credit to tem
+
 ---@param player EntityPlayer
 function VeeHelper.GetPlayerIdentifier(player)
 	local IDToCheck = 1 --Any item can be used, Sad Onion is just an easy default.
@@ -442,7 +485,7 @@ function VeeHelper.HeadDirectionToVector(player)
 end
 
 ---@param player EntityPlayer
----@param targetStartingPos Vector
+---@param targetStartingPos Vector | nil
 ---@return Vector direction
 function VeeHelper.GetIsaacShootingDirection(player, targetStartingPos)
 	local shootDir = player:GetShootingInput()
@@ -480,6 +523,8 @@ function VeeHelper.GetIsaacShootingDirection(player, targetStartingPos)
 end
 
 --Credit to DeadInfinity for Lerping directly with angles!
+
+
 function VeeHelper.GetAngleDifference(a1, a2)
 	local sub = a1 - a2
 	return (sub + 180) % 360 - 180
@@ -755,6 +800,7 @@ function VeeHelper.IsTearFromFamiliar(tear)
 end
 
 --Taken directly from the source! Shoutouts to the modders who decompiled the Switch port.
+
 ---@param tear EntityTear
 ---@return string
 function VeeHelper.TearScaleToSizeAnim(tear)

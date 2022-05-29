@@ -28,14 +28,8 @@ local function GetScreenTopLeft()
 	return Vector.Zero + offset
 end
 
----@param player EntityPlayer
-function GetCookieFrame(player)
-	local numCookieEffects = player:GetEffects():GetCollectibleEffectNum(EEVEEMOD.CollectibleType.COOKIE_JAR)
-	local cookieFrame = 5 - numCookieEffects
-	if cookieFrame < 0 then cookieFrame = 0 end
-	return cookieFrame
-end
-
+local numHUDPlayers = 1
+local hasLoadedItems = false
 ---@type table<integer, {Player: EntityPlayer, ScreenPos: function, Offset: table<ActiveSlot, Vector>}>
 local IndexedPlayers = {
 	[1] = {
@@ -72,20 +66,6 @@ local IndexedPlayers = {
 	}
 }
 
-local function AddActivePlayers(i, player)
-
-	IndexedPlayers[i].Player = player
-
-	if i == 1
-		and player:GetOtherTwin() ~= nil
-		and player:GetOtherTwin():GetPlayerType() == PlayerType.PLAYER_ESAU
-		and IndexedPlayers[4].Player == nil then
-		IndexedPlayers[4].Player = player
-	end
-end
-
-local numHUDPlayers = 1
-
 ---@type table<CollectibleType, {Sprite: Sprite, Directory: string, StartFrame: integer, UpdatedFrame: function, Condition?: function}>
 local activesToRender = {
 	[EEVEEMOD.CollectibleType.STRANGE_EGG] = {
@@ -105,6 +85,36 @@ local activesToRender = {
 		UpdatedFrame = function(player) return GetCookieFrame(player) end
 	}
 }
+
+---@param player EntityPlayer
+function GetCookieFrame(player)
+	local numCookieEffects = player:GetEffects():GetCollectibleEffectNum(EEVEEMOD.CollectibleType.COOKIE_JAR)
+	local cookieFrame = 5 - numCookieEffects
+	if cookieFrame < 0 then cookieFrame = 0 end
+	return cookieFrame
+end
+
+---@param i integer
+---@param player EntityPlayer
+local function AddActivePlayers(i, player)
+
+	IndexedPlayers[i].Player = player
+
+	if i == 1
+		and player:GetOtherTwin() ~= nil
+		and player:GetOtherTwin():GetPlayerType() == PlayerType.PLAYER_ESAU
+		and IndexedPlayers[4].Player == nil then
+		IndexedPlayers[4].Player = player
+	end
+end
+
+local function LoadItemSprites()
+	for _, params in pairs(activesToRender) do
+		params.Sprite:Load(params.Directory, true)
+		params.Sprite:Play(params.Sprite:GetDefaultAnimation(), true)
+		params.Sprite:SetFrame(params.Sprite:GetDefaultAnimation(), params.StartFrame)
+	end
+end
 
 function activeItemRender:UpdatePlayers()
 	local players = VeeHelper.GetAllMainPlayers()
@@ -126,16 +136,6 @@ function activeItemRender:UpdatePlayers()
 		end
 	end
 end
-
-local function LoadItemSprites()
-	for _, params in pairs(activesToRender) do
-		params.Sprite:Load(params.Directory, true)
-		params.Sprite:Play(params.Sprite:GetDefaultAnimation(), true)
-		params.Sprite:SetFrame(params.Sprite:GetDefaultAnimation(), params.StartFrame)
-	end
-end
-
-local hasLoadedItems = false
 
 function activeItemRender:RenderActiveItem()
 	for i = 1, #IndexedPlayers do

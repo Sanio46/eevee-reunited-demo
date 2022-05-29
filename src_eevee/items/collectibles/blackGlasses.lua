@@ -1,5 +1,6 @@
 local blackGlasses = {}
 
+---@param player EntityPlayer
 function blackGlasses:DetectDeals(player)
 	local data = player:GetData()
 
@@ -20,6 +21,8 @@ function blackGlasses:DetectDeals(player)
 	end
 end
 
+---@param item EntityPickup
+---@param player EntityPlayer
 function blackGlasses:OnCollectibleCollision(item, player)
 	local data = player:GetData()
 
@@ -34,6 +37,8 @@ function blackGlasses:OnCollectibleCollision(item, player)
 	end
 end
 
+---@param player EntityPlayer
+---@param itemStats ItemStats
 function blackGlasses:Stats(player, itemStats)
 	if not player:HasCollectible(EEVEEMOD.CollectibleType.BLACK_GLASSES) then return end
 	local effectNum = player:GetEffects():GetCollectibleEffectNum(EEVEEMOD.CollectibleType.BLACK_GLASSES)

@@ -4,7 +4,7 @@ EEVEEMOD.game = Game()
 EEVEEMOD.ItemConfig = Isaac.GetItemConfig()
 EEVEEMOD.sfx = SFXManager()
 EEVEEMOD.shouldSaveData = false
-EEVEEMOD.Name = "Eevee: Reunited - Demo"
+EEVEEMOD.Name = "Eevee: Reunited Demo"
 
 EEVEEMOD.RandomRNG = RNG()
 EEVEEMOD.RunSeededRNG = RNG()
@@ -110,7 +110,7 @@ EEVEEMOD.CollectibleType = {
 	--HI_TECH_EARBUDS = Isaac.GetItemIdByName("Hi-tech Earbuds"),
 }
 
----@type table<string, EffectVariant>
+---@type EffectVariant[]
 EEVEEMOD.EffectVariant = {
 	CUSTOM_BRIMSTONE_SWIRL = Isaac.GetEntityVariantByName("Custom Brimstone Swirl"),
 	CUSTOM_TECH_DOT = Isaac.GetEntityVariantByName("Custom Tech Dot"),
@@ -124,7 +124,7 @@ EEVEEMOD.EffectVariant = {
 	SHINY_SPARKLE = Isaac.GetEntityVariantByName("Shiny Sparkle"),
 }
 
----@type table<string, FamiliarVariant>
+---@type FamiliarVariant[]
 EEVEEMOD.FamiliarVariant = {
 	LIL_EEVEE = Isaac.GetEntityVariantByName("Lil Eevee"),
 	BAG_OF_POKEBALLS = Isaac.GetEntityVariantByName("Bag of Pokeballs"),
@@ -219,14 +219,14 @@ EEVEEMOD.IsPlayerEeveeOrEvolved = {
 	[EEVEEMOD.PlayerType.SYLVEON] = true ]]
 }
 
----@type Card[]
+---@class PokeballType
 EEVEEMOD.PokeballType = {
 	POKEBALL = Isaac.GetCardIdByName("Poke Ball"),
 	GREATBALL = Isaac.GetCardIdByName("Great Ball"),
 	ULTRABALL = Isaac.GetCardIdByName("Ultra Ball")
 }
 
----@type table<Card, string>
+---@type table<PokeballType, string>
 EEVEEMOD.PokeballTypeToString = {
 	[EEVEEMOD.PokeballType.POKEBALL] = "r",
 	[EEVEEMOD.PokeballType.GREATBALL] = "g",

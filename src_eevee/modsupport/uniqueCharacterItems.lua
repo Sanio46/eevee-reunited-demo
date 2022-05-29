@@ -3,11 +3,13 @@ local uniqueCharacterItems = {}
 local baseItemPath = "gfx/unique_items_eeveemod/collectibles_"
 local baseCostumePath = "gfx/unique_items_eeveemod/costume_"
 
+---@type table<CollectibleType, string>
 local itemPaths = {
 	[CollectibleType.COLLECTIBLE_BIRTHRIGHT] = "birthright_eevee",
 	[CollectibleType.COLLECTIBLE_MR_DOLLY] = "mrdolly_eevee"
 }
 
+---@type table<CollectibleType, boolean>
 local hasCostume = {
 	[CollectibleType.COLLECTIBLE_BIRTHRIGHT] = false,
 	[CollectibleType.COLLECTIBLE_MR_DOLLY] = true

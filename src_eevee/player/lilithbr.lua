@@ -1,10 +1,12 @@
 --Entire lua provided by tem! Please thank them for the suffering they went through.
 local lilithbr = {}
 
+---@type table<FamiliarVariant, boolean>
 local whitelistedFamiliars = {
 	[EEVEEMOD.FamiliarVariant.LIL_EEVEE] = true,
 }
 
+---@param player EntityPlayer
 local function hasLilithBR(player)
 	local playerType = player:GetPlayerType()
 	local br = false
@@ -16,6 +18,7 @@ local function hasLilithBR(player)
 	return br
 end
 
+---@param player EntityPlayer
 function lilithbr:OnPeffectUpdate(player)
 	local data = player:GetData()
 
@@ -23,6 +26,7 @@ function lilithbr:OnPeffectUpdate(player)
 		local familiars = Isaac.FindByType(3)
 		local playerfamiliars = {}
 		for i = 1, #familiars do
+			---@type EntityFamiliar
 			local familiar = familiars[i]:ToFamiliar()
 
 			if familiar.Player
@@ -49,6 +53,7 @@ function lilithbr:OnPeffectUpdate(player)
 
 		for i = 1, #playerfamiliars do
 			currentiterfamiliar = currentiterfamiliar + 1
+			---@type EntityFamiliar
 			local familiar = playerfamiliars[i]
 			local targetAngle = 180 * currentiterfamiliar / (#playerfamiliars + 1)
 			familiar:GetData().LilithBRFollowPos = aimDir:Rotated(targetAngle - 90)
@@ -56,6 +61,7 @@ function lilithbr:OnPeffectUpdate(player)
 	end
 end
 
+---@param familiar EntityFamiliar
 function lilithbr:OnFamiliarUpdate(familiar)
 	local player = familiar.Player
 	local data = familiar:GetData()
@@ -65,6 +71,7 @@ function lilithbr:OnFamiliarUpdate(familiar)
 			local kingBabies = Isaac.FindByType(EntityType.ENTITY_FAMILIAR, FamiliarVariant.KING_BABY) --Searching for all King Babies
 			local kingiestOfKingBabies = nil --The most recent King Baby
 			for i = 1, #kingBabies do
+				---@type EntityFamiliar
 				local kingBaby = kingBabies[i]:ToFamiliar()
 				if kingBaby.Player
 					and kingBaby.Player:GetData().Identifier == player:GetData().Identifier

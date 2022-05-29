@@ -1,5 +1,7 @@
 local bagOfPokeballs = {}
 
+---@param player EntityPlayer
+---@param cacheFlag CacheFlag
 function bagOfPokeballs:CheckBagOfPokeballs(player, cacheFlag)
 	if cacheFlag == CacheFlag.CACHE_FAMILIARS then
 		local effects = player:GetEffects()
@@ -13,6 +15,7 @@ function bagOfPokeballs:CheckBagOfPokeballs(player, cacheFlag)
 	end
 end
 
+---@param familiar EntityFamiliar
 function bagOfPokeballs:SpawnPokeball(familiar)
 	local sprite = familiar:GetSprite()
 	local seed = EEVEEMOD.game:GetRoom():GetSpawnSeed()

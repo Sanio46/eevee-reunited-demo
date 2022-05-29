@@ -10,6 +10,7 @@ local tearSpritePath = {
 	--[VeeHelper.TearVariant.FETUS] = "gfx/tears/tear_fetus_",
 }
 
+---@param tear EntityTear
 function customTearVariants:OnCustomTearUpdate(tear)
 	if not tear.SpawnerEntity or not tear.SpawnerEntity:ToPlayer() or not ChangedVariants[tear.Variant] then
 		return

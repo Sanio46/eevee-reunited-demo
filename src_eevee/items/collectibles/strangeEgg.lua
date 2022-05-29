@@ -89,6 +89,8 @@ local function strangeEggReward(player, charge)
 	end
 end
 
+---@param itemID CollectibleType
+---@param player EntityPlayer
 function strangeEgg:onUse(itemID, _, player, _, _, _)
 	if player:GetActiveCharge() > 0 then
 		strangeEggReward(player, player:GetActiveCharge())
@@ -103,6 +105,7 @@ function strangeEgg:onUse(itemID, _, player, _, _, _)
 	return true
 end
 
+---@param player EntityPlayer
 function strangeEgg:ChargeOnlyOnRoomClear(player)
 	--[[
 	if player:HasCollectible(EEVEEMOD.CollectibleType.STRANGE_EGG)
@@ -120,6 +123,8 @@ function strangeEgg:ChargeOnlyOnRoomClear(player)
 	end]]
 end
 
+---@param player EntityPlayer
+---@return boolean
 local function IsWarm(player)
 	local hot = false
 
@@ -136,6 +141,7 @@ local function IsWarm(player)
 	return hot
 end
 
+---@param player EntityPlayer
 function strangeEgg:ChargeOnlyOnNewLevel(player)
 	if not player:HasCollectible(EEVEEMOD.CollectibleType.STRANGE_EGG) then return end
 
@@ -153,6 +159,7 @@ function strangeEgg:ChargeOnlyOnNewLevel(player)
 	end
 end
 
+---@param player EntityPlayer
 function strangeEgg:ForceItemUse(player)
 
 	if player:GetActiveItem(ActiveSlot.SLOT_PRIMARY) == EEVEEMOD.CollectibleType.STRANGE_EGG
@@ -167,6 +174,7 @@ function strangeEgg:ForceItemUse(player)
 	end
 end
 
+---@param familiar EntityFamiliar
 function strangeEgg:OnStrangeEggWispDeath(familiar)
 	if familiar.Variant ~= FamiliarVariant.WISP or familiar.SubType ~= EEVEEMOD.CollectibleType.STRANGE_EGG then return end
 	Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_HEART, HeartSubType.HEART_FULL, familiar.Position, Vector.Zero, nil)

@@ -1,5 +1,6 @@
 local shadeEevee = {}
 
+---@param familiar EntityFamiliar
 function shadeEevee:ReplaceShade(familiar)
 	if familiar.SpawnerEntity
 		and familiar.SpawnerEntity:ToPlayer()

@@ -3,6 +3,7 @@ local shinyCharm = {}
 local baseShinyChance = 4096
 local forceSpawn = false
 
+---@param npc EntityNPC
 function shinyCharm:MakeNPCShiny(npc)
 	local colorRNG = RNG()
 	colorRNG:SetSeed(npc.Type + 1000, 35)
@@ -31,6 +32,7 @@ function shinyCharm:MakeNPCShiny(npc)
 	shiny:FollowParent(shiny.Parent)
 end
 
+---@param npc EntityNPC
 function shinyCharm:TryMakeShinyOnNPCInit(npc)
 	if npc.FrameCount <= 2 --If it makes through in its spawn frames
 		and npc:IsActiveEnemy()
@@ -64,6 +66,7 @@ end
 local frequency = 10
 local duration = 25
 
+---@param npc EntityNPC
 function shinyCharm:ShinyColoredNPCUpdate(npc)
 	local data = npc:GetData()
 
@@ -93,6 +96,7 @@ function shinyCharm:ShinyColoredNPCUpdate(npc)
 	end
 end
 
+---@param npc EntityNPC
 function shinyCharm:PostShinyKill(npc)
 	local data = npc:GetData()
 	local pos = EEVEEMOD.game:GetRoom():FindFreePickupSpawnPosition(npc.Position)
@@ -105,12 +109,15 @@ function shinyCharm:PostShinyKill(npc)
 	end
 end
 
+---@param player EntityPlayer
+---@param itemStats ItemStats
 function shinyCharm:Stats(player, itemStats)
 	if player:HasCollectible(EEVEEMOD.CollectibleType.SHINY_CHARM) then
 		itemStats.LUCK = itemStats.LUCK + (2 * player:GetCollectibleNum(EEVEEMOD.CollectibleType.SHINY_CHARM))
 	end
 end
 
+---@param effect EntityEffect
 function shinyCharm:ShinyParticleEffectUpdate(effect)
 	local sprite = effect:GetSprite()
 	local alpha = (effect.Timeout / duration)

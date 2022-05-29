@@ -1,27 +1,39 @@
 local triggerOnFire = {}
 
+---@class WeaponFireData
+---@field Parent EntityPlayer | EntityFamiliar
+---@field TotalFired integer
+---@field TotalShots integer
+---@field FirstWeaponEntity Weapon
+---@field LastWeaponEntity Weapon
 local weaponFire = {}
 
 --What you want to trigger here
+---@param weapon Weapon
 local function PostShotFunctions(weapon)
 	local init = tostring(weapon.SpawnerEntity.InitSeed)
+	---@type WeaponFireData
 	local weaponFireData = weaponFire[init]
 	weaponFireData.TotalShots = weaponFireData.TotalShots + 1
 	triggerOnFire:PostShotItems(weaponFireData)
 end
 
+---@param weapon Weapon
 local function PostFireFunctions(weapon)
 	local init = tostring(weapon.SpawnerEntity.InitSeed)
+	---@type WeaponFireData
 	local weaponFireData = weaponFire[init]
 
 	weaponFireData.TotalFired = weaponFireData.TotalFired + 1
 	triggerOnFire:PostFireItems(weaponFireData)
 end
 
+---@param weapon Weapon
 local function InitWeapon(weapon)
 	local init = tostring(weapon.SpawnerEntity.InitSeed)
 
 	if not weaponFire[init] and (weapon.SpawnerEntity:ToPlayer() or weapon.SpawnerEntity:ToFamiliar()) then
+		---@type WeaponFireData
 		weaponFire[init] = {
 			Parent = weapon.SpawnerEntity:ToPlayer() or weapon.SpawnerEntity:ToFamiliar(),
 			TotalFired = 0,
@@ -31,6 +43,7 @@ local function InitWeapon(weapon)
 		}
 		PostFireFunctions(weapon)
 	end
+	---@type WeaponFireData
 	local weaponFireData = weaponFire[init]
 
 	if not weaponFireData then return end
@@ -44,23 +57,25 @@ local function InitWeapon(weapon)
 	PostShotFunctions(weapon)
 end
 
+---@param weapon Weapon
+---@param player EntityPlayer
 local function EntTypeIsWeaponType(weapon, player)
 	local validEnt = false
 
-	if weapon.Type == EntityType.ENTITY_TEAR
+	if weapon:ToTear()
 		and (
 		player:HasWeaponType(WeaponType.WEAPON_TEARS)
 			or player:HasWeaponType(WeaponType.WEAPON_MONSTROS_LUNGS)
 		)
-		or weapon.Type == EntityType.ENTITY_LASER
+		or weapon:ToLaser()
 		and (
 		player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
 			or player:HasWeaponType(WeaponType.WEAPON_LASER)
 			or player:HasWeaponType(WeaponType.WEAPON_TECH_X)
 		)
-		or weapon.Type == EntityType.ENTITY_KNIFE and player:HasWeaponType(WeaponType.WEAPON_KNIFE)
-		or weapon.Type == EntityType.ENTITY_EFFECT and (weapon.Variant == EffectVariant.TARGET and player:HasWeaponType(WeaponType.WEAPON_ROCKETS))
-		or weapon.Type == EntityType.ENTITY_BOMBDROP and weapon.IsFetus
+		or weapon:ToKnife() and player:HasWeaponType(WeaponType.WEAPON_KNIFE)
+		or weapon:ToEffect() == EntityType.ENTITY_EFFECT and (weapon.Variant == EffectVariant.TARGET and player:HasWeaponType(WeaponType.WEAPON_ROCKETS))
+		or weapon:ToBomb() == EntityType.ENTITY_BOMBDROP and weapon.IsFetus
 	then
 		validEnt = true
 	end
@@ -68,8 +83,10 @@ local function EntTypeIsWeaponType(weapon, player)
 	return validEnt
 end
 
+---@param weapon Weapon
 local function IsFirstWeapon(weapon)
 	local init = tostring(weapon.SpawnerEntity.InitSeed)
+	---@type WeaponFireData
 	local weaponFireData = weaponFire[init]
 	local isFirst = false
 
@@ -83,7 +100,7 @@ local function IsFirstWeapon(weapon)
 	return isFirst
 end
 
---Knife Init, Bomb Init, Effect Init, Laser Init, and PostFireTear
+---@param weapon Weapon
 function triggerOnFire:OnWeaponInit(weapon)
 	if VeeHelper.EntitySpawnedByPlayer(weapon, true) then
 		local player = weapon.SpawnerEntity:ToPlayer() or weapon.SpawnerEntity:ToFamiliar().Player
@@ -94,6 +111,7 @@ function triggerOnFire:OnWeaponInit(weapon)
 	end
 end
 
+---@param laser EntityLaser
 function triggerOnFire:OnLaserUpdate(laser)
 	if IsFirstWeapon(laser)
 		and laser.Timeout > 0
@@ -104,6 +122,7 @@ function triggerOnFire:OnLaserUpdate(laser)
 	end
 end
 
+---@param target EntityEffect
 function triggerOnFire:OnTargetEffectUpdate(target)
 	if IsFirstWeapon(target)
 		and target.FrameCount % 10 == 0 --Doesn't trigger all 50 frames of its lifetime, instead only up to 5 times.
@@ -113,6 +132,7 @@ function triggerOnFire:OnTargetEffectUpdate(target)
 	end
 end
 
+---@param knife EntityKnife
 function triggerOnFire:OnKnifeUpdate(knife)
 	local data = knife:GetData()
 
@@ -135,6 +155,7 @@ end
 --  ON FIRE ITEMS  --
 ---------------------
 
+---@param player EntityPlayer
 function triggerOnFire:Tech05(player)
 	local tech05Delay = 2
 	local playerType = player:GetPlayerType()
@@ -171,6 +192,7 @@ function triggerOnFire:Tech05StayOnPlayer(laser)
 	end
 end
 
+---@param player EntityPlayer
 function triggerOnFire:DeadTooth(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
@@ -204,6 +226,8 @@ function triggerOnFire:DeadTooth(player)
 	end
 end
 
+---@param player EntityPlayer
+---@param direction Vector
 local function ImmaculateHeart(player, direction)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_IMMACULATE_HEART)
 		or EEVEEMOD.RandomNum(4) ~= 4 then
@@ -215,6 +239,9 @@ local function ImmaculateHeart(player, direction)
 	tear.FallingSpeed = -6.5
 end
 
+---@param player EntityPlayer
+---@param direction Vector
+---@param weaponFireData WeaponFireData
 local function EyeOfGreed(player, direction, weaponFireData)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_EYE_OF_GREED)
 		or weaponFireData.TotalShots <= 0
@@ -232,6 +259,9 @@ local function EyeOfGreed(player, direction, weaponFireData)
 	EEVEEMOD.sfx:Play(SoundEffect.SOUND_CASH_REGISTER)
 end
 
+---@param player EntityPlayer
+---@param direction Vector
+---@param weaponFireData WeaponFireData
 local function LeadPencil(player, direction, weaponFireData)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_LEAD_PENCIL)
 		or weaponFireData.TotalShots <= 0
@@ -249,6 +279,7 @@ local function LeadPencil(player, direction, weaponFireData)
 	end
 end
 
+---@param player EntityPlayer
 local function MomsWig(player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_WIG) then
 		return
@@ -263,6 +294,8 @@ local function MomsWig(player)
 	end
 end
 
+---@param player EntityPlayer
+---@param direction Vector
 local function GhostPepperBirdsEye(player, direction)
 	local hasBirdsEye = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRDS_EYE)
 	local hasGhostPepper = player:HasCollectible(CollectibleType.COLLECTIBLE_GHOST_PEPPER)
@@ -299,6 +332,7 @@ local function GhostPepperBirdsEye(player, direction)
 	end
 end
 
+---@param weaponFireData WeaponFireData
 function triggerOnFire:PostShotItems(weaponFireData)
 	local player = weaponFireData.Parent:ToFamiliar() and weaponFireData.Parent.Player or weaponFireData.Parent
 	local direction = VeeHelper.GetIsaacShootingDirection(player, player.Position):Resized(10)
@@ -307,6 +341,7 @@ function triggerOnFire:PostShotItems(weaponFireData)
 	LeadPencil(player, direction, weaponFireData)
 end
 
+---@param weaponFireData WeaponFireData
 function triggerOnFire:PostFireItems(weaponFireData)
 	local player = weaponFireData.Parent:ToFamiliar() and weaponFireData.Parent.Player or weaponFireData.Parent:ToPlayer()
 	local direction = VeeHelper.GetIsaacShootingDirection(player, player.Position):Resized(10)

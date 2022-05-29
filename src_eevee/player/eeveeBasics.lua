@@ -4,6 +4,7 @@ local costumeProtector = require("src_eevee.player.characterCostumeProtector")
 local miscMods = require("src_eevee.modsupport.miscModsOnPlayerInit")
 --local uniqueCharacterItems = require("src_eevee.modsupport.uniqueCharacterItems")
 
+---@param player EntityPlayer
 function eeveeBasics:TryInitEevee(player)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
@@ -23,7 +24,8 @@ end
 
 local EeveeToEsauJr = {}
 
-function eeveeBasics:OnEsauJr(itemID, itemRNG, player, flags, slot, vardata)
+---@param player EntityPlayer
+function eeveeBasics:OnEsauJr(_, _, player, _, _, _)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
 
@@ -32,6 +34,7 @@ function eeveeBasics:OnEsauJr(itemID, itemRNG, player, flags, slot, vardata)
 	end
 end
 
+---@param player EntityPlayer
 function eeveeBasics:GiveEsauJrEeveeData(player)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
@@ -50,6 +53,7 @@ function eeveeBasics:GiveEsauJrEeveeData(player)
 	end
 end
 
+---@param player EntityPlayer
 function eeveeBasics:NoTainted(player)
 	local playerType = player:GetPlayerType()
 
@@ -59,6 +63,7 @@ function eeveeBasics:NoTainted(player)
 	end
 end
 
+---@param player EntityPlayer
 function eeveeBasics:TryDeinitEevee(player)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
@@ -70,8 +75,8 @@ function eeveeBasics:TryDeinitEevee(player)
 	end
 end
 
+---@param player EntityPlayer
 function eeveeBasics:TrackFireDirection(player)
-	local playerType = player:GetPlayerType()
 	VeeHelper.GetIsaacShootingDirection(player, player.Position)
 end
 
