@@ -2,7 +2,6 @@ local eeveeBasics = {}
 
 local costumeProtector = require("src_eevee.player.characterCostumeProtector")
 local miscMods = require("src_eevee.modsupport.miscModsOnPlayerInit")
---local uniqueCharacterItems = require("src_eevee.modsupport.uniqueCharacterItems")
 
 ---@param player EntityPlayer
 function eeveeBasics:TryInitEevee(player)

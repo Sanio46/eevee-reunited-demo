@@ -14,7 +14,7 @@ function customSpiritSword:ReplaceSpiritSwordOnInit(knife)
 		and knife.SpawnerEntity:ToPlayer():GetPlayerType() == EEVEEMOD.PlayerType.EEVEE
 		and knife.SpawnerEntity:ToPlayer():HasWeaponType(WeaponType.WEAPON_SPIRIT_SWORD)
 	then
-		for i = 0, 4 do
+		for i = 0, sprite:GetLayerCount() - 1 do
 			sprite:ReplaceSpritesheet(i, swordPath)
 		end
 		sprite:LoadGraphics()

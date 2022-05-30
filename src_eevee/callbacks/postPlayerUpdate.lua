@@ -1,6 +1,5 @@
 local postPlayerUpdate = {}
 
-local customCollectibleSprites = require("src_eevee.modsupport.uniqueCharacterItems")
 local eeveeGhost = require("src_eevee.player.eeveeGhost")
 local earbuds = require("src_eevee.items.collectibles.hiTechEarbuds")
 local pokeball = require("src_eevee.items.pickups.pokeball")
@@ -22,8 +21,6 @@ function postPlayerUpdate:main(player)
 	swiftAttack:SwiftSpecialAttackKillSwitch(player)
 	swiftAttack:SwiftAttackTimers(player)
 	ccp:OnPlayerUpdate(player)
-	--[[ customCollectibleSprites:ReplaceItemCostume(player)
-	customCollectibleSprites:ReplaceCollectibleOnItemQueue(player) ]]
 	strangeEgg:ForceItemUse(player)
 end
 

@@ -102,7 +102,6 @@ function swiftTear:SpawnSwiftTears(player, degreeOfTearSpawns, offset)
 end
 
 function swiftTear:RemoveSpiritProjectile(tear)
-
 	if not VeeHelper.EntitySpawnedByPlayer(tear, false) then return end
 
 	local player = tear.SpawnerEntity:ToPlayer()
@@ -110,8 +109,9 @@ function swiftTear:RemoveSpiritProjectile(tear)
 	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
 
 	if not swiftPlayer then return end
+	
 	local multi = swiftSynergies:MultiShotCountInit(player)
-	if multi then return end
+	if multi > 0 then return end
 	if (
 		tear.Variant == TearVariant.SWORD_BEAM
 			or tear.Variant == TearVariant.TECH_SWORD_BEAM

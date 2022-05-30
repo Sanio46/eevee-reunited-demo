@@ -1,13 +1,13 @@
---[[ ---@class ModReference
----@field AddCallback fun(callbackId: ModCallbacks, callbackFn: function, entityID?: integer)
+---@class ModReference
+---@field AddCallback fun(self, callbackId: ModCallbacks, callbackFn: function, entityID?: integer)
 ---@field HasData boolean
 ---@field LoadData string
----@field RemoveCallback fun(callbackId: ModCallbacks, callbackFn: function)
+---@field RemoveCallback fun(self, callbackId: ModCallbacks, callbackFn: function)
 ---@field RemoveData nil
 ---@field SaveData nil
 ---@field Name string
 
----@type ModReference ]]
+---@type ModReference
 local EeveeReunited = RegisterMod("Eevee: Reunited - Demo", 1)
 
 --VERSION: 2.0.3
@@ -67,7 +67,7 @@ function EeveeReunited:init(j)
 	require(mods .. "eid")
 	require(mods .. "modConfigMenu")
 	require(mods .. "sewingMachine")
-	--require(mods .. "uniqueCharacterItems")
+	require(mods .. "uniqueCharacterItems")
 
 	if Encyclopedia then
 		local encyclopedia = require(mods .. "encyclopedia")

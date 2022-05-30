@@ -1,6 +1,5 @@
 local postPickupInit = {}
 
-local customCollectibleSprites = require("src_eevee.modsupport.uniqueCharacterItems")
 local unlockManager = require("src_eevee.misc.unlockManager")
 local pokeyMans = require("src_eevee.challenges.pokeyMansCrystal")
 
@@ -11,7 +10,6 @@ end
 
 ---@param collectible EntityPickup
 function postPickupInit:CollectibleInit(collectible)
-	--customCollectibleSprites:ReplaceCollectibleOnInit(collectible)
 	pokeyMans:ReplaceItemsOnInit(collectible)
 end
 

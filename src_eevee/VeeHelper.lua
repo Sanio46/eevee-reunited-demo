@@ -98,6 +98,7 @@ VeeHelper.TearFlagsBlood = {
 	[TearVariant.NAIL_BLOOD] = true,
 	[TearVariant.GLAUCOMA_BLOOD] = true,
 	[TearVariant.EYE] = true,
+	[TearVariant.EYE_BLOOD] = true,
 	[TearVariant.BALLOON] = true,
 	[TearVariant.BALLOON_BRIMSTONE] = true,
 }
