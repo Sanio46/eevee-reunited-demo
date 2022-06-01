@@ -299,6 +299,7 @@ function pokeball:TryCaptureNPC(ball)
 					data.ShouldCapture = true
 				end
 				ball.Velocity = ball.Velocity:Resized(0.9)
+				return
 			end
 		end
 	elseif data.CapturedEnemy and data.CapturedEnemy.NPC then
