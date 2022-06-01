@@ -85,6 +85,7 @@ end
 
 ---@param weapon Weapon
 local function IsFirstWeapon(weapon)
+	if not weapon.SpawnerEntity then return end
 	local init = tostring(weapon.SpawnerEntity.InitSeed)
 	---@type WeaponFireData
 	local weaponFireData = weaponFire[init]
