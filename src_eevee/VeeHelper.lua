@@ -456,7 +456,7 @@ function VeeHelper.FindMarkedTarget(player)
 		local targets = Isaac.FindByType(EntityType.ENTITY_EFFECT, targetVariants[i])
 
 		for _, target in pairs(targets) do
-			if VeeHelper.EntitySpawnedByPlayer(target, false)
+			if VeeHelper.EntitySpawnedByPlayer(target)
 				and target.SpawnerEntity:GetData().Identifier == player:GetData().Identifier then
 				targetPos = target.Position
 			end
@@ -465,25 +465,6 @@ function VeeHelper.FindMarkedTarget(player)
 	return targetPos
 end
 
----@param player EntityPlayer
-function VeeHelper.GetBasicFireDirection(player)
-	local fireDir = player:GetFireDirection()
-	local DirAngles = {
-		[-1] = Vector(0, -1),
-		[0] = Vector(-1, 0),
-		[1] = Vector(0, -1),
-		[2] = Vector(1, 0),
-		[3] = Vector(0, 1),
-	}
-	local vector = DirAngles[fireDir]
-
-	return vector
-end
-
----@param player EntityPlayer
-function VeeHelper.HeadDirectionToVector(player)
-	return Vector(-1, 0):Rotated(90 * player:GetHeadDirection())
-end
 
 ---@param player EntityPlayer
 ---@param targetStartingPos Vector | nil
@@ -524,8 +505,6 @@ function VeeHelper.GetIsaacShootingDirection(player, targetStartingPos)
 end
 
 --Credit to DeadInfinity for Lerping directly with angles!
-
-
 function VeeHelper.GetAngleDifference(a1, a2)
 	local sub = a1 - a2
 	return (sub + 180) % 360 - 180
@@ -703,19 +682,8 @@ function VeeHelper.SkinColor(player, useBody)
 end
 
 ---@param ent Entity
----@param includeFamiliar? boolean
-function VeeHelper.EntitySpawnedByPlayer(ent, includeFamiliar)
-	local hasPlayer = false
-	if ent.SpawnerEntity and
-		(
-		ent.SpawnerEntity:ToPlayer()
-			or (
-			includeFamiliar and ent.SpawnerEntity:ToFamiliar() and ent.SpawnerEntity:ToFamiliar().Player
-			)
-		) then
-		hasPlayer = true
-	end
-	return hasPlayer
+function VeeHelper.EntitySpawnedByPlayer(ent)
+	return ent.SpawnerEntity ~= nil and ent.SpawnerEntity:ToPlayer() ~= nil
 end
 
 ---@param table table
@@ -913,6 +881,38 @@ function VeeHelper.ShaderCrashFix()
 	if #Isaac.FindByType(EntityType.ENTITY_PLAYER) == 0 then
 		Isaac.ExecuteCommand("reloadshaders")
 	end
+end
+
+---@param a number
+function VeeHelper.AngleToFireDirection(a)
+	local DirAngles = {
+		[-90] = 1,
+		[0] = 2,
+		[90] = 3,
+		[180] = 0,
+		[270] = 1,
+	}
+	return DirAngles[a]
+end
+
+---@param player EntityPlayer
+function VeeHelper.FireDirectionToVector(player)
+	local fireDir = player:GetFireDirection()
+	local DirAngles = {
+		[-1] = Vector(0, -1),
+		[0] = Vector(-1, 0),
+		[1] = Vector(0, -1),
+		[2] = Vector(1, 0),
+		[3] = Vector(0, 1),
+	}
+	local vector = DirAngles[fireDir]
+
+	return vector
+end
+
+---@param player EntityPlayer
+function VeeHelper.HeadDirectionToVector(player)
+	return Vector(-1, 0):Rotated(90 * player:GetHeadDirection())
 end
 
 return VeeHelper

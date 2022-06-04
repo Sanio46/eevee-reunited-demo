@@ -6,13 +6,6 @@ local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 
 local vineDuration = 45
 
-local DirAngles = {
-	[-90] = 1,
-	[0] = 2,
-	[90] = 3,
-	[180] = 0,
-	[270] = 1,
-}
 
 local eeveeDirState = {
 	"Side2",
@@ -247,8 +240,9 @@ function lilEevee:OnFamiliarUpdate(familiar)
 
 		local fireDir = CalculateFamiliarShootDirection(familiar, player)
 		local dirToFace = VeeHelper.RoundHighestVectorPoint(fireDir):GetAngleDegrees()
-		if DirAngles[dirToFace] then
-			familiar.ShootDirection = DirAngles[dirToFace]
+		local angleToDir = VeeHelper.AngleToFireDirection(dirToFace)
+		if angleToDir then
+			familiar.ShootDirection = angleToDir
 		else
 			familiar.ShootDirection = player:GetHeadDirection()
 		end

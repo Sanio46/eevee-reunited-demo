@@ -75,7 +75,7 @@ local function TriggerSwiftCooldown(player)
 		if player:HasWeaponType(WeaponType.WEAPON_SPIRIT_SWORD) then
 			swiftPlayer.AttackCooldown = 5
 		else
-			swiftPlayer.AttackCooldown = (swiftBase:SwiftFireDelay(player) * 2.5) + 0.5
+			swiftPlayer.AttackCooldown = math.floor((swiftBase:SwiftFireDelay(player) * 2.5) + 0.5)
 		end
 		swiftPlayer.ExistingShots = nil
 	end
@@ -374,7 +374,7 @@ function swiftAttack:SwiftAttackUpdate(weapon)
 		swiftBomb:SwiftBombUpdate(weapon)
 	end
 
-	if VeeHelper.EntitySpawnedByPlayer(weapon, false) then
+	if VeeHelper.EntitySpawnedByPlayer(weapon) then
 
 		local player = weapon.SpawnerEntity:ToPlayer()
 		local ptrHashPlayer = tostring(GetPtrHash(player))
@@ -482,7 +482,7 @@ function swiftAttack:ShouldRestoreSwiftTrail(player, weapon)
 end
 
 function swiftAttack:SwiftInit(player)
-	local playerType = player:GetPlayerType()
+	--[[ local playerType = player:GetPlayerType()
 	local ptrHashPlayer = tostring(GetPtrHash(player))
 	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
 
@@ -537,7 +537,7 @@ function swiftAttack:SwiftInit(player)
 			TriggerSwiftCooldown(player)
 			swiftBase.Player[ptrHashPlayer] = nil
 		end
-	end
+	end ]]
 end
 
 function swiftAttack:SpiritSword(knife)
@@ -555,7 +555,7 @@ function swiftAttack:SpiritSword(knife)
 		["SpinUp"] = Vector(0, -1),
 		["SpinLeft"] = Vector(-1, 0)
 	}
-	if not VeeHelper.EntitySpawnedByPlayer(knife, false)
+	if not VeeHelper.EntitySpawnedByPlayer(knife)
 		or (knife.Variant ~= VeeHelper.KnifeVariant.SPIRIT_SWORD
 			and knife.Variant ~= VeeHelper.KnifeVariant.TECH_SWORD)
 	then

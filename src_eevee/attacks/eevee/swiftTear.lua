@@ -102,7 +102,7 @@ function swiftTear:SpawnSwiftTears(player, degreeOfTearSpawns, offset)
 end
 
 function swiftTear:RemoveSpiritProjectile(tear)
-	if not VeeHelper.EntitySpawnedByPlayer(tear, false) then return end
+	if not VeeHelper.EntitySpawnedByPlayer(tear) then return end
 
 	local player = tear.SpawnerEntity:ToPlayer()
 	local ptrHashPlayer = tostring(GetPtrHash(player))
@@ -162,7 +162,7 @@ function swiftTear:SwiftTearUpdate(tear)
 	local swiftTearWeapon = swiftBase.Weapon[ptrHashTear]
 	local sprite = tear:GetSprite()
 
-	if not VeeHelper.EntitySpawnedByPlayer(tear, true) then return end
+	if not VeeHelper.EntitySpawnedByPlayer(tear) then return end
 
 	local player = tear.SpawnerEntity:ToPlayer() or tear.SpawnerEntity:ToFamiliar().Player
 	local ptrHashPlayer = tostring(GetPtrHash(player))

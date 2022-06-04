@@ -84,7 +84,7 @@ end
 function swiftBase:InitSwiftWeapon(weapon)
 	local ptrHashWeapon = tostring(GetPtrHash(weapon))
 
-	if VeeHelper.EntitySpawnedByPlayer(weapon, false) then
+	if VeeHelper.EntitySpawnedByPlayer(weapon) then
 		local player = weapon.SpawnerEntity:ToPlayer()
 		local playerType = player:GetPlayerType()
 
@@ -190,7 +190,7 @@ function swiftBase:SpawnPos(player, degreeOfTearSpawns, offset)
 	local ptrHashPlayer = tostring(GetPtrHash(player))
 	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
 	local anglePos = Vector.FromAngle((degreeOfTearSpawns * swiftPlayer.NumWeaponsSpawned)):Resized(swiftBase:SwiftTearDistanceFromPlayer(player)):Rotated(offset)
-
+	--360/count * numSpawned to form star, resized for distance from the player, rotated by a customoffset (head direction)
 	return anglePos
 end
 

@@ -30,7 +30,7 @@ function eeveeStats:OnCache(player, cacheFlag)
 			player.MoveSpeed = player.MoveSpeed + statsEeveelutions[playerType][cacheFlag]
 		end
 		if cacheFlag == CacheFlag.CACHE_FIREDELAY then
-			player.MaxFireDelay = player.MaxFireDelay * statsEeveelutions[playerType][cacheFlag]
+			player.MaxFireDelay = math.floor((player.MaxFireDelay * statsEeveelutions[playerType][cacheFlag]) + 0.5)
 		end
 		if cacheFlag == CacheFlag.CACHE_DAMAGE then
 			player.Damage = player.Damage * statsEeveelutions[playerType][cacheFlag]
