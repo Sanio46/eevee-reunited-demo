@@ -112,22 +112,18 @@ local TearFlagsToDelay = {
 }
 
 function swiftSynergies:DelayTearFlags(weapon)
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
+	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
 
-	if weapon.Type ~= EntityType.ENTITY_EFFECT then
-		for i = 1, #TearFlagsToDelay do
+	if not weapon:ToEffect() then
+		for _, tearFlag in pairs(TearFlagsToDelay) do
 			if swiftWeapon.HasFired == false then
-				if weapon:HasTearFlags(TearFlagsToDelay[i]) then
-					weapon:ClearTearFlags(TearFlagsToDelay[i])
-					if swiftWeapon.DelayTearFlags == nil then
-						swiftWeapon.DelayTearFlags = {}
-					end
-					swiftWeapon.DelayTearFlags[i] = i
+				if weapon:HasTearFlags(tearFlag) then
+					swiftWeapon.DelayedTearFlag = swiftWeapon.DelayedTearFlag + tearFlag
+					weapon:ClearTearFlags(tearFlag)
 				end
-			elseif swiftWeapon.DelayTearFlags and swiftWeapon.DelayTearFlags[i] then
-				if not weapon:HasTearFlags(TearFlagsToDelay[swiftWeapon.DelayTearFlags[i]]) then
-					weapon:AddTearFlags(TearFlagsToDelay[i])
+			elseif swiftWeapon.DelayedTearFlag ~= 0 then
+				if not weapon:HasTearFlags(swiftWeapon.DelayedTearFlag) then
+					weapon:AddTearFlags(swiftWeapon.DelayedTearFlag)
 				end
 			end
 		end

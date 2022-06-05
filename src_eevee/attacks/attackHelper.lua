@@ -13,7 +13,6 @@ local itemToShotNum = {
 	[CollectibleType.COLLECTIBLE_MUTANT_SPIDER] = 3
 }
 
-
 --Returns the number of additional shots the player should shoot when firing. Does not count luck-based shot items.
 ---@param player EntityPlayer
 function attackHelper:GetMultiShot(player)
@@ -126,6 +125,16 @@ function attackHelper:ShouldFireExtraShot(player, itemID)
 		end
 	end
 	return shouldFire
+end
+
+function attackHelper:ShouldWizShot(player)
+	local shouldWiz = false
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_THE_WIZ)
+		or player:HasPlayerForm(PlayerForm.PLAYERFORM_BABY)
+	then
+		shouldWiz = true
+	end
+	return shouldWiz
 end
 
 ---@param player EntityPlayer

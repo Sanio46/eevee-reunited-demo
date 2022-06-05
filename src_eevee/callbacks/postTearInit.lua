@@ -7,8 +7,8 @@ local customTearVariants = require("src_eevee.misc.customTearVariants")
 
 ---@param tear EntityTear
 function postTearInit:main(tear)
-	swiftTear:MakeSwiftTear(tear)
-	ember:EmberTearInit(tear)
+	swiftTear:MakeStarOnTearInit(tear)
+	--ember:EmberTearInit(tear)
 end
 
 function postTearInit:init(EeveeReunited)

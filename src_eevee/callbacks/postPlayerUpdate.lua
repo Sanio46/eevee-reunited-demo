@@ -12,16 +12,15 @@ local strangeEgg = require("src_eevee.items.collectibles.strangeEgg")
 
 ---@param player EntityPlayer
 function postPlayerUpdate:main(player)
-	eeveeGhost:SpawnGhostEffect(player)
-	earbuds:LoadVolumeBar(player)
-	pokeball:PlayerThrowPokeball(player)
 	unlockManager.postPlayerUpdate(player)
-	wonderousLauncher:OnPlayerUpdate(player)
+	swiftAttack:OnPostPlayerUpdate(player)
 	eeveeSFX:PlayHurtSFX(player)
-	swiftAttack:SwiftSpecialAttackKillSwitch(player)
-	swiftAttack:SwiftAttackTimers(player)
-	ccp:OnPlayerUpdate(player)
+	eeveeGhost:SpawnGhostEffect(player)
+	pokeball:PlayerThrowPokeball(player)
+	wonderousLauncher:OnPlayerUpdate(player)
 	strangeEgg:ForceItemUse(player)
+	earbuds:LoadVolumeBar(player)
+	ccp:OnPlayerUpdate(player)
 end
 
 function postPlayerUpdate:init(EeveeReunited)

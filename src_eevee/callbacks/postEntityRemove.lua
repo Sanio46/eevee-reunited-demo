@@ -1,6 +1,6 @@
 local postEntityRemove = {}
 
-local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
+local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
 local wonderousLauncher = require("src_eevee.items.collectibles.wonderousLauncher")
 
 ---@param tear EntityTear
@@ -15,7 +15,7 @@ end
 
 ---@param ent Entity
 function postEntityRemove:main(ent)
-	swiftBase:RemoveWeaponOnPostEntRemove(ent)
+	swiftAttack:OnWeaponInstanceRemove(ent)
 	if ent:ToTear() then
 		---@type EntityTear
 		local tear = ent:ToTear()
