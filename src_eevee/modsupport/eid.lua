@@ -251,7 +251,6 @@ local TrinketDescs_Modified_KR = {
 	[EEVEEMOD.TrinketType.EVIOLITE] = "!!! 현재 적용 안됨#↑ 모든 능력치 배울 x2.0# 진화 시 사라집니다."
 }
 
-
 local Descriptions = {
 	["en_us"] = {
 		Collectibles = CollectibleDescs_EN,
@@ -261,7 +260,15 @@ local Descriptions = {
 		Birthrights = BirthrightDescs_EN,
 		Collectibles_Modified = CollectiblesDescs_Modified_EN,
 		Trinkets_Modified = TrinketDescs_Modified_EN,
-		Eevee = "Eevee"
+		Eevee = "Eevee",
+		Flareon = "Flareon",
+		Jolteon = "Jolteon",
+		Vaporeon = "Vaporeon",
+		Espeon = "Espeon",
+		Glaceon = "Glaceon",
+		Leafeon = "Leafeon",
+		Sylveon = "Sylveon",
+		Eevee_B = "Tainted Eevee"
 	},
 	["spa"] = {
 		Collectibles = CollectibleDescs_SPA,
@@ -271,7 +278,15 @@ local Descriptions = {
 		Birthrights = BirthrightDescs_SPA,
 		Collectibles_Modified = CollectiblesDescs_Modified_SPA,
 		Trinkets_Modified = TrinketDescs_Modified_SPA,
-		Eevee = "Eevee"
+		Eevee = "Eevee",
+		Flareon = "Flareon",
+		Jolteon = "Jolteon",
+		Vaporeon = "Vaporeon",
+		Espeon = "Espeon",
+		Glaceon = "Glaceon",
+		Leafeon = "Leafeon",
+		Sylveon = "Sylveon",
+		Eevee_B = "Tainted Eevee"
 	},
 	["ko_kr"] = {
 		Collectibles = CollectibleDescs_KR,
@@ -281,7 +296,15 @@ local Descriptions = {
 		Birthrights = BirthrightDescs_KR,
 		Collectibles_Modified = CollectiblesDescs_Modified_KR,
 		Trinkets_Modified = TrinketDescs_Modified_KR,
-		Eevee = "이브이"
+		Eevee = "이브이",
+		Flareon = "Flareon",
+		Jolteon = "Jolteon",
+		Vaporeon = "Vaporeon",
+		Espeon = "Espeon",
+		Glaceon = "Glaceon",
+		Leafeon = "Leafeon",
+		Sylveon = "Sylveon",
+		Eevee_B = "Tainted 이브이"
 	}
 }
 
