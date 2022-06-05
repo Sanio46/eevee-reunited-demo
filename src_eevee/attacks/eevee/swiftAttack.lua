@@ -128,10 +128,10 @@ function swiftAttack:SwiftMainFireWeapon(swiftData, swiftWeapon, weapon)
 
 	--Wiz "normal" shot
 	if attackHelper:ShouldWizShot(player) then
-		swiftAttack:FireExtraWeapon(weapon, player, attackHelper:TryFireToEnemy(player, weapon, fireDirection))
+		--swiftAttack:FireExtraWeapon(weapon, player, attackHelper:TryFireToEnemy(player, weapon, fireDirection))
 		if player:GetCollectibleNum(CollectibleType.COLLECTIBLE_THE_WIZ) >= 2
 			or player:HasPlayerForm(PlayerForm.PLAYERFORM_BABY) then
-			swiftAttack:FireExtraWeapon(weapon, player, attackHelper:TryFireToEnemy(player, weapon, fireDirection:Rotated(45)))
+			--swiftAttack:FireExtraWeapon(weapon, player, attackHelper:TryFireToEnemy(player, weapon, fireDirection:Rotated(45)))
 		end
 	end
 end
