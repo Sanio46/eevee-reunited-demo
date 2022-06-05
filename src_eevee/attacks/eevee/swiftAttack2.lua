@@ -16,9 +16,10 @@ local swiftInstanceData = {
 	CanFire = false,
 	Rotation = 0,
 	NumWeaponsSpawned = 1,
-	IgnoreTimer = false,
 	NumWeaponsToSpawn = 5,
 	NumWeaponsDead = 0,
+	InverseShootingRequirement = false,
+	Perpetual = false,
 }
 
 ---@class SwiftWeapon
@@ -27,9 +28,10 @@ local swiftInstanceData = {
 ---@field ParentInstance SwiftInstance
 local SwiftWeaponData = {
 	ParentInstance = {},
-	StartingPosition = Vector.Zero,
+	StartingAngle = Vector.Zero,
 	ShootDirection = Vector.Zero,
 	StartingAccel = 0,
+	StartingFall = 0,
 	OrbitDistance = 0,
 	Trail = nil,
 	FireDelay = 2,
@@ -46,23 +48,35 @@ local swiftWeapons = {}
 -------------------------------
 
 ---@param player EntityPlayer
-function swift:GetFireDelay(player)
+---@param ignoreCap? boolean
+function swift:GetFireDelay(player, ignoreCap)
+	local fireDelay = player.MaxFireDelay
 	local WeaponTypeToFireDelay = {
-		[WeaponType.WEAPON_TECH_X] = 1.5,
-		[WeaponType.WEAPON_KNIFE] = 1.3,
 		[WeaponType.WEAPON_BRIMSTONE] = 1.2,
+		[WeaponType.WEAPON_KNIFE] = 1.3,
+		[WeaponType.WEAPON_TECH_X] = 1.5,
 	}
+	local mult = 1
 	for weaponType, delayMult in pairs(WeaponTypeToFireDelay) do
 		if player:HasWeaponType(weaponType) then
-			return player.MaxFireDelay * delayMult
+			if mult < delayMult then
+				mult = delayMult
+			end
 		end
 	end
-	return player.MaxFireDelay
+	fireDelay = player.MaxFireDelay * mult
+	if not ignoreCap then
+		if fireDelay < 0.5 then
+			fireDelay = 0.5
+		end
+	end
+	return fireDelay
 end
 
 ---@param player EntityPlayer
 function swift:GetInstanceCooldown(player)
-	local fireDelay = swift:GetFireDelay(player) * 6
+	local fireDelay = swift:GetFireDelay(player, true)
+	fireDelay = fireDelay + (math.abs(fireDelay) * 9)
 	return fireDelay
 end
 
@@ -87,8 +101,8 @@ function swift:SwiftOrbitDistance(player)
 end
 
 ---@param swiftData SwiftInstance
-function swift:GetStartingPos(swiftData)
-	return Vector.FromAngle((360 / swiftData.NumWeaponsToSpawn) * swiftData.NumWeaponsSpawned):Resized(swift:SwiftOrbitDistance(swiftData.Player))
+function swift:GetStartingAngle(swiftData)
+	return Vector.FromAngle((360 / swiftData.NumWeaponsToSpawn) * swiftData.NumWeaponsSpawned)
 end
 
 ------------------
@@ -115,16 +129,22 @@ end
 
 ---@param player EntityPlayer
 ---@param parent Entity
-function swift:CreateSwiftInstance(player, parent)
+---@param customData? SwiftInstance
+function swift:CreateSwiftInstance(player, parent, customData)
 	---@type SwiftInstance
 	local instance = {}
 	for variableName, value in pairs(swiftInstanceData) do
-		instance[variableName] =  value
+		if customData ~= nil
+			and customData[variableName] ~= nil then
+			instance[variableName] = customData[variableName]
+		else
+			instance[variableName] = value
+		end
 	end
 	instance.Player = player
 	instance.Parent = parent
 	table.insert(swiftInstances, instance)
-	swift:InitInstanceValues(instance)
+	swift:InitInstanceValues(instance, customData)
 	swift:FireSwift(instance, player, parent)
 end
 
@@ -139,22 +159,40 @@ function swift:InitSwiftWeapon(swiftData, weapon)
 		for variableName, value in pairs(SwiftWeaponData) do
 			swiftWeapon[variableName] = value
 		end
-		swiftWeapon.ParentInstance = swiftData
+		swift:InitWeaponValues(swiftData, swiftWeapon, weapon)
 	end
 end
 
 ---@param swiftData SwiftInstance
-function swift:InitInstanceValues(swiftData)
-	local fireDelay = swift:GetFireDelay(swiftData.Player)
-	local totalDuration = fireDelay * swiftData.NumWeaponsToSpawn
-	swiftData.TotalDuration = totalDuration + 0.5
-	swiftData.DurationTimer = totalDuration + 0.5
-	swiftData.WeaponSpawnTimer = fireDelay
+---@param swiftWeapon SwiftWeapon
+---@param weapon Weapon
+function swift:InitWeaponValues(swiftData, swiftWeapon, weapon)
+	swiftWeapon.StartingAngle = swift:GetStartingAngle(swiftData)
+	swiftWeapon.StartingAccel = weapon.FallingAcceleration
+	swiftWeapon.StartingFall = weapon.FallingSpeed
+	swiftWeapon.OrbitDistance = swift:SwiftOrbitDistance(swiftData.Player)
+	swiftWeapon.ParentInstance = swiftData
+	swiftWeapon.ShootDirection = VeeHelper.GetIsaacShootingDirection(swiftData.Player, weapon.Position)
+	local fireDelay = (swift:GetFireDelay(swiftData.Player) / (swiftData.NumWeaponsToSpawn / swiftData.NumWeaponsSpawned))
+	swiftWeapon.FireDelay = fireDelay
 end
 
----@param weapon Weapon
-function swift:InitWeaponValues(weapon)
-
+---@param swiftData SwiftInstance
+---@param customData? SwiftInstance
+function swift:InitInstanceValues(swiftData, customData)
+	local fireDelay = swift:GetFireDelay(swiftData.Player)
+	local totalDuration = (fireDelay * swiftData.NumWeaponsToSpawn) + 0.5
+	
+	if customData == nil or customData.TotalDuration == nil then
+		swiftData.TotalDuration = totalDuration
+	end
+	if customData == nil or customData.DurationTimer == nil then
+		swiftData.DurationTimer = totalDuration
+	end
+	if customData == nil or customData.WeaponSpawnTimer == nil then
+		swiftData.WeaponSpawnTimer = fireDelay
+	end
+	swiftData.Rotation = VeeHelper.GetIsaacShootingDirection(swiftData.Player):Rotated(-1 * (360 / swiftData.NumWeaponsToSpawn)):GetAngleDegrees()
 end
 
 ---@param tear EntityTear
@@ -234,17 +272,13 @@ end
 ---@param player EntityPlayer
 ---@param parent Entity
 function swift:FireSwift(swiftData, player, parent)
-	local startPos = swift:GetStartingPos(swiftData)
-
+	local spawnPos = swift:GetStartingAngle(swiftData):Resized(swift:SwiftOrbitDistance(swiftData.Player)):Rotated(swiftData.Rotation)
 	local parentPos = parent:ToPlayer() and (player.Position - player.TearsOffset) or parent.Position
 	---@type EntityTear
-	local swiftTear = player:FireTear(parentPos + startPos:Rotated(swiftData.Rotation), Vector.Zero):ToTear()
+	local swiftTear = player:FireTear(parentPos + spawnPos, Vector.Zero):ToTear()
+	swiftTear:AddTearFlags(TearFlags.TEAR_SPECTRAL)
+	if swiftTear.Height > -24 then swiftTear.Height = -24 end
 	swift:InitSwiftWeapon(swiftData, swiftTear)
-	---@type SwiftWeapon
-	local swiftWeapon = swiftWeapons[tostring(GetPtrHash(swiftTear))]
-	swiftWeapon.StartingPosition = startPos
-	swiftWeapon.StartingAccel = swiftTear.Height
-	swiftWeapon.OrbitDistance = swift:SwiftOrbitDistance(player)
 end
 
 ---@param swiftData SwiftInstance
@@ -267,6 +301,42 @@ function swift:RemoveWeaponOnDeath(weapon)
 	end
 end
 
+function swift:AddSwiftTrail(weapon, player)
+	local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):ToEffect()
+	local wC = weapon:GetSprite().Color
+	local tC = Color(wC.R, wC.G, wC.B, 1, wC.RO, wC.GO, wC.BO)
+
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
+		if weapon.Type == EntityType.ENTITY_TEAR then
+			if not VeeHelper.AreColorsDifferent(wC, Color.Default) then
+				if EEVEEMOD.TrailColor[weapon.Variant] ~= nil then
+					tC = EEVEEMOD.TrailColor[weapon.Variant]
+				else
+					tC = EEVEEMOD.TrailColor[EEVEEMOD.TearVariant.SWIFT]
+				end
+			end
+		end
+	else
+		if weapon.Type ~= EntityType.ENTITY_EFFECT and weapon.Type ~= EntityType.ENTITY_LASER then
+			tC = VeeHelper.PlaydoughRandomColor()
+		else
+			trail:GetData().EeveeRGB = true
+		end
+	end
+	trail.Parent = weapon
+	trail:GetData().SwiftTrail = true
+	trail:GetData().TrailColor = tC
+	trail.Color = tC
+	trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 15, 1, true, false)
+	local swiftWeapon = swiftWeapons[tostring(GetPtrHash(weapon))]
+	if swiftWeapon then
+		swiftWeapon.Trail = trail
+	end
+	trail.MinRadius = 0.2
+	trail.RenderZOffset = -10
+	trail:Update()
+end
+
 --------------------
 --  SWIFT UPDATE  --
 --------------------
@@ -275,7 +345,7 @@ function swift:FireIfNotShooting(swiftData)
 	local player = swiftData.Player
 
 	if player:GetFireDirection() == Direction.NO_DIRECTION
-	and not swiftData.CanFire then
+		and not swiftData.CanFire then
 		swiftData.CanFire = true
 	end
 end
@@ -295,7 +365,7 @@ end
 function swift:CountdownDuration(swiftData)
 	if swiftData.DurationTimer > 0.5 then
 		swiftData.DurationTimer = swiftData.DurationTimer - 0.5
-	elseif swiftData.IgnoreTimer == false and not swiftData.CanFire then
+	elseif swiftData.Perpetual == false and not swiftData.CanFire then
 		swiftData.DurationTimer = 0
 		swiftData.CanFire = true
 	end
@@ -304,7 +374,8 @@ end
 ---@param swiftData SwiftInstance
 function swift:RateOfOrbitRotation(swiftData, player)
 	local currentRotation = swiftData.Rotation
-	local rateOfRotation = (5 * player.ShotSpeed)
+	local rateOfRotation = (7 * (player.ShotSpeed * (swiftData.DurationTimer / swiftData.TotalDuration)))
+	if rateOfRotation <= 2 then rateOfRotation = 2 end
 	currentRotation = currentRotation + rateOfRotation
 	if currentRotation > 360 then currentRotation = currentRotation - 360 end
 	swiftData.Rotation = currentRotation
@@ -330,23 +401,89 @@ function swift:OnPostTearUpdate(tear)
 	if swiftWeapon == nil then return end
 	local swiftData = swiftWeapon.ParentInstance
 	if swiftData == nil then return end
+	local sprite = tear:GetSprite()
 
-	if swiftData.CanFire == false then
-		tear.Velocity = swiftData.Parent.Position - (tear.Position - swiftWeapon.StartingPosition:Resized(swiftWeapon.OrbitDistance):Rotated(swiftData.Rotation))
+	if tear.Variant == EEVEEMOD.TearVariant.SWIFT or tear.Variant == EEVEEMOD.TearVariant.SWIFT_BLOOD then
+		local anim = tear.Variant == EEVEEMOD.TearVariant.SWIFT_BLOOD and "BloodTear" or "RegularTear"
+		local animToPlay = anim .. VeeHelper.TearScaleToSizeAnim(tear)
+
+		if tear.FrameCount > 1 and sprite:GetAnimation() ~= animToPlay then
+			sprite:Play(anim .. VeeHelper.TearScaleToSizeAnim(tear), true)
+		end
 	end
+
 	if swiftWeapon.FireDelay > 0 then
+		tear.Velocity = swiftData.Parent.Position - (tear.Position - swiftWeapon.StartingAngle:Resized(swiftWeapon.OrbitDistance):Rotated(swiftData.Rotation))
 		if swiftData.CanFire == true then
 			swiftWeapon.FireDelay = swiftWeapon.FireDelay - 1
 		end
-		tear.Height = swiftWeapon.StartingAccel
+		tear.FallingSpeed = -0.1
+		tear.FallingAcceleration = 0
 	elseif not swiftWeapon.HasFired then
 		swiftWeapon.HasFired = true
+		tear.FallingSpeed = swiftWeapon.StartingFall
+		tear.FallingAcceleration = swiftWeapon.StartingAccel
 		tear.Velocity = Vector(10, 0)
+	end
+	if tear.Variant == TearVariant.ICE or tear.Variant == TearVariant.COIN then
+		if not swiftWeapon.HasFired then
+			sprite.Rotation = swiftWeapon.ShootDirection:GetAngleDegrees()
+		end
+	elseif tear.Variant ~= TearVariant.BELIAL then
+		if not swiftWeapon.HasFired then
+			sprite.Rotation = (swiftData.Rotation * -2)
+		else
+			local data = tear:GetData()
+			if not data.AfterFireSwiftRotation then
+				data.AfterFireSwiftRotation = sprite.Rotation
+			else
+				sprite.Rotation = data.AfterFireSwiftRotation
+				data.AfterFireSwiftRotation = data.AfterFireSwiftRotation - 20
+			end
+		end
+	end
+end
+
+function swift:SwiftTrailUpdate(trail)
+	if trail.Parent then
+		local weapon = trail.Parent
+		local room = EEVEEMOD.game:GetRoom()
+		local tC = trail.Color
+
+		if trail:GetData().EeveeRGB == true then
+			trail:SetColor(EEVEEMOD.GetRBG(tC), -1, -1, true, false)
+		else
+			local wC = weapon:GetSprite().Color
+			if VeeHelper.AreColorsDifferent(wC, trail:GetData().TrailColor)
+				and VeeHelper.AreColorsDifferent(wC, Color.Default) then
+				trail:SetColor(wC, -1, 1, true, false)
+			end
+		end
+
+		if not room:IsPositionInRoom(trail.Position, -30) then
+			trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 5, 2, true, false)
+		end
+		local heightDif = 0
+		if weapon.Type == EntityType.ENTITY_TEAR then
+			local tearHeightToFollow = (weapon:ToTear().Height * 0.4) - 15
+			local sizeToFollow = weapon.Size * 0.5
+			trail.SpriteScale = Vector(weapon.Size * 0.2, 1)
+			trail.Position = Vector(weapon.Position.X, (weapon.Position.Y + (tearHeightToFollow + heightDif)) - sizeToFollow) + weapon:ToTear().PosDisplacement
+		else
+			if weapon.Type == EntityType.ENTITY_EFFECT and weapon.Variant == EffectVariant.EVIL_EYE then
+				heightDif = 20
+			end
+			trail.Position = Vector(weapon.Position.X, weapon.Position.Y + weapon.PositionOffset.Y - heightDif)
+		end
+	else
+		if trail:GetData().SwiftTrail then
+			trail:Remove()
+		end
 	end
 end
 
 function swift:Debug()
-	local numInstances = 0
+--[[ 	local numInstances = 0
 	local weaponTimer = 0
 	local durationTimer = 0
 	local cooldown = 0
@@ -362,11 +499,11 @@ function swift:Debug()
 	if Isaac.GetPlayer():GetData().TimeTillNextInstance ~= nil then
 		cooldown = Isaac.GetPlayer():GetData().TimeTillNextInstance
 	end
-	Isaac.RenderText("NumInstances: "..numInstances, 50, 50, 1, 1, 1, 1)
-	Isaac.RenderText("Duration: "..durationTimer, 50, 70, 1, 1, 1, 1)
-	Isaac.RenderText("Weapon Timer:"..weaponTimer, 50, 90, 1, 1, 1, 1)
-	Isaac.RenderText("Cooldown:"..cooldown, 50, 110, 1, 1, 1, 1)
-	Isaac.RenderText("NumDead:"..numDead, 50, 130, 1, 1, 1, 1)
+	Isaac.RenderText("NumInstances: " .. numInstances, 50, 50, 1, 1, 1, 1)
+	Isaac.RenderText("Duration: " .. durationTimer, 50, 70, 1, 1, 1, 1)
+	Isaac.RenderText("Weapon Timer:" .. weaponTimer, 50, 90, 1, 1, 1, 1)
+	Isaac.RenderText("Cooldown:" .. cooldown, 50, 110, 1, 1, 1, 1)
+	Isaac.RenderText("NumDead:" .. numDead, 50, 130, 1, 1, 1, 1) ]]
 end
 
 mod:AddCallback(ModCallbacks.MC_POST_RENDER, swift.Debug)

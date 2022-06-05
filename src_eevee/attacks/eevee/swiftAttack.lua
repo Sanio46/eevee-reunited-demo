@@ -259,50 +259,6 @@ function swiftAttack:FireExtraWeapon(parent, player, direction, rotationOffset)
 	end
 end
 
-function swiftAttack:ShouldFireExtraWeapons(weapon, player, direction)
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_LOKIS_HORNS)
-		and swiftSynergies:ShouldFireExtraShot(player, CollectibleType.COLLECTIBLE_LOKIS_HORNS) == true
-	then
-		for i = 1, 3 do
-			local rotationOffset = 90 * i
-			local newdirection = direction:Rotated(rotationOffset)
-			swiftAttack:FireExtraWeapon(weapon, player, newdirection, rotationOffset)
-		end
-	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_EYE)
-	and swiftSynergies:ShouldFireExtraShot(player, CollectibleType.COLLECTIBLE_MOMS_EYE) == true
-	then
-		local rotationOffset = 180
-		local newdirection = direction:Rotated(rotationOffset)
-		swiftAttack:FireExtraWeapon(weapon, player, newdirection, rotationOffset)
-	end
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_MONSTROS_LUNG) then
-		local WeaponTypeShotDegrees = {
-			[WeaponType.WEAPON_BRIMSTONE] = 360,
-			[WeaponType.WEAPON_KNIFE] = 360,
-			[WeaponType.WEAPON_TECH_X] = 180,
-			[WeaponType.WEAPON_LASER] = 60,
-			[WeaponType.WEAPON_BOMBS] = 30,
-		}
-		for weaponType, degrees in pairs(WeaponTypeShotDegrees) do
-			if player:HasWeaponType(weaponType) then
-				for i = 1, EEVEEMOD.RandomNum(3, 5) do
-					local rotationOffset = EEVEEMOD.RandomNum((degrees / -2), (degrees / 2))
-					local newdirection = direction:Rotated(rotationOffset)
-					swiftAttack:FireExtraWeapon(weapon, player, newdirection, rotationOffset)
-				end
-			end
-		end
-	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_EYE_SORE)
-		and swiftSynergies:ShouldFireExtraShot(player, CollectibleType.COLLECTIBLE_EYE_SORE) == true
-	then
-		for i = 1, EEVEEMOD.RandomNum(3) do
-			local rotationOffset = EEVEEMOD.RandomNum(360)
-			direction = direction:Rotated(rotationOffset)
-			swiftAttack:FireExtraWeapon(weapon, player, direction, rotationOffset)
-		end
-	end
-end
-
 function swiftAttack:SwiftAttackWaitingToFire(weapon, player)
 	local ptrHashPlayer = tostring(GetPtrHash(player))
 	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
@@ -381,7 +337,7 @@ function swiftAttack:SwiftAttackUpdate(weapon)
 		local swiftPlayer = swiftBase.Player[ptrHashPlayer]
 
 		if swiftPlayer and swiftWeapon then
-			
+
 			SwiftWeaponUpdateSynergies(weapon, player)
 			swiftAttack:ShouldRestoreSwiftTrail(player, weapon)
 			swiftAttack:SwiftMultiRotation(player, weapon)
@@ -622,7 +578,7 @@ function swiftAttack:ActivateConstantOnKidneyStone(tear)
 	if not swiftPlayer then return end
 
 	if (swiftSynergies:IsKidneyStoneActive(tear, player))
-	and swiftPlayer.Constant == false then
+		and swiftPlayer.Constant == false then
 		swiftPlayer.Constant = true
 		TriggerSwiftCooldown(player)
 	end
@@ -975,8 +931,8 @@ function swiftAttack:SwiftTrailUpdate(trail)
 			trail:SetColor(EEVEEMOD.GetRBG(tC), -1, -1, true, false)
 		else
 			local wC = weapon:GetSprite().Color
-			if swiftBase:AreColorsDifferent(wC, trail:GetData().TrailColor)
-				and swiftBase:AreColorsDifferent(wC, Color.Default) then
+			if VeeHelper.AreColorsDifferent(wC, trail:GetData().TrailColor)
+				and VeeHelper.AreColorsDifferent(wC, Color.Default) then
 				trail:SetColor(wC, -1, 1, true, false)
 			end
 		end

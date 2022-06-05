@@ -915,4 +915,33 @@ function VeeHelper.HeadDirectionToVector(player)
 	return Vector(-1, 0):Rotated(90 * player:GetHeadDirection())
 end
 
+function VeeHelper.AreColorsDifferent(c1, c2)
+	local isDifferent = false
+	if c1 ~= nil and c2 ~= nil then
+		if c1.R ~= c2.R or c1.G ~= c2.G or c1.B ~= c2.B or c1.RO ~= c2.RO or c1.GO ~= c2.GO or c1.BO ~= c2.BO then
+			isDifferent = true
+		end
+	end
+	return isDifferent
+end
+
+local playdoughColor = {
+	{ 0.9, 0, 0, 1 }, --red
+	{ 0, 0.7, 0, 0.9 }, --green
+	{ 0, 0, 1, 1 }, --blue
+	{ 0.8, 0.8, 0, 1 }, --yellow
+	{ 0, 0.5, 1, 0.9 }, --light blue
+	{ 0.6, 0.4, 0, 1 }, --light brown
+	{ 2, 0.1, 0.5, 1 }, --pink
+	{ 1.1, 0, 1.1, 0.9 }, --purple
+	{ 1, 0.1, 0, 1 } --dark orange
+}
+
+function VeeHelper.PlaydoughRandomColor()
+	local dC = Color.Default
+	local color = playdoughColor[EEVEEMOD.RandomNum(9)]
+	dC:SetColorize(color[1], color[2], color[3], color[4])
+	return dC
+end
+
 return VeeHelper

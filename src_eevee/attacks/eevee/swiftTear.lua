@@ -109,7 +109,7 @@ function swiftTear:RemoveSpiritProjectile(tear)
 	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
 
 	if not swiftPlayer then return end
-	
+
 	local multi = swiftSynergies:MultiShotCountInit(player)
 	if multi > 0 then return end
 	if (
@@ -158,7 +158,7 @@ local function BasicSwiftRotation(tear)
 end
 
 function swiftTear:SwiftTearUpdate(tear)
-	local ptrHashTear = tostring(GetPtrHash(tear))
+	--[[ 	local ptrHashTear = tostring(GetPtrHash(tear))
 	local swiftTearWeapon = swiftBase.Weapon[ptrHashTear]
 	local sprite = tear:GetSprite()
 
@@ -209,14 +209,14 @@ function swiftTear:SwiftTearUpdate(tear)
 				swiftTearWeapon.AfterFireRotation = swiftTearWeapon.AfterFireRotation - 20
 			end
 		end
-	end
+	end ]]
 end
 
 function swiftTear:OnSwiftStarDestroy(tear, splashType)
 	if tear.Variant ~= EEVEEMOD.TearVariant.SWIFT and tear.Variant ~= EEVEEMOD.TearVariant.SWIFT_BLOOD then return end
 
 	if splashType == "Wall" then return end
-	
+
 	EEVEEMOD.sfx:Play(EEVEEMOD.SoundEffect.SWIFT_HIT)
 	local splashPos = -15
 	local poofToPlay = EffectVariant.TEAR_POOF_B
@@ -237,7 +237,7 @@ function swiftTear:OnSwiftStarDestroy(tear, splashType)
 	sprite.Offset = Vector(0, splashPos)
 	sprite.Scale = Vector(tear.Scale, tear.Scale)
 	local color = Color.Default
-	if not swiftBase:AreColorsDifferent(tear.Color, Color.Default) then
+	if not VeeHelper.AreColorsDifferent(tear.Color, Color.Default) then
 		color = EEVEEMOD.TrailColor[tear.Variant]
 	else
 		color = tear.Color

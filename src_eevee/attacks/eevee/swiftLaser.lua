@@ -24,7 +24,7 @@ local function AssignSwiftLaserEffectData(player, effect, anglePos)
 		local tear = player:FireTear(effect.Position, Vector.Zero, Vector.Zero):ToTear()
 		tear.CollisionDamage = 0
 		local tC = tear:GetSprite().Color
-		if swiftBase:AreColorsDifferent(eC, tC) == true then
+		if VeeHelper.AreColorsDifferent(eC, tC) == true then
 			effect:SetColor(tC, -1, 1, false, false)
 		else
 			local colorRed = Color(1, 0, 0, 1, 0, 0, 0)
@@ -144,9 +144,9 @@ function swiftLaser:FireTechXLaser(parent, player, direction, knifeOverride)
 	swiftBase:InitSwiftWeapon(techX)
 	local ptrHashLaser = tostring(GetPtrHash(techX))
 	local swiftLaser = swiftBase.Weapon[ptrHashLaser]
-	
+
 	swiftLaser.HasFired = true
-	
+
 	if knifeOverride then
 		techX.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
 	end
@@ -166,7 +166,7 @@ function swiftLaser:FireBrimLaser(parent, player, direction, rotationOffset)
 	swiftBase:InitSwiftWeapon(brim)
 	local ptrHashLaser = tostring(GetPtrHash(brim))
 	local swiftLaser = swiftBase.Weapon[ptrHashLaser]
-	
+
 	swiftLaser.HasFired = true
 	brim.Parent = parent
 	brim.PositionOffset = Vector(0, -23)
@@ -194,7 +194,7 @@ function swiftLaser:FireTechLaser(parent, player, direction, isTech2)
 	swiftBase:InitSwiftWeapon(laser)
 	local ptrHashLaser = tostring(GetPtrHash(laser))
 	local swiftLaser = swiftBase.Weapon[ptrHashLaser]
-	
+
 	swiftLaser.HasFired = true
 	swiftLaser.Player = player
 	laser.Parent = parent
@@ -251,8 +251,8 @@ function swiftLaser:SwiftLaserEffectUpdate(effect)
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
 		effect:SetColor(EEVEEMOD.GetRBG(effect.Color), -1, 1, false, false)
 	end
-	
-	
+
+
 	if not swiftEffectWeapon.HasFired then
 		effect.Timeout = 2
 	else
@@ -271,7 +271,7 @@ function swiftLaser:SwiftLaserEffectUpdate(effect)
 			end
 			swiftEffectWeapon.LaserHasFired = true
 		end
-		
+
 		if swiftEffectWeapon.ConstantOrbit then
 			if player:GetFireDirection() ~= Direction.NO_DIRECTION then
 				effect.Timeout = 2

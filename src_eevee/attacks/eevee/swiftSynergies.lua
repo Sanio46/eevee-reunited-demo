@@ -27,7 +27,7 @@ local function IsItemWeaponActive(player)
 		end
 	end
 	for _, launcher in pairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.WONDEROUS_LAUNCHER, 0)) do
-		if VeeHelper.EntitySpawnedByPlayer(launcher, false)
+		if VeeHelper.EntitySpawnedByPlayer(launcher)
 			and launcher.SpawnerEntity:GetData().Identifier == player:GetData().Identifier then
 			weaponOut = true
 		end
@@ -134,134 +134,6 @@ function swiftSynergies:DelayTearFlags(weapon)
 	end
 end
 
-local MultiWeaponTypeCombos = {
-	[WeaponType.WEAPON_TECH_X] = CollectibleType.COLLECTIBLE_TECH_X,
-	[WeaponType.WEAPON_LASER] = CollectibleType.COLLECTIBLE_TECHNOLOGY,
-	[WeaponType.WEAPON_BOMBS] = CollectibleType.COLLECTIBLE_DR_FETUS,
-	[WeaponType.WEAPON_KNIFE] = CollectibleType.COLLECTIBLE_MOMS_KNIFE
-}
-
-local ItemToShotNum = {
-	[CollectibleType.COLLECTIBLE_20_20] = 1,
-	[CollectibleType.COLLECTIBLE_INNER_EYE] = 2,
-	[CollectibleType.COLLECTIBLE_MUTANT_SPIDER] = 3
-}
-
-function swiftSynergies:MultiShotCountInit(player)
-	local count = 0
-
-	--Basic multicount
-	for itemID, num in pairs(ItemToShotNum) do
-		if player:HasCollectible(itemID) then
-			count = count + num
-			if player:GetCollectibleNum(itemID) >= 2 then
-				count = count + (player:GetCollectibleNum(itemID) - 1)
-			end
-		end
-	end
-
-	--Reverse Hanged Man counts as another Inner Eye
-	if player:GetEffects():HasNullEffect(NullItemID.ID_REVERSE_HANGED_MAN) then
-		if not player:HasCollectible(CollectibleType.COLLECTIBLE_20_20)
-			and not player:HasCollectible(CollectibleType.COLLECTIBLE_INNER_EYE)
-			and not player:HasCollectible(CollectibleType.COLLECTIBLE_MUTANT_SPIDER)
-		then
-			count = count + 2
-		else
-			count = count + 1
-		end
-	end
-
-	--20/20 with other multi-shots removes its extra tear in trade for negating the tear delay
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_20_20) and
-		(
-		player:HasCollectible(CollectibleType.COLLECTIBLE_INNER_EYE)
-			or player:HasCollectible(CollectibleType.COLLECTIBLE_MUTANT_SPIDER)
-			or player:GetEffects():HasNullEffect(NullItemID.ID_REVERSE_HANGED_MAN)
-		)
-	then
-		count = count - 1
-	end
-
-	--Wiz items, with further Wiz's affecting the multi-tear count
-	local wizCount = 0
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_THE_WIZ) then
-		wizCount = wizCount + (1 * player:GetCollectibleNum(CollectibleType.COLLECTIBLE_THE_WIZ))
-	end
-	if player:HasPlayerForm(PlayerForm.PLAYERFORM_BABY) then
-		wizCount = wizCount + 2
-	end
-	if wizCount >= 3 then
-		count = wizCount - 2
-	end
-
-	--The weird interactions with Monstro's Lung specifically
-	if not player:HasWeaponType(WeaponType.WEAPON_MONSTROS_LUNGS) then
-		for weaponType, itemID in pairs(MultiWeaponTypeCombos) do
-			if player:HasWeaponType(weaponType) or player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE) then
-				if player:GetCollectibleNum(itemID) >= 2 then
-					count = count + (1 * (player:GetCollectibleNum(itemID) - 1))
-				end
-			end
-		end
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_MONSTROS_LUNG)
-			and player:GetCollectibleNum(CollectibleType.COLLECTIBLE_MONSTROS_LUNG) >= 2 then
-			count = count + (4 * player:GetCollectibleNum(CollectibleType.COLLECTIBLE_MONSTROS_LUNG))
-		end
-	elseif player:HasWeaponType(WeaponType.WEAPON_MONSTROS_LUNGS) then
-		count = count * 2
-		count = count + (5 * player:GetCollectibleNum(CollectibleType.COLLECTIBLE_MONSTROS_LUNG))
-	end
-
-	--Count cap
-	if count > 16 then
-		count = 16
-	end
-
-	return count
-end
-
-function swiftSynergies:BookwormShot(player)
-	local count = 0
-	if player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then
-		if EEVEEMOD.RandomNum(2) == 2 then
-			count = 1
-		end
-	end
-	return count
-end
-
-function swiftSynergies:ShouldFireExtraShot(player, itemID)
-	local currentLuck = player.Luck
-	if itemID == CollectibleType.COLLECTIBLE_MOMS_EYE then
-		local baseChance = 50
-		local maxChance = 100
-		local luckValue = 10
-		if VeeHelper.DoesLuckChanceTrigger(baseChance, maxChance, luckValue, currentLuck, EEVEEMOD.RunSeededRNG) then
-			return true
-		else
-			return false
-		end
-	end
-	if itemID == CollectibleType.COLLECTIBLE_LOKIS_HORNS then
-		local baseChance = 25
-		local maxChance = 100
-		local luckValue = 5
-		if VeeHelper.DoesLuckChanceTrigger(baseChance, maxChance, luckValue, currentLuck, EEVEEMOD.RunSeededRNG) then
-			return true
-		else
-			return false
-		end
-	end
-	if itemID == CollectibleType.COLLECTIBLE_EYE_SORE then
-		if EEVEEMOD.RandomNum(2) == 2 then
-			return true
-		else
-			return false
-		end
-	end
-end
-
 --[[function swiftSynergies:TinyPlanetDistance(player, weapon)
 	local ptrHashPlayer = tostring(GetPtrHash(player))
 	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
@@ -341,49 +213,6 @@ function swiftSynergies:AntiGravityDuration(player, weapon)
 			swiftWeapon.AntiGravDir = nil
 			swiftWeapon.AntiGravTimer = nil
 		end
-	end
-end
-
-function swiftSynergies:EyeItemDamageChance(player, weapon)
-	local shouldBeBlood
-	if weapon.Type == EntityType.ENTITY_TEAR then --All other weapon types seem to handle the synergy naturally
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_STYE) then
-			if EEVEEMOD.RandomNum(2) == 2 then
-				local c = weapon:GetSprite().Color
-				weapon.CollisionDamage = weapon.CollisionDamage / 1.24
-				weapon.Height = weapon.Height + 5
-				weapon.Velocity = weapon.Velocity:Resized(1.2)
-				if c.R == 1.5 and c.G == 2.0 and c.B == 2.0 then
-					weapon:SetColor(Color(1, 1, 1, 1, c.RO, c.GO, c.BO), -1, 0, true, false)
-				end
-			end
-		end
-		if player:GetEffects():HasCollectibleEffect(CollectibleType.COLLECTIBLE_SCOOPER) then
-			if EEVEEMOD.RandomNum(2) == 2 then
-				weapon.CollisionDamage = weapon.CollisionDamage / 1.34
-				shouldBeBlood = false
-			end
-		end
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_BLOOD_CLOT) then
-			if EEVEEMOD.RandomNum(2) == 2 then
-				weapon.CollisionDamage = weapon.CollisionDamage + 1
-				weapon.Height = weapon.Height - 10
-				shouldBeBlood = true
-			end
-		end
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_CHEMICAL_PEEL) then
-			if EEVEEMOD.RandomNum(2) == 2 then
-				weapon.CollisionDamage = weapon.CollisionDamage + 2
-				shouldBeBlood = true
-			end
-		end
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_PEEPER) then
-			if EEVEEMOD.RandomNum(2) == 2 then
-				weapon.CollisionDamage = weapon.CollisionDamage * 1.34
-				shouldBeBlood = true
-			end
-		end
-		weapon:GetData().ForceBlood = shouldBeBlood
 	end
 end
 

@@ -121,7 +121,7 @@ end
 function swiftBase:AssignSwiftSprite(tear)
 
 	if VeeHelper.TearVariantBlacklist[tear.Variant]
-	or EEVEEMOD.KeepTearVariants[tear.Variant] then
+		or EEVEEMOD.KeepTearVariants[tear.Variant] then
 		return
 	end
 
@@ -159,7 +159,7 @@ function swiftBase:AddBasicSwiftTrail(weapon)
 	local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):ToEffect()
 	local tC = EEVEEMOD.TrailColor[EEVEEMOD.TearVariant.SWIFT]
 	local data = weapon:GetData()
-	
+
 	data.BasicSwiftTrail = trail
 	trail.Parent = weapon
 	trail.Color = tC
@@ -220,28 +220,6 @@ function swiftBase:SwiftFireDelay(player)
 	return nextTearTime
 end
 
-function swiftBase:TryFireToEnemy(player, weapon, fireDir)
-	local newFireDir = fireDir
-	local radius = player.TearRange / 2
-	local closestEnemy = VeeHelper.DetectNearestEnemy(weapon, radius)
-	local dirToEnemy = nil
-	local angleLimit = 30
-
-	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)
-		and not player:HasCollectible(CollectibleType.COLLECTIBLE_TRACTOR_BEAM)
-		and not player:HasCollectible(CollectibleType.COLLECTIBLE_EYE_OF_THE_OCCULT)
-		and not swiftBase:IsSwiftLaserEffect(weapon)
-	then
-		if closestEnemy ~= nil then
-			dirToEnemy = (closestEnemy.Position - weapon.Position):Normalized()
-
-			if math.abs(math.abs(dirToEnemy:GetAngleDegrees()) - math.abs(fireDir:GetAngleDegrees())) <= angleLimit then
-				newFireDir = VeeHelper.AddTearVelocity(dirToEnemy, player.ShotSpeed * 10, player, true)
-			end
-		end
-	end
-	return newFireDir
-end
 
 function swiftBase:SwiftShotDelay(weapon, player)
 	local ptrHashPlayer = tostring(GetPtrHash(player))
@@ -304,7 +282,7 @@ function swiftBase:AddSwiftTrail(weapon, player)
 
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
 		if weapon.Type == EntityType.ENTITY_TEAR then
-			if not swiftBase:AreColorsDifferent(wC, Color.Default) and not swiftWeapon.IsFakeKnife then
+			if not VeeHelper.AreColorsDifferent(wC, Color.Default) and not swiftWeapon.IsFakeKnife then
 				if EEVEEMOD.TrailColor[weapon.Variant] ~= nil then
 					tC = EEVEEMOD.TrailColor[weapon.Variant]
 				else
@@ -388,7 +366,7 @@ function swiftBase:AssignSwiftBasicData(weapon, player, anglePos)
 		if player:HasCollectible(CollectibleType.COLLECTIBLE_KIDNEY_STONE) then
 			weapon.Height = weapon.Height - 16
 		elseif player:HasCollectible(CollectibleType.COLLECTIBLE_NUMBER_ONE)
-		or player:HasCollectible(CollectibleType.COLLECTIBLE_PLUTO) then
+			or player:HasCollectible(CollectibleType.COLLECTIBLE_PLUTO) then
 			weapon.Height = weapon.Height - 8
 		end
 		swiftWeapon.HoldTearHeight = weapon.Height
@@ -416,36 +394,7 @@ function swiftBase:AssignSwiftBasicData(weapon, player, anglePos)
 	end
 end
 
-local playdoughColor = {
-	{ 0.9, 0, 0, 1 }, --red
-	{ 0, 0.7, 0, 0.9 }, --green
-	{ 0, 0, 1, 1 }, --blue
-	{ 0.8, 0.8, 0, 1 }, --yellow
-	{ 0, 0.5, 1, 0.9 }, --light blue
-	{ 0.6, 0.4, 0, 1 }, --light brown
-	{ 2, 0.1, 0.5, 1 }, --pink
-	{ 1.1, 0, 1.1, 0.9 }, --purple
-	{ 1, 0.1, 0, 1 } --dark orange
-}
 
-function swiftBase:PlaydoughRandomColor()
-	local dC = Color.Default
-	local color = playdoughColor[EEVEEMOD.RandomNum(9)]
-	dC:SetColorize(color[1], color[2], color[3], color[4])
-	return dC
-end
-
-function swiftBase:AreColorsDifferent(c1, c2)
-	local isDifferent = false
-	if c1 ~= nil and c2 ~= nil then
-		--print(c1.R, c1.G, c1.B, c1.RO, c1.GO, c1.BO)
-		--print(c2.R, c2.G, c2.B, c2.RO, c2.GO, c2.BO)
-		if c1.R ~= c2.R or c1.G ~= c2.G or c1.B ~= c2.B or c1.RO ~= c2.RO or c1.GO ~= c2.GO or c1.BO ~= c2.BO then
-			isDifferent = true
-		end
-	end
-	return isDifferent
-end
 
 function swiftBase:IsSwiftLaserEffect(effect)
 	local variant = nil
