@@ -99,7 +99,7 @@ function swiftTear:MakeStarOnTearInit(tear)
 		local playerType = player:GetPlayerType()
 
 		if playerType == EEVEEMOD.PlayerType.EEVEE then
-			swiftBase:AssignSwiftSprite(tear)
+			swiftTear:AssignSwiftSprite(tear)
 			swiftBase:PlaySwiftFire()
 		end
 	end

@@ -16,6 +16,7 @@ local weaponTypeOverrides = {
 	WeaponType.WEAPON_FETUS,
 }
 
+---@param player EntityPlayer
 local function IsItemWeaponActive(player)
 	local weaponOut = false
 	local weaponEnt = player:GetActiveWeaponEntity()
@@ -35,13 +36,11 @@ local function IsItemWeaponActive(player)
 	return weaponOut
 end
 
-function swiftSynergies:WeaponShouldOverrideSwift(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
+---@param player EntityPlayer
+function swiftSynergies:ToggleCanShootPerWeaponType(player)
 	local override = false
-	if not swiftPlayer.ShouldOverrideSwift then
-		swiftPlayer.ShouldOverrideSwift = false
-	end
+	local canShoot = player:CanShoot()
+
 	for i = 1, #weaponTypeOverrides do
 		if player:HasWeaponType(weaponTypeOverrides[i])
 			or IsItemWeaponActive(player) then
@@ -49,54 +48,38 @@ function swiftSynergies:WeaponShouldOverrideSwift(player)
 		end
 	end
 	if override then
-		if not swiftPlayer.ShouldOverrideSwift then
-			swiftPlayer.ShouldOverrideSwift = true
-			if not player:GetData().WonderLauncher then
-				VeeHelper.SetCanShoot(player, true)
-			end
+		if canShoot == false
+			and not player:GetData().WonderLauncher then
+			VeeHelper.SetCanShoot(player, true)
 		end
-	elseif not override and (player:CanShoot() == true or swiftPlayer.ShouldOverrideSwift == true) then
-		swiftPlayer.ShouldOverrideSwift = false
+	elseif not override and canShoot == true then
 		VeeHelper.SetCanShoot(player, false)
 	end
 	return override
 end
 
-function swiftSynergies:ShouldAttachTech2Laser(weapon, player)
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_TECHNOLOGY_2) then
-		local ptrHashWeapon = tostring(GetPtrHash(weapon))
-		local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
+---@param swiftData SwiftInstance
+---@param weapon Weapon
+function swiftSynergies:ChocolateMilkDamageScaling(swiftData, weapon)
+	local player = swiftData.Player
 
-		if swiftWeapon and swiftWeapon.HasFired == false then
-			return true
-		end
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK)
+		or player:HasWeaponType(WeaponType.WEAPON_TECH_X)
+	then
+		return
 	end
-end
 
-function swiftSynergies:ChocolateMilkDamageScaling(weapon, player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
+	local damageMult = 0.5 + (1.5 * (swiftData.TotalDuration - swiftData.DurationTimer) / swiftData.TotalDuration)
+	local damageCalc = player.Damage * damageMult
 
-
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK)
-		and not player:HasWeaponType(WeaponType.WEAPON_TECH_X)
-		and not swiftWeapon.IsFakeKnife
-		and swiftPlayer.AttackDuration > 0
-		and swiftPlayer.AttackDurationSet
-		and swiftWeapon.HasFired == false then
-		local damageMult = 0.5 + (1.5 * (swiftPlayer.AttackDurationSet - swiftPlayer.AttackDuration) / swiftPlayer.AttackDurationSet)
-		local damageCalc = player.Damage * damageMult
-
-		if damageCalc < 0.1 then
-			weapon.CollisionDamage = 0.1
-		elseif damageCalc > (player.Damage * 2) then
-			weapon.CollisionDamage = (player.Damage * 2)
-		else
-			weapon.CollisionDamage = damageCalc
-		end
+	if damageCalc < 0.1 then
+		weapon.CollisionDamage = 0.1
+	elseif damageCalc > (player.Damage * 2) then
+		weapon.CollisionDamage = (player.Damage * 2)
+	else
+		weapon.CollisionDamage = damageCalc
 	end
+
 end
 
 local TearFlagsToDelay = {
@@ -111,6 +94,7 @@ local TearFlagsToDelay = {
 	TearFlags.TEAR_TURN_HORIZONTAL -- Brain Worm
 }
 
+---@param weapon Weapon
 function swiftSynergies:DelayTearFlags(weapon)
 	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
 
@@ -130,12 +114,8 @@ function swiftSynergies:DelayTearFlags(weapon)
 	end
 end
 
---[[function swiftSynergies:TinyPlanetDistance(player, weapon)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-	
+function swiftSynergies:TinyPlanetDistance(player, weapon)
+	--[[	
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_TINY_PLANET) then
 		if swiftPlayer
 		and swiftPlayer.AttackDuration > 0
@@ -147,11 +127,11 @@ end
 			local distanceCalc = (0.5*(swiftPlayer.AttackDurationSet - swiftPlayer.AttackDuration) / swiftPlayer.AttackDurationSet)
 			swiftWeapon.DistFromPlayer = swiftWeapon.OriginalDist - (swiftWeapon.OriginalDist * distanceCalc)
 		end
-	end
-end]]
+	end ]]
+end
 
 function swiftSynergies:IsKidneyStoneActive(tear, player)
-	local isKidneyActive = false
+	--[[ local isKidneyActive = false
 	local playerType = player:GetPlayerType()
 
 	if playerType ~= EEVEEMOD.PlayerType.EEVEE
@@ -166,50 +146,20 @@ function swiftSynergies:IsKidneyStoneActive(tear, player)
 		end
 	end
 
-	return isKidneyActive
+	return isKidneyActive ]]
 end
 
-function swiftSynergies:KidneyStoneDuration(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	if swiftPlayer
-		and swiftPlayer.KidneyTimer then
-		if swiftPlayer.KidneyTimer > 0 then
-			swiftPlayer.KidneyTimer = swiftPlayer.KidneyTimer - 1
-		else
-			swiftPlayer.KidneyTimer = nil
-		end
-	end
-end
-
-function swiftSynergies:AntiGravityDuration(player, weapon)
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-
-	if swiftWeapon
-		and swiftWeapon.AntiGravDir ~= nil
-		and swiftWeapon.AntiGravTimer ~= nil
+---@param swiftWeapon SwiftWeapon
+---@param weapon Weapon
+function swiftSynergies:AntiGravityBlink(swiftWeapon, player, weapon)
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_ANTI_GRAVITY)
+		or swiftWeapon.FireDelay <= 0
+		or swiftWeapon.FireDelay % 15 ~= 0
 	then
-		if swiftWeapon.AntiGravTimer > 0 and player:GetFireDirection() ~= Direction.NO_DIRECTION then
-			if swiftWeapon.AntiGravTimer % 15 == 0 then
-				local c = weapon:GetSprite().Color
-				if swiftWeapon.IsFakeKnife then
-					c = weapon.Child:GetSprite().Color
-					weapon.Child:SetColor(Color(c.R, c.G, c.B, 1, 0, 0.5, 0.5), 14, 2, true, false)
-				else
-					weapon:SetColor(Color(c.R, c.G, c.B, 1, 0, 0.5, 0.5), 14, 2, true, false)
-				end
-			end
-			swiftWeapon.AntiGravTimer = swiftWeapon.AntiGravTimer - 1
-			if weapon.Type == EntityType.ENTITY_TEAR and swiftWeapon.AntiGravHeight then
-				weapon.Height = swiftWeapon.AntiGravHeight
-			end
-		else
-			weapon.Velocity = swiftBase:TryFireToEnemy(player, weapon, swiftWeapon.AntiGravDir)
-			swiftWeapon.AntiGravDir = nil
-			swiftWeapon.AntiGravTimer = nil
-		end
+		return
 	end
+	local c = weapon:GetSprite().Color
+	weapon:SetColor(Color(c.R, c.G, c.B, 1, 0, 0.5, 0.5), 14, 2, true, false)
 end
 
 function swiftSynergies:TechXKnifeUpdate(laser, tearKnife)

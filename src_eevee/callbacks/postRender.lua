@@ -4,18 +4,15 @@ local earbuds = require("src_eevee.items.collectibles.hiTechEarbuds")
 local rgbCycle = require("src_eevee.misc.rgbCycle")
 local activeItemRender = require("src_eevee.items.activeItemRender")
 local sewingMachine = require("src_eevee.modsupport.sewingMachine")
-local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
 
 function postRender:main()
 	rgbCycle:onRender()
 	earbuds:RenderVolumeBar()
 	activeItemRender:OnRender()
-	swiftAttack:onRender()
 	--postRender:ItemSwap()
 	if Sewn_API then
 		sewingMachine:LevelBarOnRender()
 	end
-	--swiftAttack:onRender()
 	--[[ postRender:RecordPlayingSounds()
  	postRender:RenderText() ]]
 	--[[ local players = VeeHelper.GetAllPlayers()

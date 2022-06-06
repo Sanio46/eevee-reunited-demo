@@ -201,6 +201,18 @@ function swiftBase:IsSwiftLaserEffect(effect)
 	return variant
 end
 
+function swiftBase:SwiftTearFlags(weapon, addPiercing, addHoming)
+	if not weapon:HasTearFlags(TearFlags.TEAR_SPECTRAL) then
+		weapon:AddTearFlags(TearFlags.TEAR_SPECTRAL)
+	end
+	if addPiercing and not weapon:HasTearFlags(TearFlags.TEAR_PIERCING) then
+		weapon:AddTearFlags(TearFlags.TEAR_PIERCING)
+	end
+	if addHoming and not weapon:HasTearFlags(TearFlags.TEAR_HOMING) then
+		weapon:AddTearFlags(TearFlags.TEAR_HOMING)
+	end
+end
+
 --[[ local Template_SwiftPlayer = {
 	ShouldOverrideSwift = false,
 	Instance = {},
@@ -452,17 +464,6 @@ function swiftBase:SwiftShotDelay(weapon, player)
 	return delay
 end
 
-function swiftBase:SwiftTearFlags(weapon, addPiercing, addHoming)
-	if not weapon:HasTearFlags(TearFlags.TEAR_SPECTRAL) then
-		weapon:AddTearFlags(TearFlags.TEAR_SPECTRAL)
-	end
-	if addPiercing and not weapon:HasTearFlags(TearFlags.TEAR_PIERCING) then
-		weapon:AddTearFlags(TearFlags.TEAR_PIERCING)
-	end
-	if addHoming and not weapon:HasTearFlags(TearFlags.TEAR_HOMING) then
-		weapon:AddTearFlags(TearFlags.TEAR_HOMING)
-	end
-end
 
 function swiftBase:AddSwiftTrail(weapon, player)
 	local ptrHashPlayer = tostring(GetPtrHash(player))

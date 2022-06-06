@@ -14,7 +14,7 @@ function postNewRoom:main()
 	for i = 1, #players do
 		local player = players[i]
 		pokeball:ResetBallsOnNewRoom(player)
-		swiftAttack:RespawnSwiftPerRoom(player)
+		--swiftAttack:RespawnSwiftPerRoom(player)
 		ccp:OnNewRoom(player)
 		gigantafluff:CharmEnemiesOnNewRoom(player)
 		wonderousLauncher:OnNewRoom(player)

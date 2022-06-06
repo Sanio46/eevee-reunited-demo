@@ -17,7 +17,7 @@ function postEffectUpdate:main(effect)
 	if swiftBase:IsSwiftLaserEffect(effect)
 		or effect.Variant == EffectVariant.EVIL_EYE then
 		if effect.Variant == EffectVariant.EVIL_EYE then
-			swiftAttack:InitSwiftEvilEye(effect)
+			--swiftAttack:InitSwiftEvilEye(effect)
 		end
 
 		swiftAttack:SwiftAttackUpdate(effect)

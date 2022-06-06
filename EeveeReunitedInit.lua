@@ -69,8 +69,6 @@ function EeveeReunited:init(j)
 	require(mods .. "sewingMachine")
 	require(mods .. "uniqueCharacterItems")
 
-	require("src_eevee.attacks.eevee.swiftAttack2")
-
 	if Encyclopedia then
 		local encyclopedia = require(mods .. "encyclopedia")
 		encyclopedia.Init(EeveeReunited)

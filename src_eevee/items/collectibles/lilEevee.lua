@@ -2,7 +2,7 @@
 
 local lilEevee = {}
 
-local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
+local swiftTear = require("src_eevee.attacks.eevee.swiftTear")
 
 local vineDuration = 45
 
@@ -177,7 +177,7 @@ local function LilEeveeFireTear(familiar, player)
 	tear:Update()
 
 	if familiar.State == EvolutionStates.EEVEE then
-		swiftBase:AssignBasicSwiftStar(tear)
+		swiftTear:AssignSwiftSprite(tear)
 	end
 
 	--Modifiers
