@@ -208,7 +208,7 @@ function swiftAttack:SwiftAttackUpdate(weapon)
 	--swiftAttack:ShouldRestoreSwiftTrail(player, weapon)
 	if swiftWeapon.HasFired then return end
 	
-	swiftSynergies:AntiGravityBlink(swiftData, swiftWeapon, weapon)
+	swiftSynergies:AntiGravityBlink(swiftWeapon, player, weapon)
 	swiftSynergies:ChocolateMilkDamageScaling(swiftData, weapon)
 	swiftAttack:PreFireUpdate(swiftData, swiftWeapon, weapon)
 
@@ -313,12 +313,13 @@ function swiftAttack:OnPostPlayerUpdate(player)
 end
 
 function swiftAttack:SwiftTrailUpdate(trail)
+	local data = trail:GetData()
 	if trail.Parent then
 		local weapon = trail.Parent
 		local room = EEVEEMOD.game:GetRoom()
 		local tC = trail.Color
 
-		if trail:GetData().EeveeRGB == true then
+		if data.EeveeRGB == true then
 			trail:SetColor(EEVEEMOD.GetRBG(tC), -1, -1, true, false)
 		else
 			local wC = weapon:GetSprite().Color
@@ -344,7 +345,7 @@ function swiftAttack:SwiftTrailUpdate(trail)
 			trail.Position = Vector(weapon.Position.X, weapon.Position.Y + weapon.PositionOffset.Y - heightDif)
 		end
 	else
-		if trail:GetData().SwiftTrail then
+		if data.SwiftTrail then
 			trail:Remove()
 		end
 	end

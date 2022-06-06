@@ -1,41 +1,5 @@
 local swiftBase = {}
 
-function swiftBase:AddSwiftTrail(weapon, player)
-	local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):ToEffect()
-	local wC = weapon:GetSprite().Color
-	local tC = Color(wC.R, wC.G, wC.B, 1, wC.RO, wC.GO, wC.BO)
-
-	if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
-		if weapon.Type == EntityType.ENTITY_TEAR then
-			if not VeeHelper.AreColorsDifferent(wC, Color.Default) then
-				if EEVEEMOD.TrailColor[weapon.Variant] ~= nil then
-					tC = EEVEEMOD.TrailColor[weapon.Variant]
-				else
-					tC = EEVEEMOD.TrailColor[EEVEEMOD.TearVariant.SWIFT]
-				end
-			end
-		end
-	else
-		if weapon.Type ~= EntityType.ENTITY_EFFECT and weapon.Type ~= EntityType.ENTITY_LASER then
-			tC = VeeHelper.PlaydoughRandomColor()
-		else
-			trail:GetData().EeveeRGB = true
-		end
-	end
-	trail.Parent = weapon
-	trail:GetData().SwiftTrail = true
-	trail:GetData().TrailColor = tC
-	trail.Color = tC
-	trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 15, 1, true, false)
-	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
-	if swiftWeapon then
-		swiftWeapon.Trail = trail
-	end
-	trail.MinRadius = 0.2
-	trail.RenderZOffset = -10
-	trail:Update()
-end
-
 --Instance Types:
 --Default: The regular Swift attack as you know it
 --???:
@@ -101,6 +65,7 @@ function swiftBase:InitSwiftWeapon(swiftData, weapon)
 			swiftWeapon[variableName] = value
 		end
 		swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
+		swiftBase:AddSwiftTrail(weapon, swiftData.Player)
 	end
 end
 
@@ -211,6 +176,44 @@ function swiftBase:SwiftTearFlags(weapon, addPiercing, addHoming)
 	if addHoming and not weapon:HasTearFlags(TearFlags.TEAR_HOMING) then
 		weapon:AddTearFlags(TearFlags.TEAR_HOMING)
 	end
+end
+
+---@param weapon Weapon
+---@param player EntityPlayer
+function swiftBase:AddSwiftTrail(weapon, player)
+	---@type EntityEffect
+	local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):ToEffect()
+	local data = trail:GetData()
+	local wC = weapon:GetSprite().Color
+	local tC = Color(wC.R, wC.G, wC.B, 1, wC.RO, wC.GO, wC.BO)
+
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
+		if weapon.Type == EntityType.ENTITY_TEAR then
+			if not VeeHelper.AreColorsDifferent(wC, Color.Default) then
+				if EEVEEMOD.TrailColor[weapon.Variant] ~= nil then
+					tC = EEVEEMOD.TrailColor[weapon.Variant]
+				end
+			end
+		end
+	else
+		if weapon.Type ~= EntityType.ENTITY_EFFECT and weapon.Type ~= EntityType.ENTITY_LASER then
+			tC = VeeHelper.PlaydoughRandomColor()
+		else
+			data.EeveeRGB = true
+		end
+	end
+	trail.Parent = weapon
+	data.SwiftTrail = true
+	data.TrailColor = tC
+	trail:SetColor(tC, -1, 1, false, false)
+	trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 15, 1, true, false)
+	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
+	if swiftWeapon then
+		swiftWeapon.Trail = trail
+	end
+	trail.MinRadius = 0.2
+	trail.RenderZOffset = -10
+	trail:Update()
 end
 
 --[[ local Template_SwiftPlayer = {
@@ -465,50 +468,6 @@ function swiftBase:SwiftShotDelay(weapon, player)
 end
 
 
-function swiftBase:AddSwiftTrail(weapon, player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-
-	if swiftPlayer == nil
-		or swiftWeapon == nil
-		or (swiftPlayer.Constant and not swiftWeapon.ConstantOrbit and not player:HasWeaponType(WeaponType.WEAPON_LUDOVICO_TECHNIQUE))
-	then
-		return
-	end
-
-	local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):ToEffect()
-	local wC = weapon:GetSprite().Color
-	local tC = Color(wC.R, wC.G, wC.B, 1, wC.RO, wC.GO, wC.BO)
-
-	if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
-		if weapon.Type == EntityType.ENTITY_TEAR then
-			if not VeeHelper.AreColorsDifferent(wC, Color.Default) and not swiftWeapon.IsFakeKnife then
-				if EEVEEMOD.TrailColor[weapon.Variant] ~= nil then
-					tC = EEVEEMOD.TrailColor[weapon.Variant]
-				else
-					tC = EEVEEMOD.TrailColor[EEVEEMOD.TearVariant.SWIFT]
-				end
-			end
-		end
-	else
-		if weapon.Type ~= EntityType.ENTITY_EFFECT and weapon.Type ~= EntityType.ENTITY_LASER then
-			tC = swiftBase:PlaydoughRandomColor()
-		else
-			trail:GetData().EeveeRGB = true
-		end
-	end
-	trail.Parent = weapon
-	trail:GetData().SwiftTrail = true
-	trail:GetData().TrailColor = tC
-	trail.Color = tC
-	trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 15, 1, true, false)
-	swiftWeapon.Trail = trail
-	trail.MinRadius = 0.2
-	trail.RenderZOffset = -10
-	trail:Update()
-end
 
 function swiftBase:SwiftTearDistanceFromPlayer(player)
 	local distFromPlayer = 50

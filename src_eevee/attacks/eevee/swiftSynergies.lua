@@ -150,6 +150,7 @@ function swiftSynergies:IsKidneyStoneActive(tear, player)
 end
 
 ---@param swiftWeapon SwiftWeapon
+---@param player EntityPlayer
 ---@param weapon Weapon
 function swiftSynergies:AntiGravityBlink(swiftWeapon, player, weapon)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_ANTI_GRAVITY)
