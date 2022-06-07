@@ -498,7 +498,7 @@ end
 
 ---@param launcher EntityEffect
 function wonderousLauncher:FireHandling(launcher)
-	if VeeHelper.EntitySpawnedByPlayer(launcher, false) then
+	if VeeHelper.EntitySpawnedByPlayer(launcher) then
 		local player = launcher.SpawnerEntity:ToPlayer()
 		local sprite = launcher:GetSprite()
 		local data = launcher:GetData()

@@ -103,7 +103,7 @@ end
 
 ---@param weapon Weapon
 function triggerOnFire:OnWeaponInit(weapon)
-	if VeeHelper.EntitySpawnedByPlayer(weapon, true) then
+	if VeeHelper.EntitySpawnedByPlayer(weapon) then
 		local player = weapon.SpawnerEntity:ToPlayer() or weapon.SpawnerEntity:ToFamiliar().Player
 
 		if EntTypeIsWeaponType(weapon, player) then

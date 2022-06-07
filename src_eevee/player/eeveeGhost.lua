@@ -26,7 +26,7 @@ end
 
 ---@param effect EntityEffect
 function eeveeGhost:KillOnVadeRetro(effect)
-	if VeeHelper.EntitySpawnedByPlayer(effect, false) then
+	if VeeHelper.EntitySpawnedByPlayer(effect) then
 		local player = effect.SpawnerEntity:ToPlayer()
 		local sprite = effect:GetSprite()
 		local playerType = player:GetPlayerType()
