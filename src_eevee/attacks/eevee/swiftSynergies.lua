@@ -1,5 +1,4 @@
 local swiftSynergies = {}
-local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 
 --This isn't for every single synergy, as to why lasers, knives, etc are in their own file. Those are for the different weapon types.
 --This file is more of the synergies that will apply to the swift attack at varying points in the process of it, depending on your items.
@@ -95,9 +94,7 @@ local TearFlagsToDelay = {
 }
 
 ---@param weapon Weapon
-function swiftSynergies:DelayTearFlags(weapon)
-	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
-
+function swiftSynergies:DelayTearFlags(swiftWeapon, weapon)
 	if not weapon:ToEffect() then
 		for _, tearFlag in pairs(TearFlagsToDelay) do
 			if swiftWeapon.HasFired == false then
@@ -163,12 +160,11 @@ function swiftSynergies:AntiGravityBlink(swiftWeapon, player, weapon)
 	weapon:SetColor(Color(c.R, c.G, c.B, 1, 0, 0.5, 0.5), 14, 2, true, false)
 end
 
-function swiftSynergies:TechXKnifeUpdate(laser, tearKnife)
+function swiftSynergies:TechXKnifeUpdate(swiftWeapon, laser, tearKnife)
 	if tearKnife.Type == EntityType.ENTITY_TEAR
 		and laser.SubType == LaserSubType.LASER_SUBTYPE_RING_PROJECTILE
 	then
 		local ptrHashWeapon = tostring(GetPtrHash(tearKnife))
-		local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
 
 		laser.Position = tearKnife.Position
 

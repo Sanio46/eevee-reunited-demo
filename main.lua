@@ -6,7 +6,7 @@
 --Black Candle's costume on Eevee does not line up correctly
 --(FIXED?) Swift stars constantly splash on collision with friendly enemies and Stoneys, and possibly other entities.
 --(WIP) Spirit Sword with Eevee stops spawning stars when transitioning rooms
---(FIXED) Any items that would grant Eevee a unique hair costume are not applied if picked up while transitioning rooms
+--Any items that would grant Eevee a unique hair costume are not applied if picked up while transitioning rooms
 --(WIP) Anything that involves constantly changing your firerate at a rapid pace breaks Swift, usually causing it to be unable to fire. (This will take a while to fix...)
 --Swift's Brimstone lasers are invisible with Chocolate Milk
 --(FIXED) All laser weapon types deal extremely low damage with Chocolate Milk

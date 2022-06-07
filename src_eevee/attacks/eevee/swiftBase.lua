@@ -3,7 +3,7 @@ local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
 
 --Instance Types:
 --Default: The regular Swift attack as you know it
---???:
+--Anti-Gravity: Attack stays in place, revolving around the spot it was ready to fire at. Fired automatically if the player stops firing themselves.
 --???:
 --???:
 --???:
@@ -22,7 +22,7 @@ swiftBase.swiftInstanceData = {
 	WeaponSpawnTimer = 0,
 	CanFire = false,
 	Rotation = 0,
-	NumWeaponsSpawned = 1,
+	NumWeaponsSpawned = 0,
 	NumWeaponsToSpawn = 5,
 	NumWeaponsDead = 0,
 	ShotMultiplier = 1,
@@ -55,11 +55,18 @@ swiftBase.Instances = {}
 ---@type SwiftWeapon[]
 swiftBase.Weapons = {}
 
+---@param swiftData SwiftInstance
+function swiftBase:GetInstanceType(swiftData)
+	local instanceType = "Default"
+	if swiftData.Player:HasCollectible(CollectibleType.COLLECTIBLE_ANTI_GRAVITY) then
+		instanceType = "Anti-Gravity"
+	end
+	return instanceType
+end
 
 ---@param swiftData SwiftInstance
 ---@param weapon Weapon
 function swiftBase:InitSwiftWeapon(swiftData, weapon)
-	table.insert(swiftData.ActiveWeapons, weapon)
 	local ptrHashWeapon = tostring(GetPtrHash(weapon))
 	if swiftBase.Weapons[ptrHashWeapon] == nil then
 		swiftBase.Weapons[ptrHashWeapon] = {}
@@ -69,19 +76,25 @@ function swiftBase:InitSwiftWeapon(swiftData, weapon)
 		end
 		swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
 		swiftBase:AddSwiftTrail(weapon, swiftData.Player)
+		table.insert(swiftData.ActiveWeapons, weapon)
 	end
 	return swiftBase.Weapons[ptrHashWeapon]
+end
+
+---@param swiftData SwiftInstance
+function swiftBase:GetWeaponFireDelay(swiftData)
+	return (swiftBase:GetFireDelay(swiftData.Player) / (swiftData.NumWeaponsToSpawn / swiftData.NumWeaponsSpawned))
 end
 
 ---@param swiftData SwiftInstance
 ---@param swiftWeapon SwiftWeapon
 ---@param weapon Weapon
 function swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
+	swiftWeapon.ParentInstance = swiftData
 	swiftWeapon.StartingAngle = swiftBase:GetStartingAngle(swiftData)
 	swiftWeapon.OrbitDistance = swiftBase:SwiftOrbitDistance(swiftData.Player)
-	swiftWeapon.ParentInstance = swiftData
 	swiftWeapon.ShootDirection = VeeHelper.GetIsaacShootingDirection(swiftData.Player, weapon.Position)
-	local fireDelay = (swiftBase:GetFireDelay(swiftData.Player) / (swiftData.NumWeaponsToSpawn / swiftData.NumWeaponsSpawned))
+	local fireDelay = swiftBase:GetWeaponFireDelay(swiftData)
 	swiftWeapon.FireDelay = fireDelay
 	if weapon:ToTear() then
 		swiftWeapon.StartingAccel = weapon.FallingAcceleration
@@ -90,12 +103,8 @@ function swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
 end
 
 ---@param swiftData SwiftInstance
-function swiftBase:GetStartingAngleAndPosition(swiftData)
-	local player = swiftData.Player
-	local parent = swiftData.Parent
-	local spawnPos = swiftBase:GetStartingAngle(swiftData):Resized(swiftBase:SwiftOrbitDistance(swiftData.Player)):Rotated(swiftData.Rotation)
-	local parentPos = parent:ToPlayer() and (player.Position - player.TearsOffset) or parent.Position
-	return spawnPos, parentPos
+function swiftBase:GetAdjustedStartingAngle(swiftData)
+	return swiftBase:GetStartingAngle(swiftData):Resized(swiftBase:SwiftOrbitDistance(swiftData.Player)):Rotated(swiftData.Rotation)
 end
 
 function swiftBase:PlaySwiftFire()
@@ -178,21 +187,6 @@ function swiftBase:IsSwiftLaserEffect(weapon)
 	end
 
 	return variant
-end
-
----@param weapon Weapon
----@param addPiercing boolean
----@param addHoming boolean
-function swiftBase:SwiftTearFlags(weapon, addPiercing, addHoming)
-	if not weapon:HasTearFlags(TearFlags.TEAR_SPECTRAL) then
-		weapon:AddTearFlags(TearFlags.TEAR_SPECTRAL)
-	end
-	if addPiercing and not weapon:HasTearFlags(TearFlags.TEAR_PIERCING) then
-		weapon:AddTearFlags(TearFlags.TEAR_PIERCING)
-	end
-	if addHoming and not weapon:HasTearFlags(TearFlags.TEAR_HOMING) then
-		weapon:AddTearFlags(TearFlags.TEAR_HOMING)
-	end
 end
 
 ---@param weapon Weapon

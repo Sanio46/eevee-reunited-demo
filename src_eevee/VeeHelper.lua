@@ -870,11 +870,11 @@ function VeeHelper.GetCustomItemPool(pool)
 end
 
 function VeeHelper.GameContinuedOnPlayerInit()
-	local wasContinued = true
-	if #Isaac.FindByType(EntityType.ENTITY_PLAYER) == 0 then
+	--[[ local wasContinued = true
+	if game:GetRoom():GetFrameCount() == 0 and #Isaac.FindByType(EntityType.ENTITY_PLAYER) == 0 then
 		wasContinued = false
 	end
-	return wasContinued
+	return wasContinued ]]
 end
 
 function VeeHelper.ShaderCrashFix()

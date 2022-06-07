@@ -37,12 +37,12 @@ end
 function swiftTear:SpawnSwiftTears(swiftData)
 	local player = swiftData.Player
 	local parent = swiftData.Parent
-	local spawnPos, parentPos = swiftBase:GetStartingAngleAndPosition(swiftData)
+	local spawnPos = swiftBase:GetAdjustedStartingAngle(swiftData)
 	---@type EntityTear
-	local swiftTear = player:FireTear(parentPos + spawnPos, Vector.Zero, true, false, true, parent, 1):ToTear()
+	local swiftTear = player:FireTear(swiftData.Parent.Position + spawnPos, Vector.Zero, true, false, true, parent, 1):ToTear()
 	if swiftTear.Height > -24 then swiftTear.Height = -24 end
 
-	swiftBase:SwiftTearFlags(swiftTear, true, false)
+	swiftTear:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_HOMING)
 	swiftBase:InitSwiftWeapon(swiftData, swiftTear)
 end
 

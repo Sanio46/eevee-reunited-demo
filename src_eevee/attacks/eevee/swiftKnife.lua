@@ -12,9 +12,8 @@ local function AssignSwiftFakeKnifeData(swiftData, tearKnife, knife)
 	local tC = tearKnife:GetSprite().Color
 	if tearKnife.Height > -24 then tearKnife.Height = -24 end
 
-	swiftBase:SwiftTearFlags(tearKnife, true, false)
+	tearKnife:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_PIERCING | TearFlags.TEAR_HOMING)
 	swiftBase:InitSwiftWeapon(swiftData, tearKnife)
-	swiftBase:SwiftTearFlags(tearKnife, true, false)
 	tearKnife:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), -1, 1, false, false)
 	tearKnife.Child = knife
 	tearKnife.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
@@ -56,8 +55,8 @@ end
 function swiftKnife:SpawnSwiftKnives(swiftData)
 	local player = swiftData.Player
 	local parent = swiftData.Parent
-	local spawnPos, parentPos = swiftBase:GetStartingAngleAndPosition(swiftData)
-	local tearKnife = player:FireTear(parentPos + spawnPos, Vector.Zero, false, false, false, parent)
+	local spawnPos = swiftBase:GetAdjustedStartingAngle(swiftData)
+	local tearKnife = player:FireTear(swiftData.Parent.Position + spawnPos, Vector.Zero, false, false, false, parent)
 	local knife = player:FireKnife(player)
 	local swiftWeapon = swiftBase:InitSwiftWeapon(swiftData, tearKnife)
 

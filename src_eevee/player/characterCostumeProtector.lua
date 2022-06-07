@@ -774,9 +774,9 @@ local function AddItemSpecificCostumes(player)
 
 			if player:HasCollectible(itemID) and data.CCP.UniqueHairCostumesActive[itemID] == false then
 				data.CCP.UniqueHairCostumesActive[itemID] = true
-				if not VeeHelper.GameContinuedOnPlayerInit() then
+				--if not VeeHelper.GameContinuedOnPlayerInit() then
 					ccp:TryAddNullCostume(player, itemCostume, basePath .. costumePath .. ".anm2")
-				end
+				--end
 			elseif not player:HasCollectible(itemID) and data.CCP.UniqueHairCostumesActive[itemID] == true then
 				player:TryRemoveNullCostume(itemCostume)
 				data.CCP.UniqueHairCostumesActive[itemID] = false
@@ -793,10 +793,10 @@ local function AddItemSpecificCostumes(player)
 
 				if player:HasCollectible(itemID) and data.CCP.EditedCostumesActive[itemID] == false then
 					data.CCP.EditedCostumesActive[itemID] = true
-					if not VeeHelper.GameContinuedOnPlayerInit() then
+					--if not VeeHelper.GameContinuedOnPlayerInit() then
 						player:RemoveCostume(itemConfig)
 						ccp:TryAddNullCostume(player, itemCostume, costumePath)
-					end
+					--end
 				elseif not player:HasCollectible(itemID) and data.CCP.EditedCostumesActive[itemID] == true then
 					player:TryRemoveNullCostume(itemCostume)
 					data.CCP.EditedCostumesActive[itemID] = false
@@ -876,9 +876,9 @@ local function AddItemSpecificCostumes(player)
 	local mushroomCustomCostume = Isaac.GetCostumeIdByPath(mushroomPath)
 	if player:HasPlayerForm(PlayerForm.PLAYERFORM_MUSHROOM) and not data.CCP.MushroomCostume then
 		data.CCP.MushroomCostume = true
-		if not VeeHelper.GameContinuedOnPlayerInit() then
+		--if not VeeHelper.GameContinuedOnPlayerInit() then
 			ccp:TryAddNullCostume(player, mushroomCustomCostume, mushroomPath)
-		end
+		--end
 	elseif not player:HasPlayerForm(PlayerForm.PLAYERFORM_MUSHROOM) and data.CCP.MushroomCostume then
 		player:TryRemoveNullCostume(mushroomCustomCostume)
 		data.CCP.MushroomCostume = nil

@@ -13,7 +13,7 @@ local itemToShotNum = {
 	[CollectibleType.COLLECTIBLE_MUTANT_SPIDER] = 3
 }
 
---Returns the number of additional shots the player should shoot when firing. Does not count luck-based shot items.
+--Returns the number of additional shots the player should shoot when firing. Does not count external multi-shot items.
 ---@param player EntityPlayer
 function attackHelper:GetMultiShot(player)
 	local count = 1
