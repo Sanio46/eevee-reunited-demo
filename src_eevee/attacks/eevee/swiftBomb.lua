@@ -1,6 +1,6 @@
 local swiftBomb = {}
 
-local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
+--[[ local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
 
 local function AssignSwiftBombData(player, bomb, anglePos)
@@ -44,6 +44,6 @@ function swiftBomb:SwiftBombUpdate(swiftData, swiftWeapon, bomb)
 			end
 		end
 	end
-end
+end ]]
 
 return swiftBomb

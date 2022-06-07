@@ -3,7 +3,7 @@ local swiftLaser = {}
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
 
-local function SwiftLaserType(player)
+--[[ local function SwiftLaserType(player)
 	if player:HasWeaponType(WeaponType.WEAPON_TECH_X) then
 		return "techX"
 	elseif player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE) then
@@ -225,7 +225,7 @@ local LaserEffectSize = {
 }
 
 function swiftLaser:SwiftLaserEffectUpdate(effect)
-	if not VeeHelper.EntitySpawnedByPlayer(effect, true) then return end
+	if not VeeHelper.EntitySpawnedByPlayer(effect) then return end
 
 	local player = effect.SpawnerEntity:ToPlayer()
 	local ptrHashEffect = tostring(GetPtrHash(effect))
@@ -313,6 +313,6 @@ function swiftLaser:SwiftLaserUpdate(laser)
 			laser.Angle = swiftParent.ShotDir:Rotated(swiftLaserWeapon.ConstantRotationOffset):GetAngleDegrees()
 		end
 	end
-end
+end ]]
 
 return swiftLaser
