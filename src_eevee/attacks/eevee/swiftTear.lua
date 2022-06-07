@@ -60,7 +60,7 @@ function swiftTear:SwiftTearUpdate(swiftData, swiftWeapon, tear)
 			sprite:Play(anim .. VeeHelper.TearScaleToSizeAnim(tear), true)
 		end
 	end
-
+	
 	if not swiftWeapon.HasFired then
 		tear.FallingSpeed = -0.05 --Tears slowly decend with a FallingSpeed of 0
 		tear.FallingAcceleration = 0

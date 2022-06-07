@@ -16,7 +16,7 @@ swiftBase.swiftInstanceData = {
 	InstanceType = "Default",
 	Player = nil,
 	Parent = nil,
-	ActiveWeapons = {},
+	ActiveWeapons = nil,
 	TotalDuration = 0,
 	DurationTimer = 0,
 	WeaponSpawnTimer = 0,
@@ -24,7 +24,6 @@ swiftBase.swiftInstanceData = {
 	Rotation = 0,
 	NumWeaponsSpawned = 0,
 	NumWeaponsToSpawn = 5,
-	NumWeaponsDead = 0,
 	ShotMultiplier = 1,
 }
 
@@ -56,7 +55,7 @@ swiftBase.Instances = {}
 swiftBase.Weapons = {}
 
 ---@param swiftData SwiftInstance
-function swiftBase:GetInstanceType(swiftData)
+function swiftBase:SetInstanceType(swiftData)
 	local instanceType = "Default"
 	if swiftData.Player:HasCollectible(CollectibleType.COLLECTIBLE_ANTI_GRAVITY) then
 		instanceType = "Anti-Gravity"
@@ -74,6 +73,9 @@ function swiftBase:InitSwiftWeapon(swiftData, weapon)
 		for variableName, value in pairs(swiftBase.swiftWeaponData) do
 			swiftWeapon[variableName] = value
 		end
+		if swiftData.ActiveWeapons == nil then
+			swiftData.ActiveWeapons = {} --Otherwise all swift instances point to the one made by swiftWeaponData
+		end
 		swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
 		swiftBase:AddSwiftTrail(weapon, swiftData.Player)
 		table.insert(swiftData.ActiveWeapons, weapon)
@@ -82,7 +84,7 @@ function swiftBase:InitSwiftWeapon(swiftData, weapon)
 end
 
 ---@param swiftData SwiftInstance
-function swiftBase:GetWeaponFireDelay(swiftData)
+function swiftBase:SetWeaponFireDelay(swiftData)
 	return (swiftBase:GetFireDelay(swiftData.Player) / (swiftData.NumWeaponsToSpawn / swiftData.NumWeaponsSpawned))
 end
 
@@ -94,7 +96,7 @@ function swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
 	swiftWeapon.StartingAngle = swiftBase:GetStartingAngle(swiftData)
 	swiftWeapon.OrbitDistance = swiftBase:SwiftOrbitDistance(swiftData.Player)
 	swiftWeapon.ShootDirection = VeeHelper.GetIsaacShootingDirection(swiftData.Player, weapon.Position)
-	local fireDelay = swiftBase:GetWeaponFireDelay(swiftData)
+	local fireDelay = swiftBase:SetWeaponFireDelay(swiftData)
 	swiftWeapon.FireDelay = fireDelay
 	if weapon:ToTear() then
 		swiftWeapon.StartingAccel = weapon.FallingAcceleration

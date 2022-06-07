@@ -51,7 +51,7 @@ function swiftAttack:CreateSwiftInstance(player, parent, customData)
 	local swiftData = swiftBase.Instances[#swiftBase.Instances]
 	swiftData.Player = player
 	swiftData.Parent = parent
-	swiftData.InstanceType = swiftBase:GetInstanceType(swiftData)
+	swiftData.InstanceType = swiftBase:SetInstanceType(swiftData)
 	swiftAttack:InitInstanceValues(swiftData)
 	swiftAttack:SpawnSwiftWeapon(swiftData)
 end
@@ -92,6 +92,7 @@ function swiftAttack:SpawnSwiftWeapon(swiftData)
 	end
 end
 
+--BUG: Tears seem to..shift down with Anti-Grav specifically once it stops following the player?
 ---@param swiftData SwiftInstance
 ---@param firedEarly? boolean
 function swiftAttack:OnSwiftFire(swiftData, firedEarly)
@@ -101,7 +102,7 @@ function swiftAttack:OnSwiftFire(swiftData, firedEarly)
 	---@param weapon Weapon
 	for index, weapon in ipairs(swiftData.ActiveWeapons) do
 		local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
-		if swiftData.InstanceType == "Anti-Gravity" and swiftData.CanFire == false and not firedEarly then
+		if swiftData.InstanceType == "Anti-Gravity" and not firedEarly then
 			if index == 1 then
 				antiGravPlaceholder = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.DEVIL, 0, swiftData.Parent.Position, Vector.Zero, nil):ToEffect()
 				antiGravPlaceholder.Visible = false
@@ -114,9 +115,13 @@ function swiftAttack:OnSwiftFire(swiftData, firedEarly)
 	swiftData.CanFire = true
 end
 
------------------------
---  INSTANCE UPDATE  --
------------------------
+function swiftAttack:RemoveAntiGravPlaceholder()
+
+end
+
+---------------------
+--  WEAPON UPDATE  --
+---------------------
 
 ---@param swiftData SwiftInstance
 ---@param swiftWeapon SwiftWeapon
@@ -195,9 +200,8 @@ function swiftAttack:PreFireUpdate(swiftData, swiftWeapon, weapon)
 	swiftWeapon.ShootDirection = VeeHelper.GetIsaacShootingDirection(player, weapon.Position)
 
 	if swiftData.CanFire and swiftData.InstanceType == "Anti-Gravity" then
-		local baseFireDelay = swiftBase:GetWeaponFireDelay(swiftData)
-		if player:GetFireDirection() == Direction.NO_DIRECTION and swiftWeapon.FireDelay > baseFireDelay then
-			swiftWeapon.FireDelay = baseFireDelay
+		if player:GetFireDirection() == Direction.NO_DIRECTION and swiftWeapon.FireDelay > 0 then
+			swiftWeapon.FireDelay = 0
 		end
 	end
 end
@@ -211,7 +215,7 @@ function swiftAttack:SwiftAttackUpdate(weapon)
 
 	if weapon.Type == EntityType.ENTITY_TEAR then
 		swiftTear:SwiftTearUpdate(swiftData, swiftWeapon, weapon)
-		elseif weapon.Type == EntityType.ENTITY_LASER then
+	elseif weapon.Type == EntityType.ENTITY_LASER then
 		--swiftLaser:SwiftLaserUpdate(weapon)
 	elseif (
 		weapon.Type == EntityType.ENTITY_EFFECT
@@ -237,6 +241,7 @@ function swiftAttack:SwiftAttackUpdate(weapon)
 	end ]]
 
 	swiftAttack:ShouldRestoreSwiftTrail(swiftWeapon, weapon, player)
+
 	if swiftWeapon.HasFired then return end
 
 	swiftSynergies:AntiGravityBlink(swiftWeapon, player, weapon)
@@ -253,9 +258,9 @@ function swiftAttack:SwiftAttackUpdate(weapon)
 	end
 end
 
----------------------------
---  BASIC FUNCTIONALITY  --
----------------------------
+-----------------------
+--  INSTNACE UPDATE  --
+-----------------------
 
 function swiftAttack:FireIfNotShooting(swiftData)
 	local player = swiftData.Player
@@ -303,7 +308,7 @@ end
 ---@param swiftData SwiftInstance
 ---@param index integer
 function swiftAttack:RemoveSwiftInstance(swiftData, index)
-	if swiftData.CanFire and swiftData.NumWeaponsDead >= swiftData.NumWeaponsSpawned or swiftData.NumWeaponsDead >= swiftData.NumWeaponsToSpawn then
+	if swiftData.CanFire and #swiftData.ActiveWeapons == 0 then
 		table.remove(swiftBase.Instances, index)
 	end
 end
@@ -317,7 +322,11 @@ function swiftAttack:OnWeaponInstanceRemove(weapon)
 
 	if swiftWeapon ~= nil then
 		swiftBase.Weapons[tostring(GetPtrHash(weapon))] = nil
-		swiftData.NumWeaponsDead = swiftData.NumWeaponsDead + 1
+		for index, parentWeapon in ipairs(swiftData.ActiveWeapons) do
+			if GetPtrHash(weapon) == GetPtrHash(parentWeapon) then
+				table.remove(swiftData.ActiveWeapons, index)
+			end
+		end
 	end
 end
 
@@ -389,14 +398,12 @@ function swiftAttack:Debug()
 	local weaponTimer = 0
 	local durationTimer = 0
 	local cooldown = 0
-	local numDead = 0
 	local swiftData = nil
 	if swiftBase.Instances[1] ~= nil then
 		swiftData = swiftBase.Instances[1]
 		numInstances = #swiftBase.Instances
 		durationTimer = swiftData.DurationTimer
 		weaponTimer = swiftData.WeaponSpawnTimer
-		numDead = swiftData.NumWeaponsDead
 	end
 	if Isaac.GetPlayer():GetData().TimeTillNextInstance ~= nil then
 		cooldown = Isaac.GetPlayer():GetData().TimeTillNextInstance
@@ -404,9 +411,8 @@ function swiftAttack:Debug()
 	Isaac.RenderText("NumInstances: " .. numInstances, 50, 50, 1, 1, 1, 1)
 	Isaac.RenderText("Duration: " .. durationTimer, 50, 70, 1, 1, 1, 1)
 	Isaac.RenderText("Weapon Timer:" .. weaponTimer, 50, 90, 1, 1, 1, 1)
-	Isaac.RenderText("Cooldown:" .. cooldown, 50, 110, 1, 1, 1, 1)
-	Isaac.RenderText("NumDead:" .. numDead, 50, 130, 1, 1, 1, 1) ]]
-	
+	Isaac.RenderText("Cooldown:" .. cooldown, 50, 110, 1, 1, 1, 1) ]]
+
 	--[[ if swiftBase.Instances[1] == nil then return end
 	for index, weapon in ipairs(swiftBase.Instances[1].ActiveWeapons) do
 		local screenpos = EEVEEMOD.game:GetRoom():WorldToScreenPosition(weapon.Position)

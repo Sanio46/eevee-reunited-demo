@@ -146,6 +146,7 @@ function swiftSynergies:IsKidneyStoneActive(tear, player)
 	return isKidneyActive ]]
 end
 
+--BUG: Does not activate on FireDelays with decimals.
 ---@param swiftWeapon SwiftWeapon
 ---@param player EntityPlayer
 ---@param weapon Weapon
