@@ -16,7 +16,7 @@ local itemToShotNum = {
 --Returns the number of additional shots the player should shoot when firing. Does not count luck-based shot items.
 ---@param player EntityPlayer
 function attackHelper:GetMultiShot(player)
-	local count = 0
+	local count = 1
 
 	--Basic multicount
 	for itemID, num in pairs(itemToShotNum) do

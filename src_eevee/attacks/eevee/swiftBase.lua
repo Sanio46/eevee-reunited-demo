@@ -1,4 +1,5 @@
 local swiftBase = {}
+local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
 
 --Instance Types:
 --Default: The regular Swift attack as you know it
@@ -24,6 +25,7 @@ swiftBase.swiftInstanceData = {
 	NumWeaponsSpawned = 1,
 	NumWeaponsToSpawn = 5,
 	NumWeaponsDead = 0,
+	ShotMultiplier = 1,
 }
 
 ---@class SwiftWeapon
@@ -39,6 +41,7 @@ swiftBase.swiftWeaponData = {
 	FireDelay = 2,
 	HasFired = false,
 	DelayedTearFlag = 0,
+	IsMultiShot = false,
 	--Tears
 	StartingAccel = 0,
 	StartingFall = 0,
@@ -67,6 +70,7 @@ function swiftBase:InitSwiftWeapon(swiftData, weapon)
 		swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
 		swiftBase:AddSwiftTrail(weapon, swiftData.Player)
 	end
+	return swiftBase.Weapons[ptrHashWeapon]
 end
 
 ---@param swiftData SwiftInstance
@@ -83,6 +87,15 @@ function swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
 		swiftWeapon.StartingAccel = weapon.FallingAcceleration
 		swiftWeapon.StartingFall = weapon.FallingSpeed
 	end
+end
+
+---@param swiftData SwiftInstance
+function swiftBase:GetStartingAngleAndPosition(swiftData)
+	local player = swiftData.Player
+	local parent = swiftData.Parent
+	local spawnPos = swiftBase:GetStartingAngle(swiftData):Resized(swiftBase:SwiftOrbitDistance(swiftData.Player)):Rotated(swiftData.Rotation)
+	local parentPos = parent:ToPlayer() and (player.Position - player.TearsOffset) or parent.Position
+	return spawnPos, parentPos
 end
 
 function swiftBase:PlaySwiftFire()
@@ -153,19 +166,23 @@ function swiftBase:GetStartingAngle(swiftData)
 	return Vector.FromAngle((360 / swiftData.NumWeaponsToSpawn) * swiftData.NumWeaponsSpawned)
 end
 
-function swiftBase:IsSwiftLaserEffect(effect)
+---@param weapon Weapon
+function swiftBase:IsSwiftLaserEffect(weapon)
 	local variant = nil
-	if effect.Type ~= EntityType.ENTITY_EFFECT then return end
+	if weapon.Type ~= EntityType.ENTITY_weapon then return end
 
-	if effect.Variant == EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT then
+	if weapon.Variant == EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT then
 		variant = "tech"
-	elseif effect.Variant == EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL then
+	elseif weapon.Variant == EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL then
 		variant = "brim"
 	end
 
 	return variant
 end
 
+---@param weapon Weapon
+---@param addPiercing boolean
+---@param addHoming boolean
 function swiftBase:SwiftTearFlags(weapon, addPiercing, addHoming)
 	if not weapon:HasTearFlags(TearFlags.TEAR_SPECTRAL) then
 		weapon:AddTearFlags(TearFlags.TEAR_SPECTRAL)
@@ -201,6 +218,10 @@ function swiftBase:AddSwiftTrail(weapon, player)
 		else
 			data.EeveeRGB = true
 		end
+	end
+	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
+	if swiftWeapon ~= nil then
+		swiftWeapon.Trail = trail
 	end
 	trail.Parent = weapon
 	data.SwiftTrail = true

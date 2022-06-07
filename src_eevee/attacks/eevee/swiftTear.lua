@@ -33,20 +33,16 @@ function swiftTear:AssignSwiftSprite(tear)
 	tearSprite:Play(animationToPlay, true)
 end
 
-function swiftTear:FireSwiftTear()
-
-end
-
 ---@param swiftData SwiftInstance
 function swiftTear:SpawnSwiftTears(swiftData)
 	local player = swiftData.Player
 	local parent = swiftData.Parent
-	local spawnPos = swiftBase:GetStartingAngle(swiftData):Resized(swiftBase:SwiftOrbitDistance(swiftData.Player)):Rotated(swiftData.Rotation)
-	local parentPos = parent:ToPlayer() and (player.Position - player.TearsOffset) or parent.Position
+	local spawnPos, parentPos = swiftBase:GetStartingAngleAndPosition(swiftData)
 	---@type EntityTear
 	local swiftTear = player:FireTear(parentPos + spawnPos, Vector.Zero, true, false, true, parent, 1):ToTear()
-	swiftTear:AddTearFlags(TearFlags.TEAR_SPECTRAL)
 	if swiftTear.Height > -24 then swiftTear.Height = -24 end
+
+	swiftBase:SwiftTearFlags(swiftTear, true, false)
 	swiftBase:InitSwiftWeapon(swiftData, swiftTear)
 end
 
@@ -122,6 +118,8 @@ function swiftTear:RemoveSpiritProjectile(tear)
 	end
 end
 
+---@param tear EntityTear
+---@param splashType string
 function swiftTear:OnSwiftStarDestroy(tear, splashType)
 	if tear.Variant ~= EEVEEMOD.TearVariant.SWIFT and tear.Variant ~= EEVEEMOD.TearVariant.SWIFT_BLOOD then return end
 

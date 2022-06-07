@@ -12,6 +12,7 @@ function postTearSplash:main(tear, splashType, collider)
 		if tear:HasTearFlags(TearFlags.TEAR_SPECTRAL) and collider ~= nil then
 			if collider.Type == EntityType.ENTITY_FIREPLACE
 			or collider.Type == EntityType.ENTITY_STONEY
+			or collider.Type == EntityType.ENTITY_FAMILIAR
 			or collider:HasEntityFlags(EntityFlag.FLAG_FRIENDLY)
 			then
 				return
