@@ -54,7 +54,8 @@ local pickupSpawnWeights = {
 	{ PickupVariant.PICKUP_KEY, KeySubType.KEY_NORMAL },
 	{ PickupVariant.PICKUP_KEY, KeySubType.KEY_NORMAL },
 }
-local maxSpins = 6
+
+local MAX_SPINS = 6
 
 --Thank you budj for providing this old-ass hack I used in AB+ Eevee
 ---@param pos Vector
@@ -170,7 +171,7 @@ function pokeStop:SlotUpdate()
 				data.PokeStopRNG = pokeStopRNG
 			end
 
-			if data.TimesSpun ~= maxSpins then
+			if data.TimesSpun ~= MAX_SPINS then
 				local velocity = Vector(3, 0):Rotated(EEVEEMOD.RandomNum(360))
 				local randomNum = data.PokeStopRNG:RandomInt(#pickupSpawnWeights) + 1
 				data.PokeStopRNG:Next()
@@ -191,7 +192,7 @@ function pokeStop:SlotUpdate()
 			end
 		end
 
-		if data.TimesSpun >= maxSpins and sprite:GetFrame() == 8 then
+		if data.TimesSpun >= MAX_SPINS and sprite:GetFrame() == 8 then
 			sprite:Play("Disappear", false)
 		end
 

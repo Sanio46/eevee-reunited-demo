@@ -1,6 +1,6 @@
 local shinyCharm = {}
 
-local baseShinyChance = 4096
+local BASE_SHINY_CHANCE = 4096
 local forceSpawn = false
 
 ---@param npc EntityNPC
@@ -46,7 +46,7 @@ function shinyCharm:TryMakeShinyOnNPCInit(npc)
 		and not npc:GetData().ShinyChecked --So it doesn't check multiple times
 	then
 		local players = VeeHelper.GetAllPlayers()
-		local shinyRNG = baseShinyChance
+		local shinyRNG = BASE_SHINY_CHANCE
 		for i = 1, #players do
 			local player = players[i]
 			if player:HasCollectible(EEVEEMOD.CollectibleType.SHINY_CHARM) then
@@ -55,8 +55,8 @@ function shinyCharm:TryMakeShinyOnNPCInit(npc)
 		end
 
 		--Go through if shinies are enabled passively, and if not, require Shiny Charm (RNG being below 4096 means it triggered)
-		if forceSpawn or ((EEVEEMOD.PERSISTENT_DATA.PassiveShiny == true or shinyRNG < baseShinyChance)
-			and EEVEEMOD.RunSeededRNG:RandomInt(baseShinyChance) + 1 == shinyRNG) then
+		if forceSpawn or ((EEVEEMOD.PERSISTENT_DATA.PassiveShiny == true or shinyRNG < BASE_SHINY_CHANCE)
+			and EEVEEMOD.RunSeededRNG:RandomInt(BASE_SHINY_CHANCE) + 1 == shinyRNG) then
 			shinyCharm:MakeNPCShiny(npc)
 		end
 		npc:GetData().ShinyChecked = true

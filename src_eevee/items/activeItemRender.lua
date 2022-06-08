@@ -30,6 +30,7 @@ end
 
 local numHUDPlayers = 1
 local hasLoadedItems = false
+
 ---@type table<integer, {Player: EntityPlayer, ScreenPos: function, Offset: table<ActiveSlot, Vector>}>
 local IndexedPlayers = {
 	[1] = {

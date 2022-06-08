@@ -1,9 +1,9 @@
 local wonderousLauncher = {}
 
-local cooldownDuration = 20
-local shootDuration = 15
-local dimeDisc = 50
-local nickelDisc = 25
+local COOLDOWN_DURATION = 20
+local SHOOT_DURATION = 15
+local DIME_DISC_REQUIREMENT = 50
+local NICKEL_DISC_REQUIREMENT = 25
 
 local coinVariantToString = {
 	"coin",
@@ -87,9 +87,9 @@ end
 local function GetCoinDiscVariant(player)
 	local numCoins = player:GetNumCoins()
 	local type = 1
-	if numCoins >= dimeDisc then
+	if numCoins >= DIME_DISC_REQUIREMENT then
 		type = 3
-	elseif numCoins >= nickelDisc then
+	elseif numCoins >= NICKEL_DISC_REQUIREMENT then
 		type = 2
 	end
 	return type
@@ -157,7 +157,7 @@ local function SetAnimState(launcher, state)
 	data.AnimDir = GetLauncherDirection(sprite)
 	sprite:Play(data.AnimState .. data.AnimDir, true)
 	if state == "Reload" and data.ShootCooldown == nil then
-		data.ShootCooldown = cooldownDuration
+		data.ShootCooldown = COOLDOWN_DURATION
 	end
 end
 
@@ -166,7 +166,7 @@ local function SpawnWonderLauncher(player)
 	local launcher = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.WONDEROUS_LAUNCHER, 0, player.Position, Vector.Zero, player):ToEffect()
 	launcher.Parent = player
 	launcher.RenderZOffset = 101
-	launcher:GetData().ShootCooldown = cooldownDuration
+	launcher:GetData().ShootCooldown = COOLDOWN_DURATION
 	launcher:GetData().CanShoot = true
 	SetAnimState(launcher, "Idle")
 	player:GetData().WonderLauncher = launcher
@@ -231,7 +231,7 @@ function wonderousLauncher:SwapThroughPickups(player)
 	if not data.WonderLauncher or data.WonderLauncher:GetData().CanShoot == false or EEVEEMOD.game:IsPaused() then return end
 
 	if Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) and not data.CycleCooldown then
-		data.CycleCooldown = cooldownDuration
+		data.CycleCooldown = COOLDOWN_DURATION
 		local curDisc = data.WonderDiscType
 		if data.WonderDiscType then
 			for i = 1, 3 do
@@ -473,12 +473,12 @@ end
 local function LauncherTimers(launcher, player)
 	local data = launcher:GetData()
 
-	if data.ShootDuration ~= nil then
-		if data.ShootDuration > 0 then
-			data.ShootDuration = data.ShootDuration - 1
+	if data.SHOOT_DURATION ~= nil then
+		if data.SHOOT_DURATION > 0 then
+			data.SHOOT_DURATION = data.SHOOT_DURATION - 1
 		else
-			data.ShootDuration = nil
-			data.ShootCooldown = cooldownDuration
+			data.SHOOT_DURATION = nil
+			data.ShootCooldown = COOLDOWN_DURATION
 			if HasAmmoForPickup(player, player:GetData().WonderDiscType) then
 				SetAnimState(launcher, "Reload")
 			else
@@ -513,13 +513,13 @@ function wonderousLauncher:FireHandling(launcher)
 
 		if player:GetFireDirection() ~= Direction.NO_DIRECTION then
 			if data.CanShoot == true
-				and not data.ShootDuration
+				and not data.SHOOT_DURATION
 				and not data.ShootCooldown
 				and HasAmmoForPickup(player, player:GetData().WonderDiscType)
 				and data.AnimState ~= "Reload"
 			then
 				data.CanShoot = false
-				data.ShootDuration = shootDuration
+				data.SHOOT_DURATION = SHOOT_DURATION
 				SetAnimState(launcher, "Shoot")
 			end
 		end

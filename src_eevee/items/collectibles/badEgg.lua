@@ -1,12 +1,12 @@
 local badEgg = {}
 
-local maxOGCracks = 8
-local maxDupeCracks = maxOGCracks / 4
+local MAX_CRACKS = 8
+local MAX_CRACKS_DUPE = MAX_CRACKS / 4
 local familiarItems = {}
 
 local variantToCrackCount = {
-	[EEVEEMOD.FamiliarVariant.BAD_EGG] = maxOGCracks,
-	[EEVEEMOD.FamiliarVariant.BAD_EGG_DUPE] = maxDupeCracks
+	[EEVEEMOD.FamiliarVariant.BAD_EGG] = MAX_CRACKS,
+	[EEVEEMOD.FamiliarVariant.BAD_EGG_DUPE] = MAX_CRACKS_DUPE
 }
 
 ---@param proj EntityProjectile

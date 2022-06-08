@@ -4,8 +4,7 @@ local lilEevee = {}
 
 local swiftTear = require("src_eevee.attacks.eevee.swiftTear")
 
-local vineDuration = 45
-
+local VINE_DURATION = 45
 
 local eeveeDirState = {
 	"Side2",
@@ -361,7 +360,7 @@ function lilEevee:OnLeafVineUpdate(familiar)
 			familiar.Parent.Velocity = familiar.Position - familiar.Parent.Position
 		end
 		if sprite:IsPlaying("Grab") and sprite:IsEventTriggered("Shoot") then
-			data.VineGrabDuration = vineDuration
+			data.VineGrabDuration = VINE_DURATION
 			familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
 		end
 		if sprite:IsFinished("Grab") then
