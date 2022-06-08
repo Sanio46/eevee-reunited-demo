@@ -61,6 +61,7 @@ function postEffectUpdate:init(EeveeReunited)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, triggerOnFire.OnTargetEffectUpdate, EffectVariant.TARGET)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, badEgg.RemoveGlitchOnAnimEnd, EEVEEMOD.EffectVariant.BAD_EGG_GLITCH)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, shinyCharm.ShinyParticleEffectUpdate, EEVEEMOD.EffectVariant.SHINY_SPARKLE)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, swiftAttack.RemoveAntiGravPlaceholder, EEVEEMOD.EffectVariant.ANTI_GRAV_PARENT)
 end
 
 return postEffectUpdate

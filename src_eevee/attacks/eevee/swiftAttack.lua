@@ -51,7 +51,7 @@ function swiftAttack:CreateSwiftInstance(player, parent, customData)
 	local swiftData = swiftBase.Instances[#swiftBase.Instances]
 	swiftData.Player = player
 	swiftData.Parent = parent
-	swiftData.InstanceType = swiftBase:SetInstanceType(swiftData)
+	swiftData.InstanceType = swiftBase:GetInstanceType(swiftData)
 	swiftAttack:InitInstanceValues(swiftData)
 	swiftAttack:SpawnSwiftWeapon(swiftData)
 end
@@ -92,31 +92,33 @@ function swiftAttack:SpawnSwiftWeapon(swiftData)
 	end
 end
 
---BUG: Tears seem to..shift down with Anti-Grav specifically once it stops following the player?
 ---@param swiftData SwiftInstance
 ---@param firedEarly? boolean
 function swiftAttack:OnSwiftFire(swiftData, firedEarly)
 	---@type EntityEffect
-	local antiGravPlaceholder
+	local antiGravParent
 
 	---@param weapon Weapon
 	for index, weapon in ipairs(swiftData.ActiveWeapons) do
 		local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
 		if swiftData.InstanceType == "Anti-Gravity" and not firedEarly then
 			if index == 1 then
-				antiGravPlaceholder = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.DEVIL, 0, swiftData.Parent.Position, Vector.Zero, nil):ToEffect()
-				antiGravPlaceholder.Visible = false
-				antiGravPlaceholder.Timeout = swiftBase:GetFireDelay(swiftData.Player)
+				antiGravParent = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.ANTI_GRAV_PARENT, 0, swiftData.Parent.Position, Vector.Zero, nil):ToEffect()
+				antiGravParent:GetData().ParentInstance = swiftData
+				antiGravParent:Update()
 			end
-			swiftData.Parent = antiGravPlaceholder
+			swiftData.Parent = antiGravParent
 			swiftWeapon.FireDelay = swiftWeapon.FireDelay + 90
+			swiftWeapon.AntiGravBlinkThreshold = swiftWeapon.FireDelay / 6
 		end
 	end
 	swiftData.CanFire = true
 end
 
-function swiftAttack:RemoveAntiGravPlaceholder()
-
+---@param effect EntityEffect
+function swiftAttack:RemoveAntiGravPlaceholder(effect)
+	local data = effect:GetData()
+	if data.ParentInstance and #data.ParentInstance.ActiveWeapons == 0 then effect:Remove() end
 end
 
 ---------------------
@@ -197,11 +199,13 @@ function swiftAttack:PreFireUpdate(swiftData, swiftWeapon, weapon)
 		weapon.Position = swiftData.Parent.Position + swiftWeapon.ShootDirection:Resized(swiftWeapon.OrbitDistance)
 	end
 
-	swiftWeapon.ShootDirection = VeeHelper.GetIsaacShootingDirection(player, weapon.Position)
-
-	if swiftData.CanFire and swiftData.InstanceType == "Anti-Gravity" then
-		if player:GetFireDirection() == Direction.NO_DIRECTION and swiftWeapon.FireDelay > 0 then
-			swiftWeapon.FireDelay = 0
+	if swiftData.InstanceType == "Anti-Gravity" then
+		if swiftData.CanFire == true then
+			if player:GetFireDirection() == Direction.NO_DIRECTION and swiftWeapon.FireDelay > 0 then
+				swiftWeapon.FireDelay = 0
+			end
+		else
+			swiftWeapon.ShootDirection = VeeHelper.GetIsaacShootingDirection(player, weapon.Position)
 		end
 	end
 end

@@ -122,6 +122,7 @@ EEVEEMOD.EffectVariant = {
 	BAD_EGG_GLITCH = Isaac.GetEntityVariantByName("Bad Egg Glitch"),
 	SHINY_APPEAR = Isaac.GetEntityVariantByName("Shiny Appear"),
 	SHINY_SPARKLE = Isaac.GetEntityVariantByName("Shiny Sparkle"),
+	ANTI_GRAV_PARENT = Isaac.GetEntityVariantByName("Anti-Grav Parent Placeholder")
 }
 
 ---@type FamiliarVariant[]

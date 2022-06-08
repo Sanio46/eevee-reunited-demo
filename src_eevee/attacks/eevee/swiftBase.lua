@@ -47,6 +47,7 @@ swiftBase.swiftWeaponData = {
 	--Lasers
 	--Knives
 	--YoMama
+	AntiGravBlinkThreshold = 0
 }
 
 ---@type SwiftInstance[]
@@ -55,7 +56,7 @@ swiftBase.Instances = {}
 swiftBase.Weapons = {}
 
 ---@param swiftData SwiftInstance
-function swiftBase:SetInstanceType(swiftData)
+function swiftBase:GetInstanceType(swiftData)
 	local instanceType = "Default"
 	if swiftData.Player:HasCollectible(CollectibleType.COLLECTIBLE_ANTI_GRAVITY) then
 		instanceType = "Anti-Gravity"
@@ -84,7 +85,7 @@ function swiftBase:InitSwiftWeapon(swiftData, weapon)
 end
 
 ---@param swiftData SwiftInstance
-function swiftBase:SetWeaponFireDelay(swiftData)
+function swiftBase:GetWeaponFireDelay(swiftData)
 	return (swiftBase:GetFireDelay(swiftData.Player) / (swiftData.NumWeaponsToSpawn / swiftData.NumWeaponsSpawned))
 end
 
@@ -96,7 +97,7 @@ function swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
 	swiftWeapon.StartingAngle = swiftBase:GetStartingAngle(swiftData)
 	swiftWeapon.OrbitDistance = swiftBase:SwiftOrbitDistance(swiftData.Player)
 	swiftWeapon.ShootDirection = VeeHelper.GetIsaacShootingDirection(swiftData.Player, weapon.Position)
-	local fireDelay = swiftBase:SetWeaponFireDelay(swiftData)
+	local fireDelay = swiftBase:GetWeaponFireDelay(swiftData)
 	swiftWeapon.FireDelay = fireDelay
 	if weapon:ToTear() then
 		swiftWeapon.StartingAccel = weapon.FallingAcceleration
@@ -110,6 +111,7 @@ function swiftBase:GetAdjustedStartingAngle(swiftData)
 end
 
 function swiftBase:PlaySwiftFire()
+	EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
 	local values = {
 		0.9,
 		1,

@@ -153,7 +153,7 @@ end
 function swiftSynergies:AntiGravityBlink(swiftWeapon, player, weapon)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_ANTI_GRAVITY)
 		or swiftWeapon.FireDelay <= 0
-		or swiftWeapon.FireDelay % 15 ~= 0
+		or math.ceil(swiftWeapon.FireDelay) % 15 ~= 0
 	then
 		return
 	end
