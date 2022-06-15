@@ -9,7 +9,6 @@ local leafBlade = require("src_eevee.attacks.leafeon.leafBlade")
 ---@diagnostic disable-next-line: unused-local
 function preNpcCollision:main(npc, collider, low)
 	if collider.Type == EntityType.ENTITY_PLAYER and collider:ToPlayer() then
-		---@type EntityPlayer
 		local player = collider:ToPlayer()
 		local useItemFunctions = {
 			alertSpecs:OnCollisionGreedEnemy(npc, player),

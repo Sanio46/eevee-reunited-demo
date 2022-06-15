@@ -17,11 +17,9 @@ end
 function postEntityRemove:main(ent)
 	swiftAttack:OnWeaponInstanceRemove(ent)
 	if ent:ToTear() then
-		---@type EntityTear
 		local tear = ent:ToTear()
 		postEntityRemove:OnTearDeath(tear)
 	elseif ent:ToFamiliar() then
-		---@type EntityFamiliar
 		local familiar = ent:ToFamiliar()
 		postEntityRemove:OnFamiliarDeath(familiar)
 	end

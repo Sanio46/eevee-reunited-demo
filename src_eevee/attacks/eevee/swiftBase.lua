@@ -41,13 +41,15 @@ swiftBase.swiftWeaponData = {
 	HasFired = false,
 	DelayedTearFlag = 0,
 	IsMultiShot = false,
+	AntiGravBlinkThreshold = 0,
 	--Tears
 	StartingAccel = 0,
 	StartingFall = 0,
 	--Lasers
+
 	--Knives
+
 	--YoMama
-	AntiGravBlinkThreshold = 0
 }
 
 ---@type SwiftInstance[]
@@ -79,6 +81,7 @@ function swiftBase:InitSwiftWeapon(swiftData, weapon)
 		end
 		swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
 		swiftBase:AddSwiftTrail(weapon, swiftData.Player)
+		swiftBase:PlaySwiftFireSFX(weapon)
 		table.insert(swiftData.ActiveWeapons, weapon)
 	end
 	return swiftBase.Weapons[ptrHashWeapon]
@@ -103,6 +106,7 @@ function swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
 		swiftWeapon.StartingAccel = weapon.FallingAcceleration
 		swiftWeapon.StartingFall = weapon.FallingSpeed
 	end
+	swiftSynergies:ChocolateMilkDamageScaling(swiftData, weapon)
 end
 
 ---@param swiftData SwiftInstance
@@ -110,8 +114,7 @@ function swiftBase:GetAdjustedStartingAngle(swiftData)
 	return swiftBase:GetStartingAngle(swiftData):Resized(swiftBase:SwiftOrbitDistance(swiftData.Player)):Rotated(swiftData.Rotation)
 end
 
-function swiftBase:PlaySwiftFire()
-	EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
+function swiftBase:SwiftStarFireSFX()
 	local values = {
 		0.9,
 		1,
@@ -119,6 +122,22 @@ function swiftBase:PlaySwiftFire()
 	}
 	EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
 	EEVEEMOD.sfx:Play(EEVEEMOD.SoundEffect.SWIFT_FIRE, 1, 2, false, values[EEVEEMOD.RandomNum(3)])
+end
+
+---@param weapon Weapon
+function swiftBase:PlaySwiftFireSFX(weapon)
+	EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
+	if weapon:ToTear() then
+		swiftBase:SwiftStarFire()
+	elseif weapon:ToEffect() then
+		if weapon.Variant == EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT then
+			EEVEEMOD.sfx:Play(SoundEffect.SOUND_LASERRING_WEAK, 0.7, 0, false, 3, 0)
+		elseif weapon.Variant == EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL then
+			EEVEEMOD.sfx:Play(SoundEffect.SOUND_BLOOD_LASER, 1, 0, false, 1.5, 0)
+		end
+	elseif weapon:ToBomb() then
+		EEVEEMOD.sfx:Play(SoundEffect.SOUND_FETUS_LAND)
+	end
 end
 
 ---@param player EntityPlayer
@@ -197,7 +216,8 @@ end
 ---@param player EntityPlayer
 function swiftBase:AddSwiftTrail(weapon, player)
 	---@type EntityEffect
-	local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):ToEffect()
+	local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):
+		ToEffect()
 	local data = trail:GetData()
 	local wC = weapon:GetSprite().Color
 	local tC = Color(wC.R, wC.G, wC.B, 1, wC.RO, wC.GO, wC.BO)

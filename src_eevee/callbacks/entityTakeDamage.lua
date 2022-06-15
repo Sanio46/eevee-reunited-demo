@@ -11,7 +11,6 @@ local lockOnSpecs = require("src_eevee.items.trinkets.lockOnSpecs")
 ---@param source EntityRef
 ---@param countdown integer
 function entityTakeDamage:main(player, amount, flags, source, countdown)
-	player = player:ToPlayer()
 	local entTakeDamageFunctions = {
 		leafBlade:PreventDamageOnDash(player, amount, flags, source, countdown),
 		eeveeSFX:EeveeOnHit(player, amount, flags, source, countdown),

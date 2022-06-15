@@ -18,11 +18,9 @@ end
 ---@param ent Entity
 function postEntityKill:main(ent)
 	if ent:ToNPC() then
-		---@type EntityNPC
 		local npc = ent:ToNPC()
 		postEntityKill:OnNPCDeath(npc)
 	elseif ent:ToFamiliar() then
-		---@type EntityFamiliar
 		local familiar = ent:ToFamiliar()
 		postEntityKill:OnFamiliarDeath(familiar)
 	end

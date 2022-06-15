@@ -38,7 +38,6 @@ function swiftTear:SpawnSwiftTears(swiftData)
 	local player = swiftData.Player
 	local parent = swiftData.Parent
 	local spawnPos = swiftBase:GetAdjustedStartingAngle(swiftData)
-	---@type EntityTear
 	local swiftTear = player:FireTear(swiftData.Parent.Position + spawnPos, Vector.Zero, true, false, true, parent, 1):ToTear()
 	if swiftTear.Height > -24 then swiftTear.Height = -24 end
 
@@ -96,7 +95,7 @@ function swiftTear:MakeStarOnTearInit(tear)
 
 		if playerType == EEVEEMOD.PlayerType.EEVEE then
 			swiftTear:AssignSwiftSprite(tear)
-			swiftBase:PlaySwiftFire()
+			swiftBase:SwiftStarFireSFX()
 		end
 	end
 end

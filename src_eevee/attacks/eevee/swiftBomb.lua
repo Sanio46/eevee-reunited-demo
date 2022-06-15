@@ -1,8 +1,40 @@
 local swiftBomb = {}
 
---[[ local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
+local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
 
+
+---@param swiftData SwiftInstance
+function swiftBomb:SpawnSwiftBomb(swiftData)
+	local player = swiftData.Player
+	local parent = swiftData.Parent
+	local spawnPos = swiftBase:GetAdjustedStartingAngle(swiftData)
+	local swiftBomb = player:FireBomb(swiftData.Parent.Position + spawnPos, Vector.Zero, parent)
+
+	swiftBomb:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_HOMING)
+	swiftBomb.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
+	swiftBase:InitSwiftWeapon(swiftData, swiftBomb)
+end
+
+---@param swiftData SwiftInstance
+---@param swiftWeapon SwiftWeapon
+---@param bomb EntityBomb
+function swiftBomb:SwiftBombUpdate(swiftData, swiftWeapon, bomb)
+	local player = swiftData.Player
+	local room = EEVEEMOD.game:GetRoom()
+
+	if not swiftWeapon.HasFired then
+		bomb:SetExplosionCountdown(35)
+		bomb.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
+		for i = 1, DoorSlot.NUM_DOOR_SLOTS do
+			if player.Position:DistanceSquared(room:GetDoorSlotPosition(i)) <= 10 ^ 2 then
+				bomb:Remove()
+			end
+		end
+	end
+end
+
+--[[
 local function AssignSwiftBombData(player, bomb, anglePos)
 	swiftBase:AssignSwiftBasicData(bomb, player, anglePos)
 	local ptrHashPlayer = tostring(GetPtrHash(player))

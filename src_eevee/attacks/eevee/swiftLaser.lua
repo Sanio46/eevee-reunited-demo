@@ -3,7 +3,8 @@ local swiftLaser = {}
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
 
---[[ local function SwiftLaserType(player)
+---@param player EntityPlayer
+ local function SwiftLaserType(player)
 	if player:HasWeaponType(WeaponType.WEAPON_TECH_X) then
 		return "techX"
 	elseif player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE) then
@@ -13,6 +14,120 @@ local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
 	end
 end
 
+---@param swiftData SwiftInstance
+---@param effect EntityEffect
+local function AssignSwiftLaserEffectData(swiftData, effect)
+	local player = swiftData.Player
+	local eC = effect.Color
+
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
+		effect:SetColor(EEVEEMOD.GetRBG(eC), -1, 1, false, false)
+	else
+		local tear = player:FireTear(effect.Position, Vector.Zero, Vector.Zero):ToTear()
+		tear.Visible = false
+		tear.CollisionDamage = 0
+		local tC = tear:GetSprite().Color
+		if VeeHelper.AreColorsDifferent(eC, tC) == true then
+			effect:SetColor(tC, -1, 1, false, false)
+		else
+			local colorRed = Color(1, 0, 0, 1, 0, 0, 0)
+			effect:SetColor(colorRed, -1, 1, false, false)
+		end
+		tear:Remove()
+	end
+
+	if SwiftLaserType(player) == "techX" then
+		effect.CollisionDamage = player.Damage * 0.25
+	else
+		effect.CollisionDamage = player.Damage
+		if swiftBase:IsSwiftLaserEffect(effect) == "brim" then
+			effect:GetSprite().Scale = Vector(0.7, 0.7)
+		end
+	end
+	effect.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
+	effect.PositionOffset = Vector(0, -25)
+end
+
+---@param swiftData SwiftInstance
+function swiftLaser:SpawnSwiftLasers(swiftData)
+	local player = swiftData.Player
+	local laserVariant = nil
+
+	if SwiftLaserType(player) == "brim"
+		or (SwiftLaserType(player) == "techX" and player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE)) then
+		laserVariant = EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL
+	elseif SwiftLaserType(player) == "laser"
+		or SwiftLaserType(player) == "techX" then
+		laserVariant = EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT
+	end
+
+	if laserVariant == nil then return end
+
+	local parent = swiftData.Parent
+	local spawnPos = swiftBase:GetAdjustedStartingAngle(swiftData)
+	local swiftEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, laserVariant, 0, swiftData.Parent.Position + spawnPos, Vector.Zero, parent):ToEffect()
+	AssignSwiftLaserEffectData(swiftData, swiftEffect)
+	swiftBase:InitSwiftWeapon(swiftData, swiftEffect)
+end
+
+---@param swiftData SwiftInstance
+function swiftLaser:TechXRadiusScaling(swiftData)
+	local radius = 15 + (45 * (swiftData.TotalDuration - swiftData.DurationTimer) / swiftData.TotalDuration)
+	return radius
+end
+
+---@param swiftData SwiftInstance
+---@param weapon Weapon
+function swiftSynergies:TechXDamageScaling(swiftData, weapon)
+	local player = swiftData.Player
+
+	local damageMult = 0.25 + (3 * (swiftData.TotalDuration - swiftData.DurationTimer) / swiftData.TotalDuration)
+	local damageCalc = player.Damage * damageMult
+	
+	if damageCalc < 0.1 then
+		weapon.CollisionDamage = 0.1
+	elseif damageCalc > (player.Damage * 2) then
+		weapon.CollisionDamage = (player.Damage * 2)
+	else
+		weapon.CollisionDamage = damageCalc
+	end
+end
+
+---@param swiftData SwiftInstance
+---@param swiftWeapon SwiftWeapon
+function swiftLaser:FireSwiftLaser(swiftData, swiftWeapon)
+	local player = swiftData.Player
+	if SwiftLaserType(player) == "techX" then
+		swiftLaser:FireTechXLaser(swiftData, swiftWeapon)
+	elseif SwiftLaserType(player) == "brim" then
+		swiftLaser:FireBrimLaser(swiftData, swiftWeapon)
+	elseif SwiftLaserType(player) == "laser" then
+		swiftLaser:FireTechLaser(swiftData, swiftWeapon)
+	end
+end
+
+--Fire TechX, Brim, Tech laser
+
+---@param swiftData SwiftInstance
+---@param swiftWeapon SwiftWeapon
+---@param effect EntityEffect
+function swiftLaser:SwiftLaserEffectUpdate(swiftData, swiftWeapon, effect)
+	local player = swiftData.Player
+
+	if SwiftLaserType(player) == "techX" then
+		swiftLaser:TechXDamageScaling(effect, player)
+	end
+
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
+		effect:SetColor(EEVEEMOD.GetRBG(effect.Color), -1, 1, false, false)
+	end
+
+	if not swiftWeapon.HasFired then
+		effect.Timeout = 2
+	end
+end
+
+--[[
 local function AssignSwiftLaserEffectData(player, effect, anglePos)
 
 	swiftBase:AssignSwiftBasicData(effect, player, anglePos)

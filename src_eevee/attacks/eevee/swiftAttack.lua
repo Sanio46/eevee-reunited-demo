@@ -219,17 +219,15 @@ function swiftAttack:SwiftAttackUpdate(weapon)
 
 	if weapon.Type == EntityType.ENTITY_TEAR then
 		swiftTear:SwiftTearUpdate(swiftData, swiftWeapon, weapon)
-	elseif weapon.Type == EntityType.ENTITY_LASER then
-		--swiftLaser:SwiftLaserUpdate(weapon)
 	elseif (
 		weapon.Type == EntityType.ENTITY_EFFECT
 			and swiftBase:IsSwiftLaserEffect(weapon)
 		) then
-		--swiftLaser:SwiftLaserEffectUpdate(weapon)
+		swiftLaser:SwiftLaserEffectUpdate(swiftData, swiftWeapon, weapon)
 	elseif weapon.Type == EntityType.ENTITY_KNIFE then
 		swiftKnife:SwiftKnifeUpdate(swiftWeapon, weapon)
 	elseif weapon.Type == EntityType.ENTITY_BOMBDROP then
-		--swiftBomb:SwiftBombUpdate(weapon)
+		swiftBomb:SwiftBombUpdate(swiftData, swiftWeapon, weapon)
 	end
 
 	if not VeeHelper.EntitySpawnedByPlayer(weapon) then return end
