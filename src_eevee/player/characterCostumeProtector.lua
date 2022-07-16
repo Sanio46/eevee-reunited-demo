@@ -775,7 +775,7 @@ local function AddItemSpecificCostumes(player)
 			if player:HasCollectible(itemID) and data.CCP.UniqueHairCostumesActive[itemID] == false then
 				data.CCP.UniqueHairCostumesActive[itemID] = true
 				--if not VeeHelper.GameContinuedOnPlayerInit() then
-					ccp:TryAddNullCostume(player, itemCostume, basePath .. costumePath .. ".anm2")
+				ccp:TryAddNullCostume(player, itemCostume, basePath .. costumePath .. ".anm2")
 				--end
 			elseif not player:HasCollectible(itemID) and data.CCP.UniqueHairCostumesActive[itemID] == true then
 				player:TryRemoveNullCostume(itemCostume)
@@ -794,8 +794,8 @@ local function AddItemSpecificCostumes(player)
 				if player:HasCollectible(itemID) and data.CCP.EditedCostumesActive[itemID] == false then
 					data.CCP.EditedCostumesActive[itemID] = true
 					--if not VeeHelper.GameContinuedOnPlayerInit() then
-						player:RemoveCostume(itemConfig)
-						ccp:TryAddNullCostume(player, itemCostume, costumePath)
+					player:RemoveCostume(itemConfig)
+					ccp:TryAddNullCostume(player, itemCostume, costumePath)
 					--end
 				elseif not player:HasCollectible(itemID) and data.CCP.EditedCostumesActive[itemID] == true then
 					player:TryRemoveNullCostume(itemCostume)
@@ -877,7 +877,7 @@ local function AddItemSpecificCostumes(player)
 	if player:HasPlayerForm(PlayerForm.PLAYERFORM_MUSHROOM) and not data.CCP.MushroomCostume then
 		data.CCP.MushroomCostume = true
 		--if not VeeHelper.GameContinuedOnPlayerInit() then
-			ccp:TryAddNullCostume(player, mushroomCustomCostume, mushroomPath)
+		ccp:TryAddNullCostume(player, mushroomCustomCostume, mushroomPath)
 		--end
 	elseif not player:HasPlayerForm(PlayerForm.PLAYERFORM_MUSHROOM) and data.CCP.MushroomCostume then
 		player:TryRemoveNullCostume(mushroomCustomCostume)
@@ -1190,7 +1190,8 @@ function ccp:AstralProjectionOnHit(player, _, _, _, _)
 		and data.CCP
 		and data.CCP.AP_CanTrigger then
 		if not hasProjectionEffect and not data.CCP.AP_Disabled then
-			data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath .. EEVEEMOD.PlayerTypeToString[playerType] .. "/character_012_thelost.png"
+			data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath ..
+				EEVEEMOD.PlayerTypeToString[playerType] .. "/character_012_thelost.png"
 			data.CCP.AP_Disabled = true
 		elseif hasProjectionEffect and data.CCP.AP_Disabled then
 			data.CCP.DelaySpritesheetChange = ""
@@ -1206,7 +1207,8 @@ function ccp:OnLostCurse(player)
 	local hasLostCurse = playerEffects:HasNullEffect(NullItemID.ID_LOST_CURSE)
 
 	if hasLostCurse and not data.CCP.LostCurse then
-		data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath .. EEVEEMOD.PlayerTypeToString[playerType] .. "/character_012_thelost.png"
+		data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath ..
+			EEVEEMOD.PlayerTypeToString[playerType] .. "/character_012_thelost.png"
 		data.CCP.LostCurse = true
 	elseif not hasLostCurse and data.CCP.LostCurse then
 		data.CCP.DelaySpritesheetChange = ""
@@ -1222,7 +1224,8 @@ function ccp:OnSpiritShackles(player)
 	local isShacklesSoul = playerEffects:HasNullEffect(NullItemID.ID_SPIRIT_SHACKLES_SOUL)
 
 	if isShacklesSoul and not data.CCP.ShacklesGhost then
-		data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath .. EEVEEMOD.PlayerTypeToString[playerType] .. "/character_018_thesoul.png"
+		data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath ..
+			EEVEEMOD.PlayerTypeToString[playerType] .. "/character_018_thesoul.png"
 		data.CCP.ShacklesGhost = true
 	elseif not isShacklesSoul and data.CCP.ShacklesGhost then
 		data.CCP.DelaySpritesheetChange = ""
@@ -1419,7 +1422,7 @@ function ccp:DelayInCostumeReset(player)
 
 	if data.CCP.DelaySpritesheetChange then
 		if data.CCP.DelaySpritesheetChange == "" then
-			ccp:UpdatePlayerSpritesheet(player, player:GetSprite())
+			ccp:UpdatePlayerSpritesheet(player, player:GetSprite(), player:GetSprite():GetFilename())
 		else
 			ccp:UpdatePlayerSpritesheet(player, player:GetSprite(), data.CCP.DelaySpritesheetChange)
 		end
@@ -1448,7 +1451,8 @@ function ccp:GnawedLeaf(player)
 
 	if not data.CCP or not player:HasCollectible(CollectibleType.COLLECTIBLE_GNAWED_LEAF) then return end
 
-	if VeeHelper.PlayerStandingStill(player) and player:GetFireDirection() == Direction.NO_DIRECTION and not data.CCP.EeveeGnawed then
+	if VeeHelper.PlayerStandingStill(player) and player:GetFireDirection() == Direction.NO_DIRECTION and
+		not data.CCP.EeveeGnawed then
 
 		if not data.CCP.GnawedTimer then
 			data.CCP.GnawedTimer = TimeTillGnawed

@@ -26,7 +26,8 @@ local uniqueRoomReward = {
 	[RoomType.ROOM_SUPERSECRET] = { PickupVariant.PICKUP_LOCKEDCHEST, 0 },
 	[RoomType.ROOM_ARCADE] = { PickupVariant.PICKUP_COIN, CoinSubType.COIN_DIME },
 	[RoomType.ROOM_CURSE] = { PickupVariant.PICKUP_HEART, HeartSubType.HEART_BLACK },
-	[RoomType.ROOM_CHALLENGE] = { PickupVariant.PICKUP_TRINKET, function() return EEVEEMOD.game:GetItemPool():GetTrinket(true) end },
+	[RoomType.ROOM_CHALLENGE] = { PickupVariant.PICKUP_TRINKET,
+		function() return EEVEEMOD.game:GetItemPool():GetTrinket(true) end },
 	[RoomType.ROOM_LIBRARY] = { PickupVariant.PICKUP_WOODENCHEST, 0 },
 	[RoomType.ROOM_SACRIFICE] = { PickupVariant.PICKUP_HEART, HeartSubType.HEART_DOUBLEPACK },
 	[RoomType.ROOM_ISAACS] = { PickupVariant.PICKUP_CHEST, 0 },
@@ -34,7 +35,7 @@ local uniqueRoomReward = {
 	[RoomType.ROOM_CHEST] = { PickupVariant.PICKUP_ETERNALCHEST, 0 },
 	[RoomType.ROOM_DICE] = { PickupVariant.PICKUP_TAROTCARD, Card.CARD_DICE_SHARD },
 	[RoomType.ROOM_PLANETARIUM] = { PickupVariant.PICKUP_TRINKET, TrinketType.TELESCOPE_LENS },
-	[RoomType.ROOM_ULTRASECRET] = { PickupVariant.PICKUP_REDCHEST, 0 }
+	[RoomType.ROOM_ULTRASECRET] = { PickupVariant.PICKUP_REDCHEST, 0 } --TODO: Remove maybe because Ultra Secrets aren't come by often and the reward is a troll
 }
 ---@type table<PickupVariant, CoinSubType | BombSubType | KeySubType>
 local pickupSpawnWeights = {
@@ -119,7 +120,8 @@ end
 local function SpawnPokeStop()
 	local room = EEVEEMOD.game:GetRoom()
 	local centerPos = room:GetCenterPos()
-	local stop = Isaac.Spawn(EntityType.ENTITY_SLOT, EEVEEMOD.SlotVariant.POKE_STOP, 0, Vector(centerPos.X, centerPos.Y - 70), Vector.Zero, nil)
+	local stop = Isaac.Spawn(EntityType.ENTITY_SLOT, EEVEEMOD.SlotVariant.POKE_STOP, 0,
+		Vector(centerPos.X, centerPos.Y - 70), Vector.Zero, nil)
 	local data = stop:GetData()
 	data.PosToStayIn = stop.Position
 	local pokeStopRNG = RNG()
@@ -176,7 +178,8 @@ function pokeStop:SlotUpdate()
 				local randomNum = data.PokeStopRNG:RandomInt(#pickupSpawnWeights) + 1
 				data.PokeStopRNG:Next()
 				local pickupSpawn = pickupSpawnWeights[randomNum]
-				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop, pickupSpawn[2], stop.InitSeed)
+				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop, pickupSpawn[2],
+					stop.InitSeed)
 			else
 				local roomDesc = EEVEEMOD.game:GetLevel():GetCurrentRoomDesc()
 				local roomType = roomDesc.Data.Type
@@ -188,7 +191,8 @@ function pokeStop:SlotUpdate()
 					pickupSpawn[1] = PickupVariant.PICKUP_TAROTCARD
 					pickupSpawn[2] = Card.CARD_CRACKED_KEY
 				end
-				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop, pickupSpawn[2], stop.InitSeed)
+				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop, pickupSpawn[2],
+					stop.InitSeed)
 			end
 		end
 
@@ -205,14 +209,14 @@ end
 ---@param player EntityPlayer
 function pokeStop:DropPokeStopOnFirstPickup(player)
 	local data = player:GetData()
-	
+
 	if player.QueuedItem.Item ~= nil then
 		if player.QueuedItem.Item.ID == EEVEEMOD.CollectibleType.POKE_STOP
-		and not data.ShouldDropPokeStop
+			and not data.ShouldDropPokeStop
 		then
 			data.ShouldDropPokeStop = true
 		end
-		
+
 	elseif player:IsItemQueueEmpty() and data.ShouldDropPokeStop then
 		SpawnPokeStop()
 		data.ShouldDropPokeStop = nil

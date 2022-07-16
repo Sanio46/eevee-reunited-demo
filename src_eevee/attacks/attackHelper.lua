@@ -167,7 +167,7 @@ function attackHelper:GetExtraFireDirections(player, direction)
 		for weaponType, degrees in pairs(WeaponTypeShotDegrees) do
 			if player:HasWeaponType(weaponType) then
 				for i = 1, EEVEEMOD.RandomNum(3, 5) do
-					local rotationOffset = EEVEEMOD.RandomNum((degrees / -2), (degrees / 2))
+					local rotationOffset = EEVEEMOD.RandomNum(math.floor(degrees / -2), math.floor(degrees / 2))
 					local newDirection = direction:Rotated(rotationOffset)
 					table.insert(directions, newDirection)
 				end

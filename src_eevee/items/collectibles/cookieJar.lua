@@ -34,7 +34,7 @@ end
 local MAX_COOKIE_USES = 6
 
 ---@param player EntityPlayer
----@return UseItemReturn
+---@return UseItemReturn | boolean
 function cookieJar:onUse(_, _, player, _, _, _)
 	local effects = player:GetEffects()
 	local shouldRemove = false

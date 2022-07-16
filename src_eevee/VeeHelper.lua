@@ -235,11 +235,12 @@ VeeHelper.BookState = {
 }
 
 ---@param player EntityPlayer
----@return BookState bookstate
+---@return BookState integer
 function VeeHelper.GetBookState(player)
 	local hasVirtues = player:HasCollectible(CollectibleType.COLLECTIBLE_BOOK_OF_VIRTUES)
 	local hasBelial = VeeHelper.IsJudasBirthrightActive(player)
-	local bookState = (hasVirtues and hasBelial) and VeeHelper.BookState.BOOK_DOUBLE or (hasVirtues or hasBelial) and VeeHelper.BookState.BOOK_ACTIVE or VeeHelper.BookState.BOOK_NONE
+	local bookState = (hasVirtues and hasBelial) and VeeHelper.BookState.BOOK_DOUBLE or
+		(hasVirtues or hasBelial) and VeeHelper.BookState.BOOK_ACTIVE or VeeHelper.BookState.BOOK_NONE
 
 	return bookState
 end
@@ -336,7 +337,8 @@ end
 function VeeHelper.GetAllMainPlayers()
 	local players = {}
 	for i = 0, game:GetNumPlayers() - 1 do
-		if Isaac.GetPlayer(i):GetMainTwin():GetPlayerType() == Isaac.GetPlayer(i):GetPlayerType() --Is the main twin of 2 players
+		if Isaac.GetPlayer(i):GetMainTwin():GetPlayerType() == Isaac.GetPlayer(i):GetPlayerType()
+			--Is the main twin of 2 players
 			and (not Isaac.GetPlayer(i).Parent or Isaac.GetPlayer(i).Parent.Type ~= EntityType.ENTITY_PLAYER) then --Not an item-related spawned-in player.
 			table.insert(players, Isaac.GetPlayer(i))
 		end
@@ -464,7 +466,6 @@ function VeeHelper.FindMarkedTarget(player)
 	end
 	return targetPos
 end
-
 
 ---@param player EntityPlayer
 ---@param targetStartingPos Vector | nil
@@ -735,7 +736,7 @@ function VeeHelper.IsSplitTear(tear)
 
 	for _, tears in pairs(Isaac.FindInRadius(tear.Position, 10, EntityPartition.TEAR)) do
 		local mainTear = tears:ToTear()
-		if mainTear == nil then return end
+		if mainTear == nil then return false end
 		if tear.InitSeed ~= mainTear.InitSeed
 			and tear.FrameCount ~= mainTear.FrameCount
 			and tear.SpawnerEntity
@@ -827,7 +828,8 @@ end
 ---@return boolean
 function VeeHelper.IsJudasBirthrightActive(player)
 	local playerType = player:GetPlayerType()
-	return (playerType == PlayerType.PLAYER_JUDAS or playerType == PlayerType.PLAYER_BLACKJUDAS) and player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
+	return (playerType == PlayerType.PLAYER_JUDAS or playerType == PlayerType.PLAYER_BLACKJUDAS) and
+		player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 end
 
 --Loops through all EntityPlayers to see if they have the provided TrinketType. Returns true if so, false otherwise.

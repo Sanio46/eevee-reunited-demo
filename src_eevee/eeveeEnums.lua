@@ -9,6 +9,8 @@ EEVEEMOD.Name = "Eevee: Reunited Demo"
 EEVEEMOD.RandomRNG = RNG()
 EEVEEMOD.RunSeededRNG = RNG()
 EEVEEMOD.RandomRNG:SetSeed(Random() + 1, 35)
+---@param lower? integer
+---@param upper? integer
 function EEVEEMOD.RandomNum(lower, upper)
 	if upper then
 		return EEVEEMOD.RandomRNG:RandomInt((upper - lower) + 1) + lower
@@ -221,6 +223,7 @@ EEVEEMOD.IsPlayerEeveeOrEvolved = {
 }
 
 ---@class PokeballType
+---@type Card[]
 EEVEEMOD.PokeballType = {
 	POKEBALL = Isaac.GetCardIdByName("Poke Ball"),
 	GREATBALL = Isaac.GetCardIdByName("Great Ball"),
