@@ -121,7 +121,9 @@ end
 function activeItemRender:UpdatePlayers()
 	local players = VeeHelper.GetAllMainPlayers()
 
-	if #players ~= numHUDPlayers then
+	if #players ~= numHUDPlayers
+		or (EEVEEMOD.game():GetFrameCount() == 0 and IndexedPlayers[1].Player ~= nil)
+	then
 		numHUDPlayers = #players
 		for i = 1, 4 do
 			IndexedPlayers[i].Player = nil
