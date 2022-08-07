@@ -18,7 +18,8 @@ function swiftTear:AssignSwiftSprite(tear)
 
 	if dataTear.ForceBlood or VeeHelper.TearFlagsBlood[tear.Variant] then
 		animationToPlay = "BloodTear" .. animationToPlay
-		variantToUse = tear:HasTearFlags(TearFlags.TEAR_LUDOVICO) and "gfx/tear_swift_blood.anm2" or EEVEEMOD.TearVariant.SWIFT_BLOOD
+		variantToUse = tear:HasTearFlags(TearFlags.TEAR_LUDOVICO) and "gfx/tear_swift_blood.anm2" or
+			EEVEEMOD.TearVariant.SWIFT_BLOOD
 	else
 		animationToPlay = "RegularTear" .. animationToPlay
 	end
@@ -38,11 +39,12 @@ function swiftTear:SpawnSwiftTears(swiftData)
 	local player = swiftData.Player
 	local parent = swiftData.Parent
 	local spawnPos = swiftBase:GetAdjustedStartingAngle(swiftData)
-	local swiftTear = player:FireTear(swiftData.Parent.Position + spawnPos, Vector.Zero, true, false, true, parent, 1):ToTear()
-	if swiftTear.Height > -24 then swiftTear.Height = -24 end
+	local swiftStar = player:FireTear(swiftData.Parent.Position + spawnPos, Vector.Zero, true, false, true, parent, 1):
+		ToTear()
+	if swiftStar.Height > -24 then swiftStar.Height = -24 end
 
-	swiftTear:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_HOMING)
-	swiftBase:InitSwiftWeapon(swiftData, swiftTear)
+	swiftStar:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_HOMING)
+	swiftBase:InitSwiftWeapon(swiftData, swiftStar)
 end
 
 ---@param swiftData SwiftInstance
@@ -59,7 +61,7 @@ function swiftTear:SwiftTearUpdate(swiftData, swiftWeapon, tear)
 			sprite:Play(anim .. VeeHelper.TearScaleToSizeAnim(tear), true)
 		end
 	end
-	
+
 	if not swiftWeapon.HasFired then
 		tear.FallingSpeed = -0.05 --Tears slowly decend with a FallingSpeed of 0
 		tear.FallingAcceleration = 0
@@ -83,6 +85,21 @@ function swiftTear:SwiftTearUpdate(swiftData, swiftWeapon, tear)
 				sprite.Rotation = data.AfterFireSwiftRotation
 				data.AfterFireSwiftRotation = data.AfterFireSwiftRotation - 20
 			end
+		end
+	end
+end
+
+function swiftTear:SPEEEN(tear)
+	local sprite = tear:GetSprite()
+	local data = tear:GetData()
+	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(tear))]
+	
+	if (tear.Variant == EEVEEMOD.TearVariant.SWIFT or tear.Variant == EEVEEMOD.TearVariant.SWIFT_BLOOD) and not swiftWeapon then
+		if not data.BasicSwiftRotation then
+			data.BasicSwiftRotation = sprite.Rotation
+		else
+			sprite.Rotation = data.BasicSwiftRotation
+			data.BasicSwiftRotation = data.BasicSwiftRotation - 20
 		end
 	end
 end
@@ -121,8 +138,6 @@ end
 ---@param splashType string
 function swiftTear:OnSwiftStarDestroy(tear, splashType)
 	if tear.Variant ~= EEVEEMOD.TearVariant.SWIFT and tear.Variant ~= EEVEEMOD.TearVariant.SWIFT_BLOOD then return end
-
-	if splashType == "Wall" then return end
 
 	EEVEEMOD.sfx:Play(EEVEEMOD.SoundEffect.SWIFT_HIT)
 	local splashPos = -15

@@ -9,6 +9,7 @@ local customTearVariants = require("src_eevee.misc.customTearVariants")
 ---@param tear EntityTear
 function postTearUpdate:main(tear)
 	swiftAttack:SwiftAttackUpdate(tear)
+	swiftTear:SPEEEN(tear)
 	swiftTear:RemoveSpiritProjectile(tear)
 	ember:CreateEmberTrail(tear)
 	wonderousLauncher:OnPoopDiscUpdate(tear)
