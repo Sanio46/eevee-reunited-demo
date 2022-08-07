@@ -64,7 +64,14 @@ end ]]
 local function strangeEggReward(player, charge)
 	local heartToSpawn = VeeHelper.IsJudasBirthrightActive(player) and HeartSubType.HEART_BLACK or HeartSubType.HEART_FULL
 	if charge == 1 then
-		player:AddHearts(6)
+		if player:GetHearts() ~= player:GetEffectiveMaxHearts() then
+			player:AddHearts(6)
+			EEVEEMOD.sfx:Play(SoundEffect.SOUND_VAMP_GULP)
+		else
+			Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_HEART, heartToSpawn,
+				EEVEEMOD.game:GetRoom():FindFreePickupSpawnPosition(player.Position, 2), Vector(0, 0), nil)
+		end
+
 	elseif charge == 2 then
 		Isaac.Spawn(5, 100, CollectibleType.COLLECTIBLE_BREAKFAST,
 			EEVEEMOD.game:GetRoom():FindFreePickupSpawnPosition(player.Position, 2), Vector(0, 0), nil)
@@ -161,23 +168,34 @@ end
 
 ---@param player EntityPlayer
 function strangeEgg:ForceItemUse(player)
+	local data = player:GetData()
 
-	if player:GetActiveItem(ActiveSlot.SLOT_PRIMARY) == EEVEEMOD.CollectibleType.STRANGE_EGG
-		and player:GetActiveCharge(ActiveSlot.SLOT_PRIMARY) > 0
-		and Input.IsActionTriggered(ButtonAction.ACTION_ITEM, player.ControllerIndex)
-	then
-		local useFlags = UseFlag.USE_OWNED | UseFlag.USE_REMOVEACTIVE
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) then
-			useFlags = useFlags | UseFlag.USE_CAR_BATTERY
+	if player:GetActiveItem(ActiveSlot.SLOT_PRIMARY) == EEVEEMOD.CollectibleType.STRANGE_EGG then
+		if data.StrangeEggWait then
+			if data.StrangeEggWait > 0 then
+				data.StrangeEggWait = data.StrangeEggWait - 1
+			else
+				if player:GetActiveCharge(ActiveSlot.SLOT_PRIMARY) > 0
+					and Input.IsActionTriggered(ButtonAction.ACTION_ITEM, player.ControllerIndex)
+				then
+					local useFlags = UseFlag.USE_OWNED | UseFlag.USE_REMOVEACTIVE
+					if player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) then
+						useFlags = useFlags | UseFlag.USE_CAR_BATTERY
+					end
+					player:UseActiveItem(EEVEEMOD.CollectibleType.STRANGE_EGG, useFlags, ActiveSlot.SLOT_PRIMARY)
+				end
+			end
 		end
-		player:UseActiveItem(EEVEEMOD.CollectibleType.STRANGE_EGG, useFlags, ActiveSlot.SLOT_PRIMARY)
+	elseif player:GetActiveItem(ActiveSlot.SLOT_SECONDARY) == EEVEEMOD.CollectibleType.STRANGE_EGG then
+		data.StrangeEggWait = 15
 	end
 end
 
 ---@param familiar EntityFamiliar
 function strangeEgg:OnStrangeEggWispDeath(familiar)
 	if familiar.Variant ~= FamiliarVariant.WISP or familiar.SubType ~= EEVEEMOD.CollectibleType.STRANGE_EGG then return end
-	Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_HEART, HeartSubType.HEART_FULL, familiar.Position, Vector.Zero, nil)
+	Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_HEART, HeartSubType.HEART_FULL, familiar.Position,
+		Vector.Zero, nil)
 end
 
 return strangeEgg

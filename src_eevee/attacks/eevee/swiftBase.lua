@@ -128,7 +128,7 @@ end
 function swiftBase:PlaySwiftFireSFX(weapon)
 	EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
 	if weapon:ToTear() then
-		swiftBase:SwiftStarFire()
+		swiftBase:SwiftStarFireSFX()
 	elseif weapon:ToEffect() then
 		if weapon.Variant == EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT then
 			EEVEEMOD.sfx:Play(SoundEffect.SOUND_LASERRING_WEAK, 0.7, 0, false, 3, 0)
