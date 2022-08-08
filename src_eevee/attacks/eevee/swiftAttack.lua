@@ -113,6 +113,12 @@ function swiftAttack:OnSwiftFire(swiftData, firedEarly)
 		end
 	end
 	swiftData.CanFire = true
+	if firedEarly then
+		local data = swiftData.Player:GetData()
+		local noMultSpawned = swiftData.NumWeaponsSpawned / swiftData.ShotMultiplier
+		local noMultToSpawn = swiftData.NumWeaponsToSpawn / swiftData.ShotMultiplier
+		data.TimeTillNextInstance = swiftData.TotalDuration * (noMultSpawned / noMultToSpawn)
+	end
 end
 
 ---@param effect EntityEffect
@@ -130,23 +136,35 @@ end
 ---@param weapon Weapon
 function swiftAttack:SwiftMainFireWeapon(swiftData, swiftWeapon, weapon)
 	local player = swiftData.Player
-	local fireDirection = VeeHelper.AddTearVelocity(swiftWeapon.ShootDirection, player.ShotSpeed * 10, player, true)
+	local direction = VeeHelper.AddTearVelocity(swiftWeapon.ShootDirection, player.ShotSpeed * 10, player, true)
 
 	--Loki's Horns, Mom's Eye, Eye Sore, Monstro's Lung
-	--[[ if not swiftWeapon.IsMultiShot then
-		if not swiftPlayer.Constant or (swiftPlayer.Constant and not player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)) then
-			swiftAttack:ShouldFireExtraWeapons(weapon, player, fireDirection)
+	if not swiftWeapon.IsMultiShot then
+		local ExtraShotItems = {
+			CollectibleType.COLLECTIBLE_LOKIS_HORNS,
+			CollectibleType.COLLECTIBLE_MOMS_EYE,
+			CollectibleType.COLLECTIBLE_MONSTROS_LUNG,
+			CollectibleType.COLLECTIBLE_EYE_SORE
+		}
+		for i = 1, #ExtraShotItems do
+			if attackHelper:ShouldFireExtraShot(player, ExtraShotItems[i]) then
+				local directions = attackHelper:GetExtraFireDirections(player, direction)
+				for j = 1, #directions do
+					swiftAttack:FireExtraWeapon(weapon, player, directions[j])
+				end
+				break
+			end
 		end
-	end ]]
+	end
 
 	--Wiz rotation
 	if attackHelper:ShouldWizShot(player)
 		and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then
-		fireDirection = fireDirection:Rotated(45)
+		direction = direction:Rotated(45)
 	end
 
 	if not swiftBase:IsSwiftLaserEffect(weapon) then
-		weapon.Velocity = attackHelper:TryFireToEnemy(player, weapon, fireDirection)
+		weapon.Velocity = attackHelper:TryFireToEnemy(player, weapon, direction)
 	else
 		weapon.Velocity = Vector.Zero
 	end
@@ -154,38 +172,40 @@ function swiftAttack:SwiftMainFireWeapon(swiftData, swiftWeapon, weapon)
 	--Wiz opposite rotation
 	if attackHelper:ShouldWizShot(player)
 		and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then
-		fireDirection = fireDirection:Rotated(-90)
+		direction = direction:Rotated(-90)
 	end
 
 	--Wiz "normal" shot
 	if attackHelper:ShouldWizShot(player) then
-		--swiftAttack:FireExtraWeapon(weapon, player, attackHelper:TryFireToEnemy(player, weapon, fireDirection))
+		--swiftAttack:FireExtraWeapon(weapon, player, attackHelper:TryFireToEnemy(player, weapon, direction))
 		if player:GetCollectibleNum(CollectibleType.COLLECTIBLE_THE_WIZ) >= 2
 			or player:HasPlayerForm(PlayerForm.PLAYERFORM_BABY) then
-			--swiftAttack:FireExtraWeapon(weapon, player, attackHelper:TryFireToEnemy(player, weapon, fireDirection:Rotated(45)))
+			--swiftAttack:FireExtraWeapon(weapon, player, attackHelper:TryFireToEnemy(player, weapon, direction:Rotated(45)))
 		end
 	end
 end
 
---not sure how to handle just yet
-function swiftAttack:FireExtraWeapon()
-	--[[ if (
+---@param parent Entity
+---@param player EntityPlayer
+---@param direction Vector
+function swiftAttack:FireExtraWeapon(parent, player, direction)
+	if (
 		parent.Type ~= EntityType.ENTITY_EFFECT
 			or (parent.Type == EntityType.ENTITY_EFFECT and swiftBase:IsSwiftLaserEffect(parent))--No Evil Eye!
 		) then
 		if player:HasWeaponType(WeaponType.WEAPON_KNIFE) then
-			swiftKnife:FireSwiftKnife(parent, player, direction)
+			--swiftKnife:FireSwiftKnife(parent, player, direction)
 		elseif player:HasWeaponType(WeaponType.WEAPON_BOMBS) then
-			swiftBomb:FireSwiftBomb(parent, player, direction)
+			--swiftBomb:FireSwiftBomb(parent, player, direction)
 		elseif player:HasWeaponType(WeaponType.WEAPON_LASER)
 			or player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
 			or player:HasWeaponType(WeaponType.WEAPON_TECH_X) then
-			swiftLaser:FireSwiftLaser(parent, player, direction, rotationOffset)
+			--swiftLaser:FireSwiftLaser(swiftData, swiftWeapon)
 		elseif player:HasWeaponType(WeaponType.WEAPON_TEARS)
 			or player:HasWeaponType(WeaponType.WEAPON_MONSTROS_LUNGS) then
-			--swiftTear:FireSwiftTear(parent, player, direction)
+			swiftTear:FireSwiftTear(parent, player, direction)
 		end
-	end ]]
+	end
 end
 
 ---@param swiftData SwiftInstance
@@ -207,6 +227,8 @@ function swiftAttack:PreFireUpdate(swiftData, swiftWeapon, weapon)
 		else
 			swiftWeapon.ShootDirection = VeeHelper.GetIsaacShootingDirection(player, weapon.Position)
 		end
+	else
+		swiftWeapon.ShootDirection = VeeHelper.GetIsaacShootingDirection(player, weapon.Position)
 	end
 end
 
@@ -396,7 +418,7 @@ function swiftAttack:SwiftTrailUpdate(trail)
 end
 
 function swiftAttack:Debug()
-	--[[ 	local numInstances = 0
+		local numInstances = 0
 	local weaponTimer = 0
 	local durationTimer = 0
 	local cooldown = 0
@@ -413,14 +435,15 @@ function swiftAttack:Debug()
 	Isaac.RenderText("NumInstances: " .. numInstances, 50, 50, 1, 1, 1, 1)
 	Isaac.RenderText("Duration: " .. durationTimer, 50, 70, 1, 1, 1, 1)
 	Isaac.RenderText("Weapon Timer:" .. weaponTimer, 50, 90, 1, 1, 1, 1)
-	Isaac.RenderText("Cooldown:" .. cooldown, 50, 110, 1, 1, 1, 1) ]]
+	Isaac.RenderText("Cooldown:" .. cooldown, 50, 110, 1, 1, 1, 1)
 
-	--[[ if swiftBase.Instances[1] == nil then return end
+	if swiftBase.Instances[1] == nil then return end
 	for index, weapon in ipairs(swiftBase.Instances[1].ActiveWeapons) do
 		local screenpos = EEVEEMOD.game:GetRoom():WorldToScreenPosition(weapon.Position)
 		local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
 		Isaac.RenderText(swiftWeapon.FireDelay, screenpos.X, screenpos.Y, 1, 1, 1, 1)
-	end ]]
+		--Isaac.RenderText(swiftWeapon.ShootDirection.X .. ", " .. swiftWeapon.ShootDirection.Y, screenpos.X, screenpos.Y + 30, 1, 1, 1, 1)
+	end
 end
 
 --[[ -----------------------
@@ -562,7 +585,7 @@ function swiftAttack:SwiftMainFireWeapon(weapon, player)
 	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
 	local ptrHashPlayer = tostring(GetPtrHash(player))
 	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local fireDirection = VeeHelper.AddTearVelocity(swiftWeapon.ShotDir, player.ShotSpeed * 10, player, true)
+	local direction = VeeHelper.AddTearVelocity(swiftWeapon.ShotDir, player.ShotSpeed * 10, player, true)
 	
 	if player:GetEffects():HasNullEffect(NullItemID.ID_WIZARD) then
 		if not swiftPlayer.WizardShot then
@@ -577,24 +600,24 @@ function swiftAttack:SwiftMainFireWeapon(weapon, player)
 	--Loki's Horns, Mom's Eye, Eye Sore, Monstro's Lung
 	if not swiftWeapon.IsMultiShot then
 		if not swiftPlayer.Constant or (swiftPlayer.Constant and not player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)) then
-			swiftAttack:ShouldFireExtraWeapons(weapon, player, fireDirection)
+			swiftAttack:ShouldFireExtraWeapons(weapon, player, direction)
 		end
 	end
 
 	--Wiz rotation
 	if ShouldWizShot(player)
 		and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then
-		fireDirection = fireDirection:Rotated(45)
+		direction = direction:Rotated(45)
 	end
 
 	if not swiftWeapon.ConstantOrbit then
 		if not swiftBase:IsSwiftLaserEffect(weapon) then
 			if not player:HasCollectible(CollectibleType.COLLECTIBLE_ANTI_GRAVITY) then
-				weapon.Velocity = swiftBase:TryFireToEnemy(player, weapon, fireDirection)
+				weapon.Velocity = swiftBase:TryFireToEnemy(player, weapon, direction)
 			else
 				weapon.Velocity = Vector.Zero
 				swiftWeapon.AntiGravTimer = 90
-				swiftWeapon.AntiGravDir = fireDirection
+				swiftWeapon.AntiGravDir = direction
 				if weapon.Type == EntityType.ENTITY_TEAR then
 					swiftWeapon.AntiGravHeight = weapon.Height
 				end
@@ -604,23 +627,23 @@ function swiftAttack:SwiftMainFireWeapon(weapon, player)
 		end
 	else
 		if not swiftPlayer.Constant then
-			weapon.Velocity = swiftBase:TryFireToEnemy(player, weapon, fireDirection)
+			weapon.Velocity = swiftBase:TryFireToEnemy(player, weapon, direction)
 		end
-		swiftAttack:FireExtraWeapon(weapon, player, fireDirection)
+		swiftAttack:FireExtraWeapon(weapon, player, direction)
 	end
 
 	--Wiz opposite rotation
 	if ShouldWizShot(player)
 		and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then
-		fireDirection = fireDirection:Rotated(-90)
+		direction = direction:Rotated(-90)
 	end
 
 	--Wiz "normal" shot
 	if ShouldWizShot(player) then
-		swiftAttack:FireExtraWeapon(weapon, player, swiftBase:TryFireToEnemy(player, weapon, fireDirection))
+		swiftAttack:FireExtraWeapon(weapon, player, swiftBase:TryFireToEnemy(player, weapon, direction))
 		if player:GetCollectibleNum(CollectibleType.COLLECTIBLE_THE_WIZ) >= 2
 			or player:HasPlayerForm(PlayerForm.PLAYERFORM_BABY) then
-			swiftAttack:FireExtraWeapon(weapon, player, swiftBase:TryFireToEnemy(player, weapon, fireDirection:Rotated(45)))
+			swiftAttack:FireExtraWeapon(weapon, player, swiftBase:TryFireToEnemy(player, weapon, direction:Rotated(45)))
 		end
 	end
 

@@ -1,7 +1,6 @@
 local swiftTear = {}
 
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
-local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
 
 ---@param tear EntityTear
 function swiftTear:AssignSwiftSprite(tear)
@@ -34,17 +33,29 @@ function swiftTear:AssignSwiftSprite(tear)
 	tearSprite:Play(animationToPlay, true)
 end
 
+---@param parent Entity
+---@param player EntityPlayer
+---@param direction Vector
+function swiftTear:FireSwiftTear(parent, player, direction)
+	local tear = player:FireTear(parent.Position, direction, true, false, true, parent, 1):ToTear()
+	if tear.Height > -24 then tear.Height = -24 end
+
+	tear:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_HOMING)
+	swiftBase:AddSwiftTrail(tear, player)
+	swiftBase:PlaySwiftFireSFX(tear)
+end
+
 ---@param swiftData SwiftInstance
 function swiftTear:SpawnSwiftTears(swiftData)
 	local player = swiftData.Player
 	local parent = swiftData.Parent
 	local spawnPos = swiftBase:GetAdjustedStartingAngle(swiftData)
-	local swiftStar = player:FireTear(swiftData.Parent.Position + spawnPos, Vector.Zero, true, false, true, parent, 1):
+	local tear = player:FireTear(swiftData.Parent.Position + spawnPos, Vector.Zero, true, false, true, parent, 1):
 		ToTear()
-	if swiftStar.Height > -24 then swiftStar.Height = -24 end
+	if tear.Height > -24 then tear.Height = -24 end
 
-	swiftStar:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_HOMING)
-	swiftBase:InitSwiftWeapon(swiftData, swiftStar)
+	tear:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_HOMING)
+	swiftBase:InitSwiftWeapon(swiftData, tear)
 end
 
 ---@param swiftData SwiftInstance
@@ -93,7 +104,7 @@ function swiftTear:SPEEEN(tear)
 	local sprite = tear:GetSprite()
 	local data = tear:GetData()
 	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(tear))]
-	
+
 	if (tear.Variant == EEVEEMOD.TearVariant.SWIFT or tear.Variant == EEVEEMOD.TearVariant.SWIFT_BLOOD) and not swiftWeapon then
 		if not data.BasicSwiftRotation then
 			data.BasicSwiftRotation = sprite.Rotation
