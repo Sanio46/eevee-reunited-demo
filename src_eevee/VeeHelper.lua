@@ -235,7 +235,6 @@ VeeHelper.BookState = {
 }
 
 ---@param player EntityPlayer
----@return BookState integer
 function VeeHelper.GetBookState(player)
 	local hasVirtues = player:HasCollectible(CollectibleType.COLLECTIBLE_BOOK_OF_VIRTUES)
 	local hasBelial = VeeHelper.IsJudasBirthrightActive(player)
@@ -395,6 +394,7 @@ function VeeHelper.DetectNearestEnemy(ent, range)
 	local closestDistance = nil --placeholder variable we'll put the distance in
 
 	for _, npc in pairs(Isaac.FindInRadius(ent.Position, range, EntityPartition.ENEMY)) do --if there are enemies, dumbass.
+		npc = npc:ToNPC()
 		if npc:IsActiveEnemy() and npc:IsVulnerableEnemy() then --if its an active enemy
 
 			local npcDistance = npc.Position:DistanceSquared(ent.Position) --calculate the distance of this npc from the starting position of the ent
