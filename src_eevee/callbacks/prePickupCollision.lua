@@ -3,14 +3,10 @@ local prePickupCollision = {}
 local blackGlasses = require("src_eevee.items.collectibles.blackGlasses")
 local pokeyMansCrystal = require("src_eevee.challenges.pokeyMansCrystal")
 
----@param item EntityPickup
----@param collider Entity
----@param low boolean
----@diagnostic disable-next-line: unused-local
 function prePickupCollision:main(item, collider, low)
 	if collider:ToPlayer() then
 		local player = collider:ToPlayer()
-		blackGlasses:OnCollectibleCollision(item, player)
+		blackGlasses:OnCollectibleCollision(item, player, low)
 	end
 end
 

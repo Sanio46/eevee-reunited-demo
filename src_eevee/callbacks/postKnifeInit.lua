@@ -3,7 +3,6 @@ local postKnifeInit = {}
 local customSpiritSword = require("src_eevee.modsupport.customSpiritSword")
 local triggerOnFire = require("src_eevee.items.triggerOnFire")
 
----@param knife EntityKnife
 function postKnifeInit:main(knife)
 	customSpiritSword:ReplaceSpiritSwordOnInit(knife)
 	triggerOnFire:OnWeaponInit(knife)

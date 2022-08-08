@@ -4,16 +4,13 @@ local pokeball = require("src_eevee.items.pickups.pokeball")
 local wonderousLauncher = require("src_eevee.items.collectibles.wonderousLauncher")
 local strangeEgg = require("src_eevee.items.collectibles.strangeEgg")
 
----@param entity Entity
----@param inputHook InputHook
----@param buttonAction ButtonAction
 function inputAction:main(entity, inputHook, buttonAction)
 	if entity and entity:ToPlayer() then
 		local player = entity:ToPlayer()
 		local inputActionFunctions = {
 			pokeball:ForceKeysForPokeball(player, inputHook, buttonAction),
 			wonderousLauncher:ForcePoop(player, inputHook, buttonAction),
-			--strangeEgg:ForceItemUse(player, inputHook, buttonAction)
+			strangeEgg:ForceItemUse(player, inputHook, buttonAction)
 		}
 
 		for _, func in pairs(inputActionFunctions) do

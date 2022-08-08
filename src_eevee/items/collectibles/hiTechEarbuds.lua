@@ -5,7 +5,6 @@ local earbuds = {}
 local volumeBar = Sprite()
 local volumeSlider = Sprite()
 
----@param player EntityPlayer
 function earbuds:LoadVolumeBar(player)
 	--[[  if player:HasCollectible(EEVEEMOD.CollectibleType.HI_TECH_EARBUDS)
 	and (not volumeBar:IsLoaded() or not volumeSlider:IsLoaded())

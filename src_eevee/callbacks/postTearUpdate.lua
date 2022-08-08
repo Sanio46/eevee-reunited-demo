@@ -6,12 +6,13 @@ local ember = require("src_eevee.attacks.flareon.ember")
 local wonderousLauncher = require("src_eevee.items.collectibles.wonderousLauncher")
 local customTearVariants = require("src_eevee.misc.customTearVariants")
 
----@param tear EntityTear
 function postTearUpdate:main(tear)
 	swiftAttack:SwiftAttackUpdate(tear)
-	swiftTear:SPEEEN(tear)
+	swiftAttack:SwiftLudovicoSpawn(tear)
+	swiftAttack:OnSwiftLudoUpdate(tear)
+	swiftTear:MakeSwiftTear(tear)
 	swiftTear:RemoveSpiritProjectile(tear)
-	--ember:CreateEmberTrail(tear)
+	ember:CreateEmberTrail(tear)
 	wonderousLauncher:OnPoopDiscUpdate(tear)
 	customTearVariants:OnCustomTearUpdate(tear)
 end

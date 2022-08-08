@@ -1,8 +1,5 @@
 local addItemStats = {}
 
----@param player EntityPlayer
----@param cacheFlag CacheFlag
----@param itemStats ItemStats
 function addItemStats:OnCache(player, cacheFlag, itemStats)
 	if cacheFlag == CacheFlag.CACHE_SPEED then
 		player.MoveSpeed = player.MoveSpeed + itemStats.SPEED

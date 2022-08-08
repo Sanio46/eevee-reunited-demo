@@ -2,8 +2,8 @@ local eeveeBasics = {}
 
 local costumeProtector = require("src_eevee.player.characterCostumeProtector")
 local miscMods = require("src_eevee.modsupport.miscModsOnPlayerInit")
+--local uniqueCharacterItems = require("src_eevee.modsupport.uniqueCharacterItems")
 
----@param player EntityPlayer
 function eeveeBasics:TryInitEevee(player)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
@@ -14,6 +14,9 @@ function eeveeBasics:TryInitEevee(player)
 		miscMods:addPogCompatibility()
 		miscMods:addCoopGhostCompatibility()
 		miscMods:addNoCostumesCompatibility()
+		--[[ if UniqueCharacterItemsAPI then
+			uniqueCharacterItems:OnPlayerInit(player)
+		end ]]
 		VeeHelper.SetCanShoot(player, false)
 		player:AddCacheFlags(CacheFlag.CACHE_ALL)
 		player:EvaluateItems()
@@ -23,8 +26,7 @@ end
 
 local EeveeToEsauJr = {}
 
----@param player EntityPlayer
-function eeveeBasics:OnEsauJr(_, _, player, _, _, _)
+function eeveeBasics:OnEsauJr(itemID, itemRNG, player, flags, slot, vardata)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
 
@@ -33,7 +35,6 @@ function eeveeBasics:OnEsauJr(_, _, player, _, _, _)
 	end
 end
 
----@param player EntityPlayer
 function eeveeBasics:GiveEsauJrEeveeData(player)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
@@ -52,7 +53,6 @@ function eeveeBasics:GiveEsauJrEeveeData(player)
 	end
 end
 
----@param player EntityPlayer
 function eeveeBasics:NoTainted(player)
 	local playerType = player:GetPlayerType()
 
@@ -62,7 +62,6 @@ function eeveeBasics:NoTainted(player)
 	end
 end
 
----@param player EntityPlayer
 function eeveeBasics:TryDeinitEevee(player)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
@@ -74,8 +73,8 @@ function eeveeBasics:TryDeinitEevee(player)
 	end
 end
 
----@param player EntityPlayer
 function eeveeBasics:TrackFireDirection(player)
+	local playerType = player:GetPlayerType()
 	VeeHelper.GetIsaacShootingDirection(player, player.Position)
 end
 

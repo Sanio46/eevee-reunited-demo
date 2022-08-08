@@ -24,7 +24,6 @@
 	<costume anm2path="edited_216_ceremonialrobes.anm2" type="none" />
 	<costume anm2path="edited_222_antigravity.anm2" type="none" skinColor="2" overwriteColor="true" />
 	<costume anm2path="edited_231_balloftar.anm2" type="none" skinColor="1" overwriteColor="true" />
-	<costume anm2path="edited_260_blackcandle.anm2" type="none" />
 	<costume anm2path="edited_375_hosthat.anm2" type="none" />
 	<costume anm2path="edited_420_blackpowder.anm2" type="none" />
 	<costume anm2path="edited_428_pjs.anm2" type="none" hasSkinAlt="true" />

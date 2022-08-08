@@ -9,6 +9,15 @@ local statsEevee = {
 	[CacheFlag.CACHE_LUCK] = 0,
 }
 
+local statsDefault = {
+	[CacheFlag.CACHE_SPEED] = 0,
+	[CacheFlag.CACHE_FIREDELAY] = 1,
+	[CacheFlag.CACHE_DAMAGE] = 1,
+	[CacheFlag.CACHE_RANGE] = 0,
+	[CacheFlag.CACHE_SHOTSPEED] = 0,
+	[CacheFlag.CACHE_LUCK] = 0,
+}
+
 local statsEeveelutions = {
 	[EEVEEMOD.PlayerType.EEVEE] = statsEevee,
 	--[[ [EEVEEMOD.PlayerType.FLAREON] = statsDefault,
@@ -21,8 +30,6 @@ local statsEeveelutions = {
 	[EEVEEMOD.PlayerType.SYLVEON] = statsDefault, ]]
 }
 
----@param player EntityPlayer
----@param cacheFlag CacheFlag
 function eeveeStats:OnCache(player, cacheFlag)
 	local playerType = player:GetPlayerType()
 	if EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] then
@@ -30,7 +37,7 @@ function eeveeStats:OnCache(player, cacheFlag)
 			player.MoveSpeed = player.MoveSpeed + statsEeveelutions[playerType][cacheFlag]
 		end
 		if cacheFlag == CacheFlag.CACHE_FIREDELAY then
-			player.MaxFireDelay = math.floor((player.MaxFireDelay * statsEeveelutions[playerType][cacheFlag]) + 0.5)
+			player.MaxFireDelay = player.MaxFireDelay * statsEeveelutions[playerType][cacheFlag]
 		end
 		if cacheFlag == CacheFlag.CACHE_DAMAGE then
 			player.Damage = player.Damage * statsEeveelutions[playerType][cacheFlag]

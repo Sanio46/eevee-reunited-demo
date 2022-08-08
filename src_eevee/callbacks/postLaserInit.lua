@@ -2,7 +2,6 @@ local postLaserInit = {}
 
 local triggerOnFire = require("src_eevee.items.triggerOnFire")
 
----@param laser EntityLaser
 function postLaserInit:main(laser)
 	triggerOnFire:OnWeaponInit(laser)
 end

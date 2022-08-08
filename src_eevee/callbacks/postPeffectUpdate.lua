@@ -12,8 +12,9 @@ local leafBlade = require("src_eevee.attacks.leafeon.leafBlade")
 local lilithbr = require("src_eevee.player.lilithbr")
 local sneakScarf = require("src_eevee.items.collectibles.sneakScarf")
 local strangeEgg = require("src_eevee.items.collectibles.strangeEgg")
+local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
+local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 
----@param player EntityPlayer
 function postPeffectUpdate:main(player)
 	eeveeBasics:TrackFireDirection(player)
 
@@ -32,8 +33,9 @@ function postPeffectUpdate:main(player)
 	lilithbr:OnPeffectUpdate(player)
 	sneakScarf:ConfuseOutOfRangeEnemies(player)
 	strangeEgg:ChargeOnlyOnRoomClear(player) --Unused
+	swiftBase:InitSwiftPlayer(player)
+	swiftAttack:SwiftInit(player)
 
-	triggerOnFire:StopIgnoreItemNextFrame(player)
 end
 
 function postPeffectUpdate:init(EeveeReunited)

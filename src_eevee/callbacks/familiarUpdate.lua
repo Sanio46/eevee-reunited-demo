@@ -7,7 +7,6 @@ local sewingMachine = require("src_eevee.modsupport.sewingMachine")
 local badEgg = require("src_eevee.items.collectibles.badEgg")
 local familiarBasics = require("src_eevee.misc.familiarBasics")
 
----@param familiar EntityFamiliar
 function familiarUpdate:main(familiar)
 	for i, familiarTable in pairs(EEVEEMOD.ItemToFamiliarVariant) do
 		local familiarVariant = familiarTable[2]

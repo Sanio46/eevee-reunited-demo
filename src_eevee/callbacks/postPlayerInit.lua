@@ -5,10 +5,7 @@ local eeveeBasics = require("src_eevee.player.eeveeBasics")
 local unlockManager = require("src_eevee.misc.unlockManager")
 local pokeyMans = require("src_eevee.challenges.pokeyMansCrystal")
 
----@param player EntityPlayer
 function postPlayerInit:main(player)
-	VeeHelper.ShaderCrashFix()
-
 	local seed = EEVEEMOD.game:GetSeeds():GetStartSeed()
 	EEVEEMOD.RunSeededRNG:SetSeed(seed, 1)
 

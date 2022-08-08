@@ -3,14 +3,6 @@ VeeHelper = {}
 local game = Game()
 VeeHelper.RoomCleared = false
 
----@class UseItemReturn
----@field Discharge boolean
----@field ShowAnim boolean
----@field Remove boolean
-
----@alias Weapon EntityTear | EntityLaser | EntityKnife | EntityBomb
-
----@class KnifeVariant
 VeeHelper.KnifeVariant = {
 	MOMS_KNIFE = 0,
 	BONE = 1,
@@ -23,7 +15,6 @@ VeeHelper.KnifeVariant = {
 	TECH_SWORD = 11,
 }
 
----@class LaserVariant
 VeeHelper.LaserVariant = {
 	BRIMSTONE = 1,
 	TECHNOLOGY = 2,
@@ -40,11 +31,10 @@ VeeHelper.LaserVariant = {
 	BEAST = 13,
 }
 
----@class PoopVariant
 VeeHelper.PoopVariant = {
 	POOP = 0,
 	GOLD = 1,
-	POOP_BB = 10,
+	BB_POOP = 10,
 	STONE = 11,
 	CORNY = 12,
 	BURNING = 13,
@@ -53,7 +43,6 @@ VeeHelper.PoopVariant = {
 	HOLY = 16
 }
 
----@class SlotVariant
 VeeHelper.SlotVariant = {
 	SLOT_MACHINE = 1,
 	BLOOD_DONATION = 2,
@@ -75,7 +64,6 @@ VeeHelper.SlotVariant = {
 	BEGGAR_ROTTEN = 18,
 }
 
----@type table<TearVariant, boolean>
 VeeHelper.TearVariantBlacklist = {
 	[TearVariant.BOBS_HEAD] = true,
 	[TearVariant.CHAOS_CARD] = true,
@@ -84,12 +72,10 @@ VeeHelper.TearVariantBlacklist = {
 	[TearVariant.FIRE] = true,
 }
 
----@type TearVariant[]
 VeeHelper.TearVariant = {
 	FETUS = 50 --Funny missing enum
 }
 
----@type table<TearVariant, boolean>
 VeeHelper.TearFlagsBlood = {
 	[TearVariant.BLOOD] = true,
 	[TearVariant.CUPID_BLOOD] = true,
@@ -98,14 +84,10 @@ VeeHelper.TearFlagsBlood = {
 	[TearVariant.NAIL_BLOOD] = true,
 	[TearVariant.GLAUCOMA_BLOOD] = true,
 	[TearVariant.EYE] = true,
-	[TearVariant.EYE_BLOOD] = true,
 	[TearVariant.BALLOON] = true,
 	[TearVariant.BALLOON_BRIMSTONE] = true,
 }
 
----@class MajorBoss : integer
-
----@type table<MajorBoss, boolean>
 VeeHelper.MajorBosses = {
 	[EntityType.ENTITY_MOM] = true,
 	[EntityType.ENTITY_MOMS_HEART] = true, --+It Lives
@@ -120,7 +102,6 @@ VeeHelper.MajorBosses = {
 	[EntityType.ENTITY_BEAST] = true,
 }
 
----@class PlayerAnimations
 VeeHelper.PlayerAnimations = {
 	"Appear",
 	"Pickup",
@@ -153,7 +134,6 @@ VeeHelper.PlayerAnimations = {
 	"ForgottenDeath"
 }
 
----@type PlayerAnimations[]
 VeeHelper.PickupAnimations = {
 	"PickupWalkDown",
 	"PickupWalkLeft",
@@ -161,7 +141,6 @@ VeeHelper.PickupAnimations = {
 	"PickupWalkRight"
 }
 
----@type PlayerAnimations[]
 VeeHelper.WalkAnimations = {
 	"WalkLeft",
 	"WalkUp",
@@ -169,7 +148,6 @@ VeeHelper.WalkAnimations = {
 	"WalkDown"
 }
 
----@type PlayerAnimations[]
 VeeHelper.GamePauseAnimations = {
 	"Appear",
 	"LightTravel",
@@ -179,7 +157,6 @@ VeeHelper.GamePauseAnimations = {
 	"MinecartEnter"
 }
 
----@type PlayerAnimations[]
 VeeHelper.SuplexAnimations = {
 	"LeapUp",
 	"SuperLeapUp",
@@ -187,7 +164,6 @@ VeeHelper.SuplexAnimations = {
 	"SuperLeapDown"
 }
 
----@type table<SkinColor, string>
 VeeHelper.SkinColorToString = {
 	[SkinColor.SKIN_PINK] = "",
 	[SkinColor.SKIN_WHITE] = "_white",
@@ -199,82 +175,14 @@ VeeHelper.SkinColorToString = {
 	[SkinColor.SKIN_SHADOW] = "_shadow"
 }
 
----@type table<SeedEffect, boolean>
 VeeHelper.SeedDisablesAchievements = {
-	[SeedEffect.SEED_INFINITE_BASEMENT] = true,
-	[SeedEffect.SEED_PICKUPS_SLIDE] = true,
-	[SeedEffect.SEED_ITEMS_COST_MONEY] = true,
-	[SeedEffect.SEED_PACIFIST] = true,
-	[SeedEffect.SEED_ENEMIES_RESPAWN] = true,
-	[SeedEffect.SEED_POOP_TRAIL] = true,
-	[SeedEffect.SEED_INVINCIBLE] = true,
-	[SeedEffect.SEED_KIDS_MODE] = true,
-	[SeedEffect.SEED_PERMANENT_CURSE_LABYRINTH] = true,
-	[SeedEffect.SEED_PREVENT_CURSE_DARKNESS] = true,
-	[SeedEffect.SEED_PREVENT_CURSE_LABYRINTH] = true,
-	[SeedEffect.SEED_PREVENT_CURSE_LOST] = true,
-	[SeedEffect.SEED_PREVENT_CURSE_UNKNOWN] = true,
-	[SeedEffect.SEED_PREVENT_CURSE_MAZE] = true,
-	[SeedEffect.SEED_PREVENT_CURSE_BLIND] = true,
-	[SeedEffect.SEED_PREVENT_ALL_CURSES] = true,
-	[SeedEffect.SEED_GLOWING_TEARS] = true,
-	[SeedEffect.SEED_ALL_CHAMPIONS] = true,
-	[SeedEffect.SEED_ALWAYS_CHARMED] = true,
-	[SeedEffect.SEED_ALWAYS_CONFUSED] = true,
-	[SeedEffect.SEED_ALWAYS_AFRAID] = true,
-	[SeedEffect.SEED_ALWAYS_ALTERNATING_FEAR] = true,
-	[SeedEffect.SEED_ALWAYS_CHARMED_AND_AFRAID] = true,
-	[SeedEffect.SEED_SUPER_HOT] = true
+	SeedEffect.SEED_INFINITE_BASEMENT, SeedEffect.SEED_PICKUPS_SLIDE, SeedEffect.SEED_ITEMS_COST_MONEY, SeedEffect.SEED_PACIFIST, SeedEffect.SEED_ENEMIES_RESPAWN,
+	SeedEffect.SEED_POOP_TRAIL, SeedEffect.SEED_INVINCIBLE, SeedEffect.SEED_KIDS_MODE, SeedEffect.SEED_PERMANENT_CURSE_LABYRINTH, SeedEffect.SEED_PREVENT_CURSE_DARKNESS,
+	SeedEffect.SEED_PREVENT_CURSE_LABYRINTH, SeedEffect.SEED_PREVENT_CURSE_LOST, SeedEffect.SEED_PREVENT_CURSE_UNKNOWN, SeedEffect.SEED_PREVENT_CURSE_MAZE,
+	SeedEffect.SEED_PREVENT_CURSE_BLIND, SeedEffect.SEED_PREVENT_ALL_CURSES, SeedEffect.SEED_GLOWING_TEARS, SeedEffect.SEED_ALL_CHAMPIONS, SeedEffect.SEED_ALWAYS_CHARMED,
+	SeedEffect.SEED_ALWAYS_CONFUSED, SeedEffect.SEED_ALWAYS_AFRAID, SeedEffect.SEED_ALWAYS_ALTERNATING_FEAR, SeedEffect.SEED_ALWAYS_CHARMED_AND_AFRAID, SeedEffect.SEED_SUPER_HOT
 }
 
----@class BookState
-VeeHelper.BookState = {
-	BOOK_NONE = 0,
-	BOOK_ACTIVE = 1,
-	BOOK_DOUBLE = 2
-}
-
----@param player EntityPlayer
-function VeeHelper.GetBookState(player)
-	local hasVirtues = player:HasCollectible(CollectibleType.COLLECTIBLE_BOOK_OF_VIRTUES)
-	local hasBelial = VeeHelper.IsJudasBirthrightActive(player)
-	local bookState = (hasVirtues and hasBelial) and VeeHelper.BookState.BOOK_DOUBLE or
-		(hasVirtues or hasBelial) and VeeHelper.BookState.BOOK_ACTIVE or VeeHelper.BookState.BOOK_NONE
-
-	return bookState
-end
-
----@class Rune
-local runes = {
-	Card.RUNE_HAGALAZ,
-	Card.RUNE_JERA,
-	Card.RUNE_EHWAZ,
-	Card.RUNE_DAGAZ,
-	Card.RUNE_ANSUZ,
-	Card.RUNE_PERTHRO,
-	Card.RUNE_BLANK,
-	Card.RUNE_BLACK,
-	Card.CARD_SOUL_ISAAC,
-	Card.CARD_SOUL_MAGDALENE,
-	Card.CARD_SOUL_CAIN,
-	Card.CARD_SOUL_JUDAS,
-	Card.CARD_SOUL_BLUEBABY,
-	Card.CARD_SOUL_EVE,
-	Card.CARD_SOUL_SAMSON,
-	Card.CARD_SOUL_AZAZEL,
-	Card.CARD_SOUL_LAZARUS,
-	Card.CARD_SOUL_EDEN,
-	Card.CARD_SOUL_LOST,
-	Card.CARD_SOUL_LILITH,
-	Card.CARD_SOUL_KEEPER,
-	Card.CARD_SOUL_APOLLYON,
-	Card.CARD_SOUL_FORGOTTEN,
-	Card.CARD_SOUL_BETHANY,
-	Card.CARD_SOUL_JACOB
-}
-
----@param card Card
----@return boolean
 function VeeHelper.IsRune(card)
 	local isRune = false
 	if (card >= Card.RUNE_HAGALAZ and card <= Card.RUNE_BLACK)
@@ -323,7 +231,6 @@ function VeeHelper.RoundHighestVectorPoint(vec)
 	return Vector(x, y)
 end
 
----@return EntityPlayer[]
 function VeeHelper.GetAllPlayers()
 	local players = {}
 	for i = 0, game:GetNumPlayers() - 1 do
@@ -332,12 +239,10 @@ function VeeHelper.GetAllPlayers()
 	return players
 end
 
----@return EntityPlayer[]
 function VeeHelper.GetAllMainPlayers()
 	local players = {}
 	for i = 0, game:GetNumPlayers() - 1 do
-		if Isaac.GetPlayer(i):GetMainTwin():GetPlayerType() == Isaac.GetPlayer(i):GetPlayerType()
-			--Is the main twin of 2 players
+		if Isaac.GetPlayer(i):GetMainTwin():GetPlayerType() == Isaac.GetPlayer(i):GetPlayerType() --Is the main twin of 2 players
 			and (not Isaac.GetPlayer(i).Parent or Isaac.GetPlayer(i).Parent.Type ~= EntityType.ENTITY_PLAYER) then --Not an item-related spawned-in player.
 			table.insert(players, Isaac.GetPlayer(i))
 		end
@@ -346,9 +251,6 @@ function VeeHelper.GetAllMainPlayers()
 end
 
 --Credit: tem for blindfold toggle
-
----@param player EntityPlayer
----@param canShoot boolean
 function VeeHelper.SetCanShoot(player, canShoot)
 	local oldChallenge = game.Challenge
 	game.Challenge = canShoot and 0 or 6
@@ -356,8 +258,6 @@ function VeeHelper.SetCanShoot(player, canShoot)
 	game.Challenge = oldChallenge
 end
 
----@param player EntityPlayer
----@return boolean canControl
 function VeeHelper.PlayerCanControl(player)
 	local canControl = false
 
@@ -371,9 +271,6 @@ function VeeHelper.PlayerCanControl(player)
 	return canControl
 end
 
----@param sprite Sprite
----@param anims string[]
----@return boolean isPlaying
 function VeeHelper.IsSpritePlayingAnims(sprite, anims)
 	local playing = false
 
@@ -386,15 +283,11 @@ function VeeHelper.IsSpritePlayingAnims(sprite, anims)
 end
 
 --Thank you piber!
----@param ent Entity
----@param range number
----@return EntityNPC | nil
 function VeeHelper.DetectNearestEnemy(ent, range)
 	local closestEnemy = nil --placeholder variable we'll put the closest enemy in
 	local closestDistance = nil --placeholder variable we'll put the distance in
 
 	for _, npc in pairs(Isaac.FindInRadius(ent.Position, range, EntityPartition.ENEMY)) do --if there are enemies, dumbass.
-		npc = npc:ToNPC()
 		if npc:IsActiveEnemy() and npc:IsVulnerableEnemy() then --if its an active enemy
 
 			local npcDistance = npc.Position:DistanceSquared(ent.Position) --calculate the distance of this npc from the starting position of the ent
@@ -408,10 +301,6 @@ function VeeHelper.DetectNearestEnemy(ent, range)
 	end
 end
 
----@param ent EntityNPC
----@param range integer
----@param direction Vector
----@return Vector direction
 function VeeHelper.TryFireToNearestEnemy(ent, range, direction)
 	local closestEnemy = VeeHelper.DetectNearestEnemy(ent, range)
 
@@ -421,7 +310,6 @@ function VeeHelper.TryFireToNearestEnemy(ent, range, direction)
 	return direction
 end
 
----@param player EntityPlayer
 function VeeHelper.PlayerStandingStill(player)
 	if not game:IsPaused() and not player:IsDead() and player.ControlsEnabled and
 		not (Input.IsActionPressed(ButtonAction.ACTION_LEFT, player.ControllerIndex)
@@ -435,8 +323,6 @@ function VeeHelper.PlayerStandingStill(player)
 end
 
 --Yet again more credit to tem
-
----@param player EntityPlayer
 function VeeHelper.GetPlayerIdentifier(player)
 	local IDToCheck = 1 --Any item can be used, Sad Onion is just an easy default.
 	local playerType = player:GetPlayerType()
@@ -447,7 +333,6 @@ function VeeHelper.GetPlayerIdentifier(player)
 	return player:GetCollectibleRNG(IDToCheck):GetSeed()
 end
 
----@param player EntityPlayer
 function VeeHelper.FindMarkedTarget(player)
 	local targetPos = nil
 	local targetVariants = {
@@ -458,7 +343,7 @@ function VeeHelper.FindMarkedTarget(player)
 		local targets = Isaac.FindByType(EntityType.ENTITY_EFFECT, targetVariants[i])
 
 		for _, target in pairs(targets) do
-			if VeeHelper.EntitySpawnedByPlayer(target)
+			if VeeHelper.EntitySpawnedByPlayer(target, false)
 				and target.SpawnerEntity:GetData().Identifier == player:GetData().Identifier then
 				targetPos = target.Position
 			end
@@ -467,9 +352,24 @@ function VeeHelper.FindMarkedTarget(player)
 	return targetPos
 end
 
----@param player EntityPlayer
----@param targetStartingPos Vector | nil
----@return Vector direction
+function VeeHelper.GetBasicFireDirection(player)
+	local fireDir = player:GetFireDirection()
+	local DirAngles = {
+		[-1] = Vector(0, -1),
+		[0] = Vector(-1, 0),
+		[1] = Vector(0, -1),
+		[2] = Vector(1, 0),
+		[3] = Vector(0, 1),
+	}
+	local vector = DirAngles[fireDir]
+
+	return vector
+end
+
+function VeeHelper.HeadDirectionToVector(player)
+	return Vector(-1, 0):Rotated(90 * player:GetHeadDirection())
+end
+
 function VeeHelper.GetIsaacShootingDirection(player, targetStartingPos)
 	local shootDir = player:GetShootingInput()
 	local data = player:GetData()
@@ -515,10 +415,6 @@ function VeeHelper.LerpAngleDegrees(aStart, aEnd, percent)
 	return aStart + VeeHelper.GetAngleDifference(aEnd, aStart) * percent
 end
 
----@param direction Vector
----@param shotSpeed number
----@param player EntityPlayer
----@param useMovement? boolean
 function VeeHelper.AddTearVelocity(direction, shotSpeed, player, useMovement)
 	local newDirection = direction:Resized(shotSpeed)
 
@@ -531,8 +427,6 @@ function VeeHelper.AddTearVelocity(direction, shotSpeed, player, useMovement)
 	return newDirection
 end
 
----@param player EntityPlayer
----@param itemID CollectibleType
 function VeeHelper.GetActiveSlots(player, itemID)
 	local slots = {}
 	for i = 0, 3 do
@@ -543,8 +437,6 @@ function VeeHelper.GetActiveSlots(player, itemID)
 	return slots
 end
 
----@param player EntityPlayer
----@param itemID CollectibleType
 function VeeHelper.GetActiveItemCharges(player, itemID)
 	local slots = VeeHelper.GetActiveSlots(player, itemID)
 	local slotNum = {}
@@ -556,11 +448,6 @@ function VeeHelper.GetActiveItemCharges(player, itemID)
 	return charges, slotNum
 end
 
----@param baseChance number
----@param maxChance number
----@param luckValue number
----@param currentLuck number
----@param rng RNG
 function VeeHelper.DoesLuckChanceTrigger(baseChance, maxChance, luckValue, currentLuck, rng)
 	local number = baseChance + (currentLuck * luckValue)
 	if number > maxChance then
@@ -674,24 +561,26 @@ function VeeHelper.RoomClearTriggered()
 	VeeHelper.RoomCleared = triggerRoomClear
 end
 
----@param player EntityPlayer
----@param useBody? boolean
 function VeeHelper.SkinColor(player, useBody)
 	local skinColor = player:GetHeadColor() or useBody and player:GetBodyColor()
 
 	return VeeHelper.SkinColorToString[skinColor]
 end
 
----@param ent Entity
-function VeeHelper.EntitySpawnedByPlayer(ent)
-	return ent.SpawnerEntity ~= nil and ent.SpawnerEntity:ToPlayer() ~= nil
+function VeeHelper.EntitySpawnedByPlayer(ent, includeFamiliar)
+	local hasPlayer = false
+	if ent.SpawnerEntity and
+		(
+		ent.SpawnerEntity:ToPlayer()
+			or (
+			includeFamiliar and ent.SpawnerEntity:ToFamiliar() and ent.SpawnerEntity:ToFamiliar().Player
+			)
+		) then
+		hasPlayer = true
+	end
+	return hasPlayer
 end
 
----@param table table
----@param trinketType TrinketType
----@param player EntityPlayer
----@param mult? number
----@param mult2? number
 function VeeHelper.MultiplyTrinketStats(table, trinketType, player, mult, mult2)
 	local trinketMult = player:GetTrinketMultiplier(trinketType)
 
@@ -710,9 +599,6 @@ function VeeHelper.MultiplyTrinketStats(table, trinketType, player, mult, mult2)
 	end
 end
 
----Detects if the PlayerType of the provided EntityPlayer is a Tainted variant. If so, changes its PlayerType to its non-Tainted counterpart. They must both share the same name.
----@param player EntityPlayer
----@param playerName string
 function VeeHelper.DisableTainted(player, playerName)
 	local tainted = Isaac.GetPlayerTypeByName(playerName, true)
 	local nonTainted = Isaac.GetPlayerTypeByName(playerName, false)
@@ -722,21 +608,16 @@ function VeeHelper.DisableTainted(player, playerName)
 	end
 end
 
----@param c Color
----@param alpha number
----@return Color
 function VeeHelper.SetColorAlpha(c, alpha)
 	return Color(c.R, c.G, c.B, alpha, c.RO, c.GO, c.BO)
 end
 
----@param tear EntityTear
----@return boolean isSplitTear
 function VeeHelper.IsSplitTear(tear)
 	local isSplit = false
 
 	for _, tears in pairs(Isaac.FindInRadius(tear.Position, 10, EntityPartition.TEAR)) do
 		local mainTear = tears:ToTear()
-		if mainTear == nil then return false end
+		if mainTear == nil then return end
 		if tear.InitSeed ~= mainTear.InitSeed
 			and tear.FrameCount ~= mainTear.FrameCount
 			and tear.SpawnerEntity
@@ -749,8 +630,6 @@ function VeeHelper.IsSplitTear(tear)
 	return isSplit
 end
 
----@param tear EntityTear
----@return boolean tearFromFamiliar
 function VeeHelper.IsTearFromFamiliar(tear)
 	local isFamiliarSpawn = false
 
@@ -770,9 +649,6 @@ function VeeHelper.IsTearFromFamiliar(tear)
 end
 
 --Taken directly from the source! Shoutouts to the modders who decompiled the Switch port.
-
----@param tear EntityTear
----@return string
 function VeeHelper.TearScaleToSizeAnim(tear)
 	local scale = tear.Scale
 	local anim = "8"
@@ -806,9 +682,6 @@ function VeeHelper.TearScaleToSizeAnim(tear)
 	return anim
 end
 
----@param currentNums integer[]
----@param maxNum integer
----@param rng RNG
 function VeeHelper.DifferentRandomNum(currentNums, maxNum, rng)
 	local checkCount = 0
 	local randomNum = function() return rng:RandomInt(maxNum) end
@@ -824,16 +697,21 @@ function VeeHelper.DifferentRandomNum(currentNums, maxNum, rng)
 	return num
 end
 
----@param player EntityPlayer
----@return boolean
 function VeeHelper.IsJudasBirthrightActive(player)
 	local playerType = player:GetPlayerType()
-	return (playerType == PlayerType.PLAYER_JUDAS or playerType == PlayerType.PLAYER_BLACKJUDAS) and
-		player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
+	return (playerType == PlayerType.PLAYER_JUDAS or playerType == PlayerType.PLAYER_BLACKJUDAS) and player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 end
 
---Loops through all EntityPlayers to see if they have the provided TrinketType. Returns true if so, false otherwise.
----@param trinketType TrinketType
+function VeeHelper.IsNewRunAndNotJustContinued()
+	local shouldApply = false
+	if (EEVEEMOD.game:GetFrameCount() > 0 and EEVEEMOD.game:GetRoom():GetFrameCount() > 0) --Doesn't apply when continuing
+		or game:GetFrameCount() == 0 --Applies when starting a new run
+	then
+		shouldApply = true
+	end
+	return shouldApply
+end
+
 function VeeHelper.IsTrinketOwned(trinketType)
 	local hasTrinket = false
 	local players = VeeHelper.GetAllPlayers()
@@ -847,8 +725,6 @@ function VeeHelper.IsTrinketOwned(trinketType)
 	return hasTrinket
 end
 
---Takes a custom array of CollectibleTypes and returns a modified version of the array that excludes any player-owned items. Active items are removed if any player owns the "No!" trinket.
----@param pool CollectibleType[]
 function VeeHelper.GetCustomItemPool(pool)
 	local itemsOutOfPool = {}
 	local players = VeeHelper.GetAllPlayers()
@@ -869,81 +745,6 @@ function VeeHelper.GetCustomItemPool(pool)
 		end
 	end
 	return currentPool
-end
-
-function VeeHelper.GameContinuedOnPlayerInit()
-	--[[ local wasContinued = true
-	if game:GetRoom():GetFrameCount() == 0 and #Isaac.FindByType(EntityType.ENTITY_PLAYER) == 0 then
-		wasContinued = false
-	end
-	return wasContinued ]]
-end
-
-function VeeHelper.ShaderCrashFix()
-	if #Isaac.FindByType(EntityType.ENTITY_PLAYER) == 0 then
-		Isaac.ExecuteCommand("reloadshaders")
-	end
-end
-
----@param a number
-function VeeHelper.AngleToFireDirection(a)
-	local DirAngles = {
-		[-90] = 1,
-		[0] = 2,
-		[90] = 3,
-		[180] = 0,
-		[270] = 1,
-	}
-	return DirAngles[a]
-end
-
----@param player EntityPlayer
-function VeeHelper.FireDirectionToVector(player)
-	local fireDir = player:GetFireDirection()
-	local DirAngles = {
-		[-1] = Vector(0, -1),
-		[0] = Vector(-1, 0),
-		[1] = Vector(0, -1),
-		[2] = Vector(1, 0),
-		[3] = Vector(0, 1),
-	}
-	local vector = DirAngles[fireDir]
-
-	return vector
-end
-
----@param player EntityPlayer
-function VeeHelper.HeadDirectionToVector(player)
-	return Vector(-1, 0):Rotated(90 * player:GetHeadDirection())
-end
-
-function VeeHelper.AreColorsDifferent(c1, c2)
-	local isDifferent = false
-	if c1 ~= nil and c2 ~= nil then
-		if c1.R ~= c2.R or c1.G ~= c2.G or c1.B ~= c2.B or c1.RO ~= c2.RO or c1.GO ~= c2.GO or c1.BO ~= c2.BO then
-			isDifferent = true
-		end
-	end
-	return isDifferent
-end
-
-local playdoughColor = {
-	{ 0.9, 0, 0, 1 }, --red
-	{ 0, 0.7, 0, 0.9 }, --green
-	{ 0, 0, 1, 1 }, --blue
-	{ 0.8, 0.8, 0, 1 }, --yellow
-	{ 0, 0.5, 1, 0.9 }, --light blue
-	{ 0.6, 0.4, 0, 1 }, --light brown
-	{ 2, 0.1, 0.5, 1 }, --pink
-	{ 1.1, 0, 1.1, 0.9 }, --purple
-	{ 1, 0.1, 0, 1 } --dark orange
-}
-
-function VeeHelper.PlaydoughRandomColor()
-	local dC = Color.Default
-	local color = playdoughColor[EEVEEMOD.RandomNum(9)]
-	dC:SetColorize(color[1], color[2], color[3], color[4])
-	return dC
 end
 
 return VeeHelper

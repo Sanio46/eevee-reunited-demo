@@ -1,6 +1,5 @@
 local postNpcInit = {}
 
----@param npc EntityNPC
 function postNpcInit:main(npc)
 
 end

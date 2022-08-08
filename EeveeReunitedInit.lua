@@ -1,13 +1,3 @@
----@class ModReference
----@field AddCallback fun(self, callbackId: ModCallbacks, callbackFn: function, entityID?: integer)
----@field HasData boolean
----@field LoadData string
----@field RemoveCallback fun(self, callbackId: ModCallbacks, callbackFn: function)
----@field RemoveData nil
----@field SaveData nil
----@field Name string
-
----@type ModReference
 local EeveeReunited = RegisterMod("Eevee: Reunited - Demo", 1)
 
 --VERSION: 2.0.3
@@ -16,7 +6,6 @@ local json = nil
 
 local SaveDataVer = 2.1
 
----@class SaveData
 EeveeReunited.SavedData = {
 	CustomDolly = false,
 	ClassicVoice = false,
@@ -29,15 +18,11 @@ EeveeReunited.SavedData = {
 	UnlockData_PokeyMansCrystal = false,
 }
 
----@class PlayerSaveData
 local Template_PlayerData = {
 	CookieSpeed = 0,
 	WonderLauncherWisps = {}
 }
 
----@class LilEeveeSaveData
----@field Ultra LilEeveeSaveData
----@field Super LilEeveeSaveData
 local Template_LilEeveeData = {
 	Level = 1,
 	Exp = {
@@ -67,7 +52,7 @@ function EeveeReunited:init(j)
 	require(mods .. "eid")
 	require(mods .. "modConfigMenu")
 	require(mods .. "sewingMachine")
-	require(mods .. "uniqueCharacterItems")
+	--require(mods .. "uniqueCharacterItems")
 
 	if Encyclopedia then
 		local encyclopedia = require(mods .. "encyclopedia")
@@ -93,9 +78,7 @@ function EeveeReunited:init(j)
 		"preGameExit",
 		"postNewLevel",
 		"postNewRoom",
-		"getShaderParams",
 		"executeCmd",
-		"preUseItem",
 		"postNpcInit",
 		"preNpcCollision",
 		"postPlayerUpdate",
@@ -153,7 +136,6 @@ function EeveeReunited:SaveEeveeData()
 	end
 end
 
----@param player EntityPlayer
 function EeveeReunited:CreatePersistentData(player)
 	local data = player:GetData()
 
@@ -168,12 +150,11 @@ function EeveeReunited:CreatePersistentData(player)
 		EEVEEMOD.PERSISTENT_DATA.PlayerData[data.Identifier] = {}
 
 		for variable, value in pairs(Template_PlayerData) do
-			EEVEEMOD.PERSISTENT_DATA.PlayerData[data.Identifier][variable] = value
+			EEVEEMOD.PERSISTENT_DATA.PlayerData[data.Identifier][tostring(variable)] = value
 		end
 	end
 end
 
----@param familiar EntityFamiliar
 function EeveeReunited:CreatePersistentLilEeveeData(familiar)
 	local initSeed = tostring(familiar.InitSeed)
 	if EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed] == nil then
@@ -182,8 +163,8 @@ function EeveeReunited:CreatePersistentLilEeveeData(familiar)
 		EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed].Ultra = {}
 
 		for variable, value in pairs(Template_LilEeveeData) do
-			EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed].Super[variable] = value
-			EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed].Ultra[variable] = value
+			EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed].Super[tostring(variable)] = value
+			EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed].Ultra[tostring(variable)] = value
 		end
 	end
 end
@@ -206,10 +187,10 @@ function EeveeReunited:LoadEeveeData()
 			EEVEEMOD.PERSISTENT_DATA.PassiveShiny = EeveeReunited.SavedData.PassiveShiny or true
 			EEVEEMOD.PERSISTENT_DATA.UniqueBirthright = EeveeReunited.SavedData.UniqueBirthright or false
 			EEVEEMOD.PERSISTENT_DATA.PlayerData = EeveeReunited.SavedData.PlayerData or EEVEEMOD.PERSISTENT_DATA.PlayerData
-			EEVEEMOD.PERSISTENT_DATA.LilEeveeData = EeveeReunited.SavedData.LilEeveeData or EEVEEMOD.PERSISTENT_DATA.LilEeveeData
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee = EeveeReunited.SavedData.UnlockData_Eevee or EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B = EeveeReunited.SavedData.UnlockData_Eevee_B or EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal = EeveeReunited.SavedData.UnlockData_PokeyMansCrystal or EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal
+			EEVEEMOD.PERSISTENT_DATA.LilEeveeData = EeveeReunited.SavedData.LilEeveeData or EEVEEMOD.PERSISTENT_DATA.LilEeveeData
 		end
 	end
 end
@@ -245,6 +226,6 @@ EeveeReunited:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, EeveeReunited.postFire
 function EeveeReunited:postEntCheckInit(entity)
 	entChecks = entChecks + 1
 end
-EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, EeveeReunited.postEntCheckInit, EffectVariant.BLUE_FLAME) --Change this to whatever you're checking ]]
+EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, EeveeReunited.postEntCheckInit, EffectVariant.RIFT) --Change this to whatever you're checking ]]
 
 return EeveeReunited

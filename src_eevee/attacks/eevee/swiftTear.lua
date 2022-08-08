@@ -1,184 +1,9 @@
 local swiftTear = {}
 
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
+local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
 
----@param tear EntityTear
-function swiftTear:AssignSwiftSprite(tear)
-
-	if VeeHelper.TearVariantBlacklist[tear.Variant]
-		or EEVEEMOD.KeepTearVariants[tear.Variant] then
-		return
-	end
-
-	local tearSprite = tear:GetSprite()
-	local dataTear = tear:GetData()
-	local animationToPlay = VeeHelper.TearScaleToSizeAnim(tear)
-	local variantToUse = tear:HasTearFlags(TearFlags.TEAR_LUDOVICO) and "gfx/tear_swift.anm2" or EEVEEMOD.TearVariant.SWIFT
-
-	if dataTear.ForceBlood or VeeHelper.TearFlagsBlood[tear.Variant] then
-		animationToPlay = "BloodTear" .. animationToPlay
-		variantToUse = tear:HasTearFlags(TearFlags.TEAR_LUDOVICO) and "gfx/tear_swift_blood.anm2" or
-			EEVEEMOD.TearVariant.SWIFT_BLOOD
-	else
-		animationToPlay = "RegularTear" .. animationToPlay
-	end
-
-	--So, for some dumb fuck reason, Ludo tears when updated entirely BREAK when having their variant changed. Can't damage anything and has strange collision with grid ents/walls.
-	if tear:HasTearFlags(TearFlags.TEAR_LUDOVICO) then
-		tear:GetSprite():Load(variantToUse, true)
-	else
-		tear:ChangeVariant(variantToUse)
-	end
-
-	tearSprite:Play(animationToPlay, true)
-end
-
----@param parent Entity
----@param player EntityPlayer
----@param direction Vector
-function swiftTear:FireSwiftTear(parent, player, direction)
-	local tear = player:FireTear(parent.Position, direction, true, false, true, parent, 1):ToTear()
-	if tear.Height > -24 then tear.Height = -24 end
-
-	tear:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_HOMING)
-	swiftBase:AddSwiftTrail(tear, player)
-	swiftBase:PlaySwiftFireSFX(tear)
-end
-
----@param swiftData SwiftInstance
-function swiftTear:SpawnSwiftTears(swiftData)
-	local player = swiftData.Player
-	local parent = swiftData.Parent
-	local spawnPos = swiftBase:GetAdjustedStartingAngle(swiftData)
-	local tear = player:FireTear(swiftData.Parent.Position + spawnPos, Vector.Zero, true, false, true, parent, 1):
-		ToTear()
-	if tear.Height > -24 then tear.Height = -24 end
-
-	tear:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_HOMING)
-	swiftBase:InitSwiftWeapon(swiftData, tear)
-end
-
----@param swiftData SwiftInstance
----@param swiftWeapon SwiftWeapon
----@param tear EntityTear
-function swiftTear:SwiftTearUpdate(swiftData, swiftWeapon, tear)
-	local sprite = tear:GetSprite()
-
-	if tear.Variant == EEVEEMOD.TearVariant.SWIFT or tear.Variant == EEVEEMOD.TearVariant.SWIFT_BLOOD then
-		local anim = tear.Variant == EEVEEMOD.TearVariant.SWIFT_BLOOD and "BloodTear" or "RegularTear"
-		local animToPlay = anim .. VeeHelper.TearScaleToSizeAnim(tear)
-
-		if tear.FrameCount > 1 and sprite:GetAnimation() ~= animToPlay then
-			sprite:Play(anim .. VeeHelper.TearScaleToSizeAnim(tear), true)
-		end
-	end
-
-	if not swiftWeapon.HasFired then
-		tear.FallingSpeed = -0.05 --Tears slowly decend with a FallingSpeed of 0
-		tear.FallingAcceleration = 0
-		if swiftWeapon.FireDelay == 0 then
-			tear.FallingSpeed = swiftWeapon.StartingFall
-			tear.FallingAcceleration = swiftWeapon.StartingAccel
-		end
-	end
-	if tear.Variant == TearVariant.ICE or tear.Variant == TearVariant.COIN then
-		if not swiftWeapon.HasFired then
-			sprite.Rotation = swiftWeapon.ShootDirection:GetAngleDegrees()
-		end
-	elseif tear.Variant ~= TearVariant.BELIAL then
-		if not swiftWeapon.HasFired then
-			sprite.Rotation = (swiftData.Rotation * -2)
-		else
-			local data = tear:GetData()
-			if not data.AfterFireSwiftRotation then
-				data.AfterFireSwiftRotation = sprite.Rotation
-			else
-				sprite.Rotation = data.AfterFireSwiftRotation
-				data.AfterFireSwiftRotation = data.AfterFireSwiftRotation - 20
-			end
-		end
-	end
-end
-
-function swiftTear:SPEEEN(tear)
-	local sprite = tear:GetSprite()
-	local data = tear:GetData()
-	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(tear))]
-
-	if (tear.Variant == EEVEEMOD.TearVariant.SWIFT or tear.Variant == EEVEEMOD.TearVariant.SWIFT_BLOOD) and not swiftWeapon then
-		if not data.BasicSwiftRotation then
-			data.BasicSwiftRotation = sprite.Rotation
-		else
-			sprite.Rotation = data.BasicSwiftRotation
-			data.BasicSwiftRotation = data.BasicSwiftRotation - 20
-		end
-	end
-end
-
----@param tear EntityTear
-function swiftTear:MakeStarOnTearInit(tear)
-	if VeeHelper.EntitySpawnedByPlayer(tear) then
-		local player = tear.SpawnerEntity:ToPlayer()
-		local playerType = player:GetPlayerType()
-
-		if playerType == EEVEEMOD.PlayerType.EEVEE then
-			swiftTear:AssignSwiftSprite(tear)
-			swiftBase:SwiftStarFireSFX()
-		end
-	end
-end
-
----@param tear EntityTear
-function swiftTear:RemoveSpiritProjectile(tear)
-	if not VeeHelper.EntitySpawnedByPlayer(tear) then return end
-
-	local player = tear.SpawnerEntity:ToPlayer()
-	local playerType = player:GetPlayerType()
-	if playerType == EEVEEMOD.PlayerType.EEVEE
-		and (
-		tear.Variant == TearVariant.SWORD_BEAM
-			or tear.Variant == TearVariant.TECH_SWORD_BEAM
-		)
-		and player:HasWeaponType(WeaponType.WEAPON_SPIRIT_SWORD)
-	then
-		tear:Remove()
-	end
-end
-
----@param tear EntityTear
----@param splashType string
-function swiftTear:OnSwiftStarDestroy(tear, splashType)
-	if tear.Variant ~= EEVEEMOD.TearVariant.SWIFT and tear.Variant ~= EEVEEMOD.TearVariant.SWIFT_BLOOD then return end
-
-	EEVEEMOD.sfx:Play(EEVEEMOD.SoundEffect.SWIFT_HIT)
-	local splashPos = -15
-	local poofToPlay = EffectVariant.TEAR_POOF_B
-	if tear.Height < -4 and tear.Height > -5 then
-		splashPos = 0
-	end
-	if tear.Scale > 0.55 then
-		if splashType == "Collision" then
-			poofToPlay = EffectVariant.TEAR_POOF_A
-		end
-	elseif tear.Scale < 0.3 then
-		poofToPlay = EffectVariant.TEAR_POOF_SMALL
-	else
-		poofToPlay = EffectVariant.TEAR_POOF_VERYSMALL
-	end
-	local splash = Isaac.Spawn(EntityType.ENTITY_EFFECT, poofToPlay, 0, tear.Position, Vector.Zero, nil)
-	local sprite = splash:GetSprite()
-	sprite.Offset = Vector(0, splashPos)
-	sprite.Scale = Vector(tear.Scale, tear.Scale)
-	local color = Color.Default
-	if not VeeHelper.AreColorsDifferent(tear.Color, Color.Default) then
-		color = EEVEEMOD.TrailColor[tear.Variant]
-	else
-		color = tear.Color
-	end
-	splash.Color = color
-end
-
---[[ local function AssignSwiftTearData(player, tear, anglePos)
+local function AssignSwiftTearData(player, tear, anglePos)
 	swiftBase:AssignSwiftBasicData(tear, player, anglePos)
 	local ptrHashPlayer = tostring(GetPtrHash(player))
 	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
@@ -276,6 +101,26 @@ function swiftTear:SpawnSwiftTears(player, degreeOfTearSpawns, offset)
 	swiftBase:AssignSwiftSounds(tear)
 end
 
+function swiftTear:RemoveSpiritProjectile(tear)
+
+	if not VeeHelper.EntitySpawnedByPlayer(tear, false) then return end
+
+	local player = tear.SpawnerEntity:ToPlayer()
+	local ptrHashPlayer = tostring(GetPtrHash(player))
+	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
+
+	if not swiftPlayer then return end
+	local multi = swiftSynergies:MultiShotCountInit(player)
+	if multi then return end
+	if (
+		tear.Variant == TearVariant.SWORD_BEAM
+			or tear.Variant == TearVariant.TECH_SWORD_BEAM
+		)
+		and player:HasWeaponType(WeaponType.WEAPON_SPIRIT_SWORD)
+	then
+		tear:Remove()
+	end
+end
 
 function swiftTear:MakeSwiftTear(tear)
 	if not tear.SpawnerEntity then return end
@@ -313,11 +158,11 @@ local function BasicSwiftRotation(tear)
 end
 
 function swiftTear:SwiftTearUpdate(tear)
-		local ptrHashTear = tostring(GetPtrHash(tear))
+	local ptrHashTear = tostring(GetPtrHash(tear))
 	local swiftTearWeapon = swiftBase.Weapon[ptrHashTear]
 	local sprite = tear:GetSprite()
 
-	if not VeeHelper.EntitySpawnedByPlayer(tear) then return end
+	if not VeeHelper.EntitySpawnedByPlayer(tear, true) then return end
 
 	local player = tear.SpawnerEntity:ToPlayer() or tear.SpawnerEntity:ToFamiliar().Player
 	local ptrHashPlayer = tostring(GetPtrHash(player))
@@ -367,6 +212,41 @@ function swiftTear:SwiftTearUpdate(tear)
 	end
 end
 
- ]]
+function swiftTear:OnSwiftStarDestroy(tear, splashType)
+	if tear.Variant ~= EEVEEMOD.TearVariant.SWIFT and tear.Variant ~= EEVEEMOD.TearVariant.SWIFT_BLOOD then return end
+
+	if splashType == "Wall" then return end
+	
+	EEVEEMOD.sfx:Play(EEVEEMOD.SoundEffect.SWIFT_HIT)
+	local splashPos = -15
+	local poofToPlay = EffectVariant.TEAR_POOF_B
+	if tear.Height < -4 and tear.Height > -5 then
+		splashPos = 0
+	end
+	if tear.Scale > 0.55 then
+		if splashType == "Collision" then
+			poofToPlay = EffectVariant.TEAR_POOF_A
+		end
+	elseif tear.Scale < 0.3 then
+		poofToPlay = EffectVariant.TEAR_POOF_SMALL
+	else
+		poofToPlay = EffectVariant.TEAR_POOF_VERYSMALL
+	end
+	local splash = Isaac.Spawn(EntityType.ENTITY_EFFECT, poofToPlay, 0, tear.Position, Vector.Zero, nil)
+	local sprite = splash:GetSprite()
+	sprite.Offset = Vector(0, splashPos)
+	sprite.Scale = Vector(tear.Scale, tear.Scale)
+	local color = Color.Default
+	if not swiftBase:AreColorsDifferent(tear.Color, Color.Default) then
+		if tear.Variant == EEVEEMOD.TearVariant.SWIFT then
+			color = EEVEEMOD.TrailColor.Normal
+		elseif tear.Variant == EEVEEMOD.TearVariant.SWIFT_BLOOD then
+			color = EEVEEMOD.TrailColor.Blood
+		end
+	else
+		color = tear.Color
+	end
+	splash.Color = color
+end
 
 return swiftTear

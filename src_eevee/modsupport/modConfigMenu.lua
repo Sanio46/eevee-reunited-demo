@@ -21,7 +21,7 @@ ModConfigMenu.AddSetting(EEVEEMOD.Name, "Settings",
 		if EEVEEMOD.PERSISTENT_DATA.CustomDolly then
 			onOff = "True"
 		end
-		return "Custom Mr. Dollys: " .. onOff
+		return 'Custom Mr. Dollys: ' .. onOff
 	end,
 	OnChange = function(currentBool)
 		EEVEEMOD.PERSISTENT_DATA.CustomDolly = currentBool

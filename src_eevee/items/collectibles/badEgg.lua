@@ -1,16 +1,14 @@
 local badEgg = {}
 
-local MAX_CRACKS = 8
-local MAX_CRACKS_DUPE = MAX_CRACKS / 4
+local maxOGCracks = 8
+local maxDupeCracks = maxOGCracks / 4
 local familiarItems = {}
 
 local variantToCrackCount = {
-	[EEVEEMOD.FamiliarVariant.BAD_EGG] = MAX_CRACKS,
-	[EEVEEMOD.FamiliarVariant.BAD_EGG_DUPE] = MAX_CRACKS_DUPE
+	[EEVEEMOD.FamiliarVariant.BAD_EGG] = maxOGCracks,
+	[EEVEEMOD.FamiliarVariant.BAD_EGG_DUPE] = maxDupeCracks
 }
 
----@param proj EntityProjectile
----@param collider Entity
 function badEgg:BlockProjectile(proj, collider)
 	if collider.Type == EntityType.ENTITY_FAMILIAR
 		and variantToCrackCount[collider.Variant] ~= nil then
@@ -38,8 +36,6 @@ function badEgg:GetFamiliarItemsOnGameStart()
 	end
 end
 
----@param familiar EntityFamiliar
----@param maxNum integer
 local function SpawnShells(familiar, maxNum)
 	for i = 1, maxNum do
 		local vel = Vector(3, 0):Rotated(EEVEEMOD.RandomNum(360))
@@ -49,7 +45,6 @@ local function SpawnShells(familiar, maxNum)
 	end
 end
 
----@param familiar EntityFamiliar
 local function SpawnGlitch(familiar)
 	local glitch = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.BAD_EGG_GLITCH, 0, familiar.Position, Vector.Zero, nil):ToEffect()
 	glitch.Parent = familiar
@@ -57,7 +52,6 @@ local function SpawnGlitch(familiar)
 	EEVEEMOD.sfx:Play(SoundEffect.SOUND_EDEN_GLITCH)
 end
 
----@param familiar EntityFamiliar
 local function ResetState(familiar)
 	familiar.State = 0
 	familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ALL
@@ -77,8 +71,6 @@ end
 	end
 end ]]
 
----@param player EntityPlayer
----@param familiar EntityFamiliar
 local function RemoveDupedEgg(player, familiar)
 	local effects = player:GetEffects()
 
@@ -89,9 +81,6 @@ local function RemoveDupedEgg(player, familiar)
 	player:EvaluateItems()
 end
 
----@param familiar EntityFamiliar
----@param pos Vector
----@param rng RNG
 local function BFFSSpawnItem(familiar, pos, rng)
 	local itemConfig = Isaac.GetItemConfig()
 	local MaxCollectibles = itemConfig:GetCollectibles().Size - 2
@@ -111,7 +100,6 @@ local function BFFSSpawnItem(familiar, pos, rng)
 	EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, pos, Vector.Zero, familiar, randomItem, rng:GetSeed())
 end
 
----@param familiar EntityFamiliar
 local function BreakEgg(familiar)
 	local player = familiar.Player
 	if not player then return end
@@ -168,7 +156,6 @@ local function BreakEgg(familiar)
 	end
 end
 
----@param familiar EntityFamiliar
 local function GetCrackState(familiar)
 	local maxCracks = variantToCrackCount[familiar.Variant]
 	local interVal = (maxCracks / 4)
@@ -176,12 +163,10 @@ local function GetCrackState(familiar)
 	return crackState
 end
 
----@param familiar EntityFamiliar
 function badEgg:OnFamiliarInit(familiar)
 	familiar:GetSprite():Play("FloatDown_" .. GetCrackState(familiar), true)
 end
 
----@param familiar EntityFamiliar
 function badEgg:OnFamiliarUpdate(familiar)
 	local crackState = GetCrackState(familiar)
 	local currentAnim = string.gsub(familiar:GetSprite():GetAnimation(), "FloatDown_", "")
@@ -202,7 +187,6 @@ function badEgg:OnFamiliarUpdate(familiar)
 	end
 end
 
----@param effect EntityEffect
 function badEgg:RemoveGlitchOnAnimEnd(effect)
 	if effect:GetSprite():IsFinished("Glitch") then
 		effect:Remove()

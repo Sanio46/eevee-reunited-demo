@@ -1,260 +1,6 @@
 local swiftBase = {}
-local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
 
---Instance Types:
---Default: The regular Swift attack as you know it
---Anti-Gravity: Attack stays in place, revolving around the spot it was ready to fire at. Fired automatically if the player stops firing themselves.
---???:
---???:
---???:
-
----@class SwiftInstance
----@field Player EntityPlayer
----@field Parent Entity
----@field ActiveWeapons Weapon[]
-swiftBase.swiftInstanceData = {
-	InstanceType = "Default",
-	Player = nil,
-	Parent = nil,
-	ActiveWeapons = nil,
-	TotalDuration = 0,
-	DurationTimer = 0,
-	WeaponSpawnTimer = 0,
-	CanFire = false,
-	Rotation = 0,
-	NumWeaponsSpawned = 0,
-	NumWeaponsToSpawn = 5,
-	ShotMultiplier = 1,
-}
-
----@class SwiftWeapon
----@field Trail EntityEffect
----@field WeaponEntity Weapon
----@field ParentInstance SwiftInstance
-swiftBase.swiftWeaponData = {
-	ParentInstance = {},
-	StartingAngle = Vector.Zero,
-	ShootDirection = Vector.Zero,
-	OrbitDistance = 0,
-	Trail = nil,
-	FireDelay = 2,
-	HasFired = false,
-	DelayedTearFlag = 0,
-	IsMultiShot = false,
-	AntiGravBlinkThreshold = 0,
-	--Tears
-	StartingAccel = 0,
-	StartingFall = 0,
-	--Lasers
-
-	--Knives
-
-	--YoMama
-}
-
----@type SwiftInstance[]
-swiftBase.Instances = {}
----@type SwiftWeapon[]
-swiftBase.Weapons = {}
-
----@param swiftData SwiftInstance
-function swiftBase:GetInstanceType(swiftData)
-	local instanceType = "Default"
-	if swiftData.Player:HasCollectible(CollectibleType.COLLECTIBLE_ANTI_GRAVITY) then
-		instanceType = "Anti-Gravity"
-	end
-	return instanceType
-end
-
----@param swiftData SwiftInstance
----@param weapon Weapon
-function swiftBase:InitSwiftWeapon(swiftData, weapon)
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	if swiftBase.Weapons[ptrHashWeapon] == nil then
-		swiftBase.Weapons[ptrHashWeapon] = {}
-		local swiftWeapon = swiftBase.Weapons[ptrHashWeapon]
-		for variableName, value in pairs(swiftBase.swiftWeaponData) do
-			swiftWeapon[variableName] = value
-		end
-		if swiftData.ActiveWeapons == nil then
-			swiftData.ActiveWeapons = {} --Otherwise all swift instances point to the one made by swiftWeaponData
-		end
-		swiftBase:AddSwiftTrail(weapon, swiftData.Player)
-		swiftBase:PlaySwiftFireSFX(weapon)
-		swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
-		table.insert(swiftData.ActiveWeapons, weapon)
-	end
-
-	return swiftBase.Weapons[ptrHashWeapon]
-end
-
----@param swiftData SwiftInstance
-function swiftBase:GetWeaponFireDelay(swiftData)
-	return (swiftBase:GetFireDelay(swiftData.Player) / (swiftData.NumWeaponsToSpawn / swiftData.NumWeaponsSpawned))
-end
-
----@param swiftData SwiftInstance
----@param swiftWeapon SwiftWeapon
----@param weapon Weapon
-function swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
-	swiftWeapon.ParentInstance = swiftData
-	swiftWeapon.StartingAngle = swiftBase:GetStartingAngle(swiftData)
-	swiftWeapon.OrbitDistance = swiftBase:SwiftOrbitDistance(swiftData.Player)
-	swiftWeapon.ShootDirection = VeeHelper.GetIsaacShootingDirection(swiftData.Player, weapon.Position)
-	local fireDelay = swiftBase:GetWeaponFireDelay(swiftData)
-	swiftWeapon.FireDelay = fireDelay
-	if weapon:ToTear() then
-		swiftWeapon.StartingAccel = weapon.FallingAcceleration
-		swiftWeapon.StartingFall = weapon.FallingSpeed
-	end
-	swiftSynergies:ChocolateMilkDamageScaling(swiftData, weapon)
-end
-
----@param swiftData SwiftInstance
-function swiftBase:GetAdjustedStartingAngle(swiftData)
-	return swiftBase:GetStartingAngle(swiftData):Resized(swiftBase:SwiftOrbitDistance(swiftData.Player)):Rotated(swiftData.Rotation)
-end
-
-function swiftBase:SwiftStarFireSFX()
-	local values = {
-		0.9,
-		1,
-		1.1
-	}
-	EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
-	EEVEEMOD.sfx:Play(EEVEEMOD.SoundEffect.SWIFT_FIRE, 1, 2, false, values[EEVEEMOD.RandomNum(3)])
-end
-
----@param weapon Weapon
-function swiftBase:PlaySwiftFireSFX(weapon)
-	EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
-	if weapon:ToTear() then
-		swiftBase:SwiftStarFireSFX()
-	elseif weapon:ToEffect() then
-		EEVEEMOD.sfx:Stop(EEVEEMOD.SoundEffect.SWIFT_FIRE)
-		if weapon.Variant == EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT then
-			EEVEEMOD.sfx:Play(SoundEffect.SOUND_LASERRING_WEAK, 0.7, 0, false, 3, 0)
-		elseif weapon.Variant == EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL then
-			EEVEEMOD.sfx:Play(SoundEffect.SOUND_BLOOD_LASER, 1, 0, false, 1.5, 0)
-		end
-	elseif weapon:ToBomb() then
-		EEVEEMOD.sfx:Play(SoundEffect.SOUND_FETUS_LAND)
-	end
-end
-
----@param player EntityPlayer
----@param ignoreCap? boolean
-function swiftBase:GetFireDelay(player, ignoreCap)
-	local fireDelay = player.MaxFireDelay
-	local WeaponTypeToFireDelay = {
-		[WeaponType.WEAPON_BRIMSTONE] = 1.2,
-		[WeaponType.WEAPON_KNIFE] = 1.3,
-		[WeaponType.WEAPON_TECH_X] = 1.5,
-	}
-	local mult = 1
-	for weaponType, delayMult in pairs(WeaponTypeToFireDelay) do
-		if player:HasWeaponType(weaponType) then
-			if mult < delayMult then
-				mult = delayMult
-			end
-		end
-	end
-	fireDelay = player.MaxFireDelay * mult
-	if not ignoreCap then
-		if fireDelay < 0.5 then
-			fireDelay = 0.5
-		end
-	end
-	return fireDelay
-end
-
----@param player EntityPlayer
-function swiftBase:GetInstanceCooldown(player)
-	local fireDelay = swiftBase:GetFireDelay(player, true)
-	fireDelay = fireDelay + (math.abs(fireDelay) * 9)
-	return fireDelay
-end
-
----@param player EntityPlayer
-function swiftBase:SwiftOrbitDistance(player)
-	local distFromPlayer = 50
-	if player:HasWeaponType(WeaponType.WEAPON_LUDOVICO_TECHNIQUE) then return distFromPlayer end
-	if player:GetEffects():HasCollectibleEffect(CollectibleType.COLLECTIBLE_MEGA_MUSH) then
-		distFromPlayer = 100
-	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_ANGELIC_PRISM) then
-		distFromPlayer = 40
-	elseif player:HasWeaponType(WeaponType.WEAPON_SPIRIT_SWORD) then
-		distFromPlayer = 65
-	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_IPECAC)
-		or player:HasCollectible(CollectibleType.COLLECTIBLE_FIRE_MIND)
-	then
-		distFromPlayer = 70
-	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_LOST_CONTACT) then
-		distFromPlayer = 30
-	end
-	return distFromPlayer
-end
-
----@param swiftData SwiftInstance
-function swiftBase:GetStartingAngle(swiftData)
-	return Vector.FromAngle((360 / swiftData.NumWeaponsToSpawn) * swiftData.NumWeaponsSpawned)
-end
-
----@param weapon Weapon
-function swiftBase:IsSwiftLaserEffect(weapon)
-	local variant = nil
-	if weapon.Type ~= EntityType.ENTITY_EFFECT then return end
-
-	if weapon.Variant == EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT then
-		variant = "tech"
-	elseif weapon.Variant == EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL then
-		variant = "brim"
-	end
-
-	return variant
-end
-
----@param weapon Weapon
----@param player EntityPlayer
-function swiftBase:AddSwiftTrail(weapon, player)
-	---@type EntityEffect
-	local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):
-		ToEffect()
-	local data = trail:GetData()
-	local wC = weapon:GetSprite().Color
-	local tC = Color(wC.R, wC.G, wC.B, 1, wC.RO, wC.GO, wC.BO)
-
-	if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
-		if weapon.Type == EntityType.ENTITY_TEAR then
-			if not VeeHelper.AreColorsDifferent(wC, Color.Default) then
-				if EEVEEMOD.TrailColor[weapon.Variant] ~= nil then
-					tC = EEVEEMOD.TrailColor[weapon.Variant]
-				end
-			end
-		end
-	else
-		if weapon.Type ~= EntityType.ENTITY_EFFECT and weapon.Type ~= EntityType.ENTITY_LASER then
-			tC = VeeHelper.PlaydoughRandomColor()
-		else
-			data.EeveeRGB = true
-		end
-	end
-	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
-
-	trail.Parent = weapon
-	data.SwiftTrail = true
-	data.TrailColor = tC
-	trail:SetColor(tC, -1, 1, false, false)
-	trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 15, 1, true, false)
-	if swiftWeapon then
-		swiftWeapon.Trail = trail
-	end
-	trail.MinRadius = 0.2
-	trail.RenderZOffset = -10
-	trail:Update()
-end
-
---[[ local Template_SwiftPlayer = {
+local Template_SwiftPlayer = {
 	ShouldOverrideSwift = false,
 	Instance = {},
 	AttackInit = false,
@@ -338,7 +84,7 @@ end
 function swiftBase:InitSwiftWeapon(weapon)
 	local ptrHashWeapon = tostring(GetPtrHash(weapon))
 
-	if VeeHelper.EntitySpawnedByPlayer(weapon) then
+	if VeeHelper.EntitySpawnedByPlayer(weapon, false) then
 		local player = weapon.SpawnerEntity:ToPlayer()
 		local playerType = player:GetPlayerType()
 
@@ -375,7 +121,7 @@ end
 function swiftBase:AssignSwiftSprite(tear)
 
 	if VeeHelper.TearVariantBlacklist[tear.Variant]
-		or EEVEEMOD.KeepTearVariants[tear.Variant] then
+	or EEVEEMOD.KeepTearVariants[tear.Variant] then
 		return
 	end
 
@@ -411,9 +157,9 @@ end
 
 function swiftBase:AddBasicSwiftTrail(weapon)
 	local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):ToEffect()
-	local tC = EEVEEMOD.TrailColor[EEVEEMOD.TearVariant.SWIFT]
+	local tC = EEVEEMOD.TrailColor.Normal
 	local data = weapon:GetData()
-
+	
 	data.BasicSwiftTrail = trail
 	trail.Parent = weapon
 	trail.Color = tC
@@ -444,7 +190,7 @@ function swiftBase:SpawnPos(player, degreeOfTearSpawns, offset)
 	local ptrHashPlayer = tostring(GetPtrHash(player))
 	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
 	local anglePos = Vector.FromAngle((degreeOfTearSpawns * swiftPlayer.NumWeaponsSpawned)):Resized(swiftBase:SwiftTearDistanceFromPlayer(player)):Rotated(offset)
-	--360/count * numSpawned to form star, resized for distance from the player, rotated by a customoffset (head direction)
+
 	return anglePos
 end
 
@@ -474,6 +220,28 @@ function swiftBase:SwiftFireDelay(player)
 	return nextTearTime
 end
 
+function swiftBase:TryFireToEnemy(player, weapon, fireDir)
+	local newFireDir = fireDir
+	local radius = player.TearRange / 2
+	local closestEnemy = VeeHelper.DetectNearestEnemy(weapon, radius)
+	local dirToEnemy = nil
+	local angleLimit = 30
+
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)
+		and not player:HasCollectible(CollectibleType.COLLECTIBLE_TRACTOR_BEAM)
+		and not player:HasCollectible(CollectibleType.COLLECTIBLE_EYE_OF_THE_OCCULT)
+		and not swiftBase:IsSwiftLaserEffect(weapon)
+	then
+		if closestEnemy ~= nil then
+			dirToEnemy = (closestEnemy.Position - weapon.Position):Normalized()
+
+			if math.abs(math.abs(dirToEnemy:GetAngleDegrees()) - math.abs(fireDir:GetAngleDegrees())) <= angleLimit then
+				newFireDir = VeeHelper.AddTearVelocity(dirToEnemy, player.ShotSpeed * 10, player, true)
+			end
+		end
+	end
+	return newFireDir
+end
 
 function swiftBase:SwiftShotDelay(weapon, player)
 	local ptrHashPlayer = tostring(GetPtrHash(player))
@@ -505,7 +273,64 @@ function swiftBase:SwiftShotDelay(weapon, player)
 	return delay
 end
 
+function swiftBase:SwiftTearFlags(weapon, addPiercing, addHoming)
+	if not weapon:HasTearFlags(TearFlags.TEAR_SPECTRAL) then
+		weapon:AddTearFlags(TearFlags.TEAR_SPECTRAL)
+	end
+	if addPiercing and not weapon:HasTearFlags(TearFlags.TEAR_PIERCING) then
+		weapon:AddTearFlags(TearFlags.TEAR_PIERCING)
+	end
+	if addHoming and not weapon:HasTearFlags(TearFlags.TEAR_HOMING) then
+		weapon:AddTearFlags(TearFlags.TEAR_HOMING)
+	end
+end
 
+function swiftBase:AddSwiftTrail(weapon, player)
+	local ptrHashPlayer = tostring(GetPtrHash(player))
+	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
+	local ptrHashWeapon = tostring(GetPtrHash(weapon))
+	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
+
+	if swiftPlayer == nil
+		or swiftWeapon == nil
+		or (swiftPlayer.Constant and not swiftWeapon.ConstantOrbit and not player:HasWeaponType(WeaponType.WEAPON_LUDOVICO_TECHNIQUE))
+	then
+		return
+	end
+
+	local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):ToEffect()
+	local wC = weapon:GetSprite().Color
+	local tC = Color(wC.R, wC.G, wC.B, 1, wC.RO, wC.GO, wC.BO)
+
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
+		if weapon.Type == EntityType.ENTITY_TEAR then
+			if not swiftBase:AreColorsDifferent(wC, Color.Default) and not swiftWeapon.IsFakeKnife then
+				if weapon:GetSprite():GetFilename() == "gfx/tear_swift_blood.anm2" then
+					tC = EEVEEMOD.TrailColor.Blood
+				elseif EEVEEMOD.TrailColor[weapon.Variant] ~= nil then
+					tC = EEVEEMOD.TrailColor[weapon.Variant]
+				else
+					tC = EEVEEMOD.TrailColor.Normal
+				end
+			end
+		end
+	else
+		if weapon.Type ~= EntityType.ENTITY_EFFECT and weapon.Type ~= EntityType.ENTITY_LASER then
+			tC = swiftBase:PlaydoughRandomColor()
+		else
+			trail:GetData().EeveeRGB = true
+		end
+	end
+	trail.Parent = weapon
+	trail:GetData().SwiftTrail = true
+	trail:GetData().TrailColor = tC
+	trail.Color = tC
+	trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 15, 1, true, false)
+	swiftWeapon.Trail = trail
+	trail.MinRadius = 0.2
+	trail.RenderZOffset = -10
+	trail:Update()
+end
 
 function swiftBase:SwiftTearDistanceFromPlayer(player)
 	local distFromPlayer = 50
@@ -565,7 +390,7 @@ function swiftBase:AssignSwiftBasicData(weapon, player, anglePos)
 		if player:HasCollectible(CollectibleType.COLLECTIBLE_KIDNEY_STONE) then
 			weapon.Height = weapon.Height - 16
 		elseif player:HasCollectible(CollectibleType.COLLECTIBLE_NUMBER_ONE)
-			or player:HasCollectible(CollectibleType.COLLECTIBLE_PLUTO) then
+		or player:HasCollectible(CollectibleType.COLLECTIBLE_PLUTO) then
 			weapon.Height = weapon.Height - 8
 		end
 		swiftWeapon.HoldTearHeight = weapon.Height
@@ -593,8 +418,49 @@ function swiftBase:AssignSwiftBasicData(weapon, player, anglePos)
 	end
 end
 
+local playdoughColor = {
+	{ 0.9, 0, 0, 1 }, --red
+	{ 0, 0.7, 0, 0.9 }, --green
+	{ 0, 0, 1, 1 }, --blue
+	{ 0.8, 0.8, 0, 1 }, --yellow
+	{ 0, 0.5, 1, 0.9 }, --light blue
+	{ 0.6, 0.4, 0, 1 }, --light brown
+	{ 2, 0.1, 0.5, 1 }, --pink
+	{ 1.1, 0, 1.1, 0.9 }, --purple
+	{ 1, 0.1, 0, 1 } --dark orange
+}
 
+function swiftBase:PlaydoughRandomColor()
+	local dC = Color.Default
+	local color = playdoughColor[EEVEEMOD.RandomNum(9)]
+	dC:SetColorize(color[1], color[2], color[3], color[4])
+	return dC
+end
 
+function swiftBase:AreColorsDifferent(c1, c2)
+	local isDifferent = false
+	if c1 ~= nil and c2 ~= nil then
+		--print(c1.R, c1.G, c1.B, c1.RO, c1.GO, c1.BO)
+		--print(c2.R, c2.G, c2.B, c2.RO, c2.GO, c2.BO)
+		if c1.R ~= c2.R or c1.G ~= c2.G or c1.B ~= c2.B or c1.RO ~= c2.RO or c1.GO ~= c2.GO or c1.BO ~= c2.BO then
+			isDifferent = true
+		end
+	end
+	return isDifferent
+end
+
+function swiftBase:IsSwiftLaserEffect(effect)
+	local variant = nil
+	if effect.Type ~= EntityType.ENTITY_EFFECT then return end
+
+	if effect.Variant == EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT then
+		variant = "tech"
+	elseif effect.Variant == EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL then
+		variant = "brim"
+	end
+
+	return variant
+end
 
 function swiftBase:SwiftShouldBeConstant(player)
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_SOY_MILK)
@@ -610,7 +476,7 @@ end
 
 --Unused as I opted to entirely kill off arc shots instead
 local function RestoreArcShot(player, tear)
-	local local ptrHashTear = tostring(GetPtrHash(tear))
+	--[[ local local ptrHashTear = tostring(GetPtrHash(tear))
 	local swiftTear = swiftBase.Weapon[ptrHashTear]
 	local range = player.TearRange / 10
 
@@ -646,7 +512,7 @@ local function RestoreArcShot(player, tear)
 				tear.FallingAcceleration = swiftTear.StoredFallingAccel
 			end
 		end
-	end
+	end ]]
 end
 
 function swiftBase:DelayFallingAcceleration(player, tear)
@@ -667,6 +533,6 @@ function swiftBase:DelayFallingAcceleration(player, tear)
 			end
 		end
 	end
-end ]]
+end
 
 return swiftBase

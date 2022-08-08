@@ -1,6 +1,5 @@
 local sneakScarf = {}
 
----@param player EntityPlayer
 function sneakScarf:ConfuseOutOfRangeEnemies(player)
 	if not player:HasCollectible(EEVEEMOD.CollectibleType.SNEAK_SCARF) then return end
 
@@ -17,8 +16,6 @@ function sneakScarf:ConfuseOutOfRangeEnemies(player)
 	end
 end
 
----@param player EntityPlayer
----@param itemStats ItemStats
 function sneakScarf:Stats(player, itemStats)
 	if player:HasCollectible(EEVEEMOD.CollectibleType.SNEAK_SCARF) then
 		itemStats.SPEED = itemStats.SPEED + (0.3 * player:GetCollectibleNum(EEVEEMOD.CollectibleType.SNEAK_SCARF))

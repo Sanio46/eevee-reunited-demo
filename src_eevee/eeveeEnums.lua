@@ -4,13 +4,11 @@ EEVEEMOD.game = Game()
 EEVEEMOD.ItemConfig = Isaac.GetItemConfig()
 EEVEEMOD.sfx = SFXManager()
 EEVEEMOD.shouldSaveData = false
-EEVEEMOD.Name = "Eevee: Reunited Demo"
+EEVEEMOD.Name = "Eevee: Reunited - Demo"
 
 EEVEEMOD.RandomRNG = RNG()
 EEVEEMOD.RunSeededRNG = RNG()
 EEVEEMOD.RandomRNG:SetSeed(Random() + 1, 35)
----@param lower? integer
----@param upper? integer
 function EEVEEMOD.RandomNum(lower, upper)
 	if upper then
 		return EEVEEMOD.RandomRNG:RandomInt((upper - lower) + 1) + lower
@@ -67,7 +65,6 @@ EEVEEMOD.AchievementGraphics = {
 	TrueFullCompletion = "achievement_woodencross"
 }
 
----@type CollectibleType
 EEVEEMOD.Birthright = {
 	TAIL_WHIP = Isaac.GetItemIdByName("Tail Whip"),
 	--[[ OVERHEAT = Isaac.GetItemIdByName("Overheat"),
@@ -80,25 +77,22 @@ EEVEEMOD.Birthright = {
 	SYLV = Isaac.GetItemIdByName("Sylveon's Birthright") ]]
 }
 
----@type Challenge[]
 EEVEEMOD.Challenge = {
 	POKEY_MANS_CRYSTAL = Isaac.GetChallengeIdByName("Pokey Mans: Crystal")
 }
 
----@type CollectibleType[]
 EEVEEMOD.CollectibleType = {
 	SNEAK_SCARF = Isaac.GetItemIdByName("Sneak Scarf"),
 	SHINY_CHARM = Isaac.GetItemIdByName("Shiny Charm"),
 	BLACK_GLASSES = Isaac.GetItemIdByName("Black Glasses"),
-	--[[ COOKIE_JAR = {
+	COOKIE_JAR = {
 		Isaac.GetItemIdByName("Cookie Jar"),
 		Isaac.GetItemIdByName(" Cookie Jar "),
 		Isaac.GetItemIdByName("  Cookie Jar  "),
 		Isaac.GetItemIdByName("   Cookie Jar   "),
 		Isaac.GetItemIdByName("    Cookie Jar    "),
 		Isaac.GetItemIdByName("     Cookie Jar     ")
-	}, ]]
-	COOKIE_JAR = Isaac.GetItemIdByName("Cookie Jar"),
+	},
 	STRANGE_EGG = Isaac.GetItemIdByName("Strange Egg"),
 	LIL_EEVEE = Isaac.GetItemIdByName("Lil Eevee"),
 	BAD_EGG = Isaac.GetItemIdByName("Bad EGG"),
@@ -112,7 +106,6 @@ EEVEEMOD.CollectibleType = {
 	--HI_TECH_EARBUDS = Isaac.GetItemIdByName("Hi-tech Earbuds"),
 }
 
----@type EffectVariant[]
 EEVEEMOD.EffectVariant = {
 	CUSTOM_BRIMSTONE_SWIRL = Isaac.GetEntityVariantByName("Custom Brimstone Swirl"),
 	CUSTOM_TECH_DOT = Isaac.GetEntityVariantByName("Custom Tech Dot"),
@@ -124,10 +117,8 @@ EEVEEMOD.EffectVariant = {
 	BAD_EGG_GLITCH = Isaac.GetEntityVariantByName("Bad Egg Glitch"),
 	SHINY_APPEAR = Isaac.GetEntityVariantByName("Shiny Appear"),
 	SHINY_SPARKLE = Isaac.GetEntityVariantByName("Shiny Sparkle"),
-	ANTI_GRAV_PARENT = Isaac.GetEntityVariantByName("Anti-Grav Parent Placeholder")
 }
 
----@type FamiliarVariant[]
 EEVEEMOD.FamiliarVariant = {
 	LIL_EEVEE = Isaac.GetEntityVariantByName("Lil Eevee"),
 	BAG_OF_POKEBALLS = Isaac.GetEntityVariantByName("Bag of Pokeballs"),
@@ -149,7 +140,6 @@ EEVEEMOD.ItemPool = {
 	}
 }
 
----@type table<CollectibleType, FamiliarVariant>
 EEVEEMOD.ItemToFamiliarVariant = {
 	{ EEVEEMOD.CollectibleType.LIL_EEVEE, EEVEEMOD.FamiliarVariant.LIL_EEVEE },
 	{ EEVEEMOD.CollectibleType.BAG_OF_POKEBALLS, EEVEEMOD.FamiliarVariant.BAG_OF_POKEBALLS },
@@ -157,7 +147,6 @@ EEVEEMOD.ItemToFamiliarVariant = {
 	{ EEVEEMOD.CollectibleType.BAD_EGG_DUPE, EEVEEMOD.FamiliarVariant.BAD_EGG_DUPE },
 }
 
----@type NullItemID[]
 EEVEEMOD.NullCostume = {
 	--POKEMON_MASTER = Isaac.GetCostumeIdByPath("gfx/characters/costume_pokemon_master.anm2"),
 	CUSTOM_SHOOP = Isaac.GetCostumeIdByPath("gfx/characters/edited_049_shoop da whoop.anm2"),
@@ -165,7 +154,6 @@ EEVEEMOD.NullCostume = {
 	CUSTOM_BOOMERANG = Isaac.GetCostumeIdByPath("gfx/characters/edited_n030_boomerang.anm2"),
 }
 
----@type PlayerType[]
 EEVEEMOD.PlayerType = {
 	EEVEE = Isaac.GetPlayerTypeByName("Eevee", false),
 	EEVEE_B = Isaac.GetPlayerTypeByName("Eevee", true),
@@ -179,7 +167,6 @@ EEVEEMOD.PlayerType = {
 	SYLVEON = Isaac.GetPlayerTypeByName("Sylveon") ]]
 }
 
----@type table<PlayerType, string>
 EEVEEMOD.PlayerTypeToString = {
 	[EEVEEMOD.PlayerType.EEVEE] = "eevee",
 	--[[ [EEVEEMOD.PlayerType.FLAREON] = "flareon",
@@ -192,12 +179,10 @@ EEVEEMOD.PlayerTypeToString = {
 	[EEVEEMOD.PlayerType.SYLVEON] = "sylveon", ]]
 }
 
----@type table<CollectibleType, PlayerType>
 EEVEEMOD.BirthrightToPlayerType = {
 	[EEVEEMOD.Birthright.TAIL_WHIP] = EEVEEMOD.PlayerType.EEVEE
 }
 
----@type table<PlayerType, table<SoundEffect, SoundEffect>>
 EEVEEMOD.PlayerSounds = {
 	[EEVEEMOD.PlayerType.EEVEE] = {
 		[SoundEffect.SOUND_ISAAC_HURT_GRUNT] = Isaac.GetSoundIdByName("Eevee Hurt"),
@@ -209,7 +194,6 @@ EEVEEMOD.PlayerSounds = {
 	}
 }
 
----@type table<PlayerType, boolean>
 EEVEEMOD.IsPlayerEeveeOrEvolved = {
 	[EEVEEMOD.PlayerType.EEVEE] = true,
 	--[[ [EEVEEMOD.PlayerType.FLAREON] = true,
@@ -222,15 +206,12 @@ EEVEEMOD.IsPlayerEeveeOrEvolved = {
 	[EEVEEMOD.PlayerType.SYLVEON] = true ]]
 }
 
----@class PokeballType
----@type Card[]
 EEVEEMOD.PokeballType = {
 	POKEBALL = Isaac.GetCardIdByName("Poke Ball"),
 	GREATBALL = Isaac.GetCardIdByName("Great Ball"),
 	ULTRABALL = Isaac.GetCardIdByName("Ultra Ball")
 }
 
----@type table<PokeballType, string>
 EEVEEMOD.PokeballTypeToString = {
 	[EEVEEMOD.PokeballType.POKEBALL] = "r",
 	[EEVEEMOD.PokeballType.GREATBALL] = "g",
@@ -238,24 +219,20 @@ EEVEEMOD.PokeballTypeToString = {
 	[EEVEEMOD.CollectibleType.MASTER_BALL] = "m"
 }
 
----@type number[]
 EEVEEMOD.RGB = {
 	R = 255,
 	G = 0,
 	B = 0,
 }
 
----@param entColor Color
 function EEVEEMOD.GetRBG(entColor)
 	return Color(EEVEEMOD.RGB.R / 255, EEVEEMOD.RGB.G / 255, EEVEEMOD.RGB.B / 255, entColor.A, 0, 0, 0)
 end
 
----@type SlotVariant[]
 EEVEEMOD.SlotVariant = {
 	POKE_STOP = Isaac.GetEntityVariantByName("Poke Stop")
 }
 
----@type SoundEffect[]
 EEVEEMOD.SoundEffect = {
 	SWIFT_FIRE = Isaac.GetSoundIdByName("Swift Fire"),
 	SWIFT_HIT = Isaac.GetSoundIdByName("Swift Hit"),
@@ -267,14 +244,11 @@ EEVEEMOD.SoundEffect = {
 	SHINY_APPEAR = Isaac.GetSoundIdByName("Shiny Appear"),
 }
 
----@type Sprite[]
 EEVEEMOD.Sprite = {
 	EggOutline = Sprite(),
 	LevelBar = Sprite(),
-	CookieJar = Sprite(),
 }
 
----@type table<TearVariant, boolean>
 EEVEEMOD.KeepTearVariants = {
 	[TearVariant.COIN] = true,
 	[TearVariant.BELIAL] = true,
@@ -283,7 +257,15 @@ EEVEEMOD.KeepTearVariants = {
 	[VeeHelper.TearVariant.FETUS] = true,
 }
 
----@type TrinketType[]
+EEVEEMOD.TrailColor = {
+	Normal = Color(1, 1, 0.5, 1, 0.176, 0.05, 0),
+	Blood = Color(1, 0, 0, 1, 0, 0, 0),
+	[TearVariant.BELIAL] = Color(1, 0, 0, 1, 0, 0, 0),
+	[TearVariant.ROCK] = Color(0.5, 0.5, 0.5, 1, 0, 0, 0),
+	[TearVariant.ICE] = Color(0.4, 0.5, 0.9, 1, 0, 0.3, 0),
+	[VeeHelper.TearVariant.FETUS] = Color(1, 1, 1, 1, 0, 0, 0),
+}
+
 EEVEEMOD.TrinketType = {
 	ALERT_SPECS = Isaac.GetTrinketIdByName("Alert Specs"),
 	LOCKON_SPECS = Isaac.GetTrinketIdByName("Lock-On Specs"),
@@ -300,22 +282,11 @@ EEVEEMOD.TrinketType = {
 	}, ]]
 }
 
----@type TearVariant[]
 EEVEEMOD.TearVariant = {
 	SWIFT = Isaac.GetEntityVariantByName("Swift Tear"),
 	SWIFT_BLOOD = Isaac.GetEntityVariantByName("Swift Blood Tear"),
 	WONDERCOIN = Isaac.GetEntityVariantByName("Wonder Coin Tear"),
 	WONDERPOOP = Isaac.GetEntityVariantByName("Wonder Poop Tear"),
-}
-
----@type table<TearVariant, Color>
-EEVEEMOD.TrailColor = {
-	[EEVEEMOD.TearVariant.SWIFT] = Color(1, 1, 0.5, 1, 0.176, 0.05, 0),
-	[EEVEEMOD.TearVariant.SWIFT_BLOOD] = Color(1, 0, 0, 1, 0, 0, 0),
-	[TearVariant.BELIAL] = Color(1, 0, 0, 1, 0, 0, 0),
-	[TearVariant.ROCK] = Color(0.5, 0.5, 0.5, 1, 0, 0, 0),
-	[TearVariant.ICE] = Color(0.4, 0.5, 0.9, 1, 0, 0.3, 0),
-	[VeeHelper.TearVariant.FETUS] = Color(1, 1, 1, 1, 0, 0, 0),
 }
 
 return EEVEEMOD

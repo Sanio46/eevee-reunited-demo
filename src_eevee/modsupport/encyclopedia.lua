@@ -866,15 +866,19 @@ function eeveeEncyclopedia.AddEncyclopediaDescs()
 		Pools = ItemPoolsTable.BlackGlasses,
 		UnlockFunc = UnlocksTable.BlackGlasses
 	})
-	Encyclopedia.AddItem({
-		ModName = EEVEEMOD.Name,
-		ID = EEVEEMOD.CollectibleType.COOKIE_JAR,
-		Name = "Cookie Jar",
-		Desc = "One at a time please",
-		WikiDesc = ItemsWiki.CookieJar,
-		Pools = ItemPoolsTable.CookieJar,
-		UnlockFunc = UnlocksTable.CookieJar
-	})
+	for i = 1, 6 do
+		local shouldHide = i < 6 and true or false
+		Encyclopedia.AddItem({
+			ModName = EEVEEMOD.Name,
+			ID = EEVEEMOD.CollectibleType.COOKIE_JAR[i],
+			Name = "Cookie Jar",
+			Desc = "One at a time please",
+			WikiDesc = ItemsWiki.CookieJar,
+			Hide = shouldHide,
+			Pools = ItemPoolsTable.CookieJar,
+			UnlockFunc = UnlocksTable.CookieJar
+		})
+	end
 	Encyclopedia.AddItem({
 		ModName = EEVEEMOD.Name,
 		ID = EEVEEMOD.CollectibleType.STRANGE_EGG,

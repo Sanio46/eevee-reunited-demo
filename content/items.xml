@@ -3,12 +3,13 @@
 	<passive id="0" cache="speed" name="Sneak Scarf" description="Be careful not to make a sound!" gfx="collectibles_sneak_scarf.png" quality="3" />
 	<passive id="1" cache="luck" name="Shiny Charm" description="Luck up" gfx="collectibles_shiny_charm.png" quality="2" tags="offensive" />
 	<passive id="2"  cache="damage" name="Black Glasses" description="Be a part of the cool kids" gfx="collectibles_black_glasses.png" persistent="true" quality="2" tags="offensive " />
-	<!-- <active id="3"  cache="speed" name="     Cookie Jar     " description="One at a time please" gfx="collectibles_cookie_jar6.png" maxcharges="0" quality="1" tags="nolostbr" />
+	<!--Given I had to render the Strange Egg's active outline, I could totally render Cookie Jar too...maybe later. I'd need to adjust quite a few things.-->
+	<active id="3"  cache="speed" name="     Cookie Jar     " description="One at a time please" gfx="collectibles_cookie_jar6.png" maxcharges="0" quality="1" tags="nolostbr" />
 	<active id="3" cache="speed" name="    Cookie Jar    " description="One at a time please" gfx="collectibles_cookie_jar5.png" hidden="true" maxcharges="0" quality="1" tags="nolostbr" />
 	<active id="3" cache="speed" name="   Cookie Jar   " description="One at a time please" gfx="collectibles_cookie_jar4.png" hidden="true" maxcharges="0" quality="1" tags="nolostbr" />
 	<active id="3" cache="speed" name="  Cookie Jar  " description="One at a time please" gfx="collectibles_cookie_jar3.png" hidden="true" maxcharges="0" quality="1" tags="nolostbr" />
-	<active id="3" cache="speed" name=" Cookie Jar " description="One at a time please" gfx="collectibles_cookie_jar2.png" hidden="true" maxcharges="0" quality="1" tags="nolostbr" /> -->
-	<active id="3" cache="speed" name="Cookie Jar" description="One at a time please" gfx="collectibles_cookie_jar.png" persistent="true" maxcharges="0" quality="1" tags="nolostbr" />
+	<active id="3" cache="speed" name=" Cookie Jar " description="One at a time please" gfx="collectibles_cookie_jar2.png" hidden="true" maxcharges="0" quality="1" tags="nolostbr" />
+	<active id="3" cache="speed" name="Cookie Jar" description="One at a time please" gfx="collectibles_cookie_jar1.png" hidden="true" maxcharges="0" quality="1" tags="nolostbr" />
 	<active  id="4" cache="" name="Strange Egg" description="Should I take care of it?" gfx="collectibles_strange_egg.png" maxcharges="3" chargetype="special" initcharge="0" quality="1" tags="nolostbr" />
 	<familiar id="5" cache="familiars" name="Lil Eevee" description="Protect the child" gfx="familiar_lileevee.png" quality="2" tags="summonable monstermanual offensive" />
 	<familiar id="6" cache="familiars" name="Bad EGG" description="Sounds can be heard coming from inside" gfx="collectibles_bad_egg.png" quality="2" tags="quest uniquefamiliar" />
@@ -19,7 +20,7 @@
 	<passive id="10" cache="" name="Poke Stop" description="Gotta find em..." gfx="collectibles_poke_stop.png" quality="1" tags="lazarussharedglobal offensive nogreed nocantrip" />
 	<!-- <passive id="21" cache="" name="Gigantafluff" description="It radiates irressistible cuteness" gfx="collectibles_gigantafluff.png" quality="0" tags="nolostbr" /> -->
 	<!-- Birthrights -->
-	<active id="11" cache="" name="Tail Whip" description="Aggressive tail wagging" gfx="birthright_tailwhip.png" maxcharges="300" chargetype="timed" quality="1" />
+	<active id="11" cache="" name="Tail Whip" description="Aggressive tail wagging" gfx="birthright_tailwhip.png" maxcharges="300" chargetype="timed" hidden="true" quality="1" />
 	<!-- <active cache="12" name="Overheat" description="Build up and release" gfx="birthright_overheat.png" maxcharges="8" />
 	<active cache="13" name="Thunder" description="Strike thy foe" gfx="birthright_thunder.png" maxcharges="3" />
 	<active cache="14" name="Dive" description="This'll go swimmingly!" gfx="birthright_dive.png" maxcharges="0" />

@@ -5,7 +5,6 @@ local leafBlade = require("src_eevee.attacks.leafeon.leafBlade")
 local pokeyMans = require("src_eevee.challenges.pokeyMansCrystal")
 local shinyCharm = require("src_eevee.items.collectibles.shinyCharm")
 
----@param npc EntityNPC
 function npcUpdate:main(npc)
 	shinyCharm:TryMakeShinyOnNPCInit(npc)
 	shinyCharm:ShinyColoredNPCUpdate(npc)

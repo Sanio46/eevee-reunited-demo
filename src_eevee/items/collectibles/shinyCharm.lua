@@ -1,9 +1,8 @@
 local shinyCharm = {}
 
-local BASE_SHINY_CHANCE = 4096
+local baseShinyChance = 4096
 local forceSpawn = false
 
----@param npc EntityNPC
 function shinyCharm:MakeNPCShiny(npc)
 	local colorRNG = RNG()
 	colorRNG:SetSeed(npc.Type + 1000, 35)
@@ -32,7 +31,6 @@ function shinyCharm:MakeNPCShiny(npc)
 	shiny:FollowParent(shiny.Parent)
 end
 
----@param npc EntityNPC
 function shinyCharm:TryMakeShinyOnNPCInit(npc)
 	if npc.FrameCount <= 2 --If it makes through in its spawn frames
 		and npc:IsActiveEnemy()
@@ -46,7 +44,7 @@ function shinyCharm:TryMakeShinyOnNPCInit(npc)
 		and not npc:GetData().ShinyChecked --So it doesn't check multiple times
 	then
 		local players = VeeHelper.GetAllPlayers()
-		local shinyRNG = BASE_SHINY_CHANCE
+		local shinyRNG = baseShinyChance
 		for i = 1, #players do
 			local player = players[i]
 			if player:HasCollectible(EEVEEMOD.CollectibleType.SHINY_CHARM) then
@@ -55,8 +53,8 @@ function shinyCharm:TryMakeShinyOnNPCInit(npc)
 		end
 
 		--Go through if shinies are enabled passively, and if not, require Shiny Charm (RNG being below 4096 means it triggered)
-		if forceSpawn or ((EEVEEMOD.PERSISTENT_DATA.PassiveShiny == true or shinyRNG < BASE_SHINY_CHANCE)
-			and EEVEEMOD.RunSeededRNG:RandomInt(BASE_SHINY_CHANCE) + 1 == shinyRNG) then
+		if forceSpawn or ((EEVEEMOD.PERSISTENT_DATA.PassiveShiny == true or shinyRNG < baseShinyChance)
+			and EEVEEMOD.RunSeededRNG:RandomInt(baseShinyChance) + 1 == shinyRNG) then
 			shinyCharm:MakeNPCShiny(npc)
 		end
 		npc:GetData().ShinyChecked = true
@@ -66,7 +64,6 @@ end
 local frequency = 10
 local duration = 25
 
----@param npc EntityNPC
 function shinyCharm:ShinyColoredNPCUpdate(npc)
 	local data = npc:GetData()
 
@@ -96,7 +93,6 @@ function shinyCharm:ShinyColoredNPCUpdate(npc)
 	end
 end
 
----@param npc EntityNPC
 function shinyCharm:PostShinyKill(npc)
 	local data = npc:GetData()
 	local pos = EEVEEMOD.game:GetRoom():FindFreePickupSpawnPosition(npc.Position)
@@ -109,15 +105,12 @@ function shinyCharm:PostShinyKill(npc)
 	end
 end
 
----@param player EntityPlayer
----@param itemStats ItemStats
 function shinyCharm:Stats(player, itemStats)
 	if player:HasCollectible(EEVEEMOD.CollectibleType.SHINY_CHARM) then
 		itemStats.LUCK = itemStats.LUCK + (2 * player:GetCollectibleNum(EEVEEMOD.CollectibleType.SHINY_CHARM))
 	end
 end
 
----@param effect EntityEffect
 function shinyCharm:ShinyParticleEffectUpdate(effect)
 	local sprite = effect:GetSprite()
 	local alpha = (effect.Timeout / duration)

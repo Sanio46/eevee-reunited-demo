@@ -2,8 +2,6 @@ local usePill = {}
 
 local ccp = require("src_eevee.player.characterCostumeProtector")
 
----@param pillID PillEffect
----@param player EntityPlayer
 function usePill:main(pillID, player)
 	ccp:ResetCostumeOnPill(pillID, player)
 end

@@ -7,7 +7,7 @@ local game = Game()
 local sound = SFXManager()
 local AchievementQueue = {}
 local AchievementSpr = Sprite()
-AchievementSpr:Load("gfx/ui/achievement display api/achievements.anm2", true)
+AchievementSpr:Load("gfx/ui/achievement display api/achievements.anm2")
 AchievementSpr.PlaybackSpeed = 0.5
 
 local function GetScreenSize() -- By Kilburn himself.
@@ -35,7 +35,6 @@ local function FreezeGame(unfreeze)
 		if REPENTANCE then
 			Isaac.GetPlayer(0):UseActiveItem(CollectibleType.COLLECTIBLE_PAUSE, UseFlag.USE_NOANIM)
 		else
-			---@diagnostic disable-next-line: param-type-mismatch, redundant-parameter
 			Isaac.GetPlayer(0):UseActiveItem(CollectibleType.COLLECTIBLE_PAUSE, false, false, true, false, 0)
 		end
 		game.TimeCounter = OldTimer

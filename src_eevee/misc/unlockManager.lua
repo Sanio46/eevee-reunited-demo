@@ -4,7 +4,7 @@ local Manager = {}
 
 local itemToUnlock = {
 	[EEVEEMOD.CollectibleType.SHINY_CHARM] = { Unlock = "Isaac" },
-	[EEVEEMOD.CollectibleType.COOKIE_JAR] = { Unlock = "BlueBaby" },
+	[EEVEEMOD.CollectibleType.COOKIE_JAR[6]] = { Unlock = "BlueBaby" },
 	[EEVEEMOD.CollectibleType.BLACK_GLASSES] = { Unlock = "Satan" },
 	[EEVEEMOD.CollectibleType.SNEAK_SCARF] = { Unlock = "BossRush" },
 	[EEVEEMOD.CollectibleType.STRANGE_EGG] = { Unlock = "MegaSatan" },
@@ -54,16 +54,14 @@ local trinketToUnlock = {
 	[EEVEEMOD.TrinketType.ALERT_SPECS] = { Unlock = "GreedMode" },
 }
 
-function Manager.postPlayerInit(_)
+function Manager.postPlayerInit(player)
 	local TotPlayers = #Isaac.FindByType(EntityType.ENTITY_PLAYER)
 
 	if TotPlayers == 0 then
 		if EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.MomsHeart == nil then
-			---@type Unlocks
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee = tracker.CreateUnlocksTemplate()
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.Tainted = false
 
-			---@type Unlocks
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B = tracker.CreateUnlocksTemplate()
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.PolNegPath = false
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.SoulPath = false
@@ -102,7 +100,6 @@ function Manager.postPlayerInit(_)
 	end
 end
 
----@param pickup EntityPickup
 function Manager.postPickupInit(pickup)
 	if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE
 		or pickup.Variant == PickupVariant.PICKUP_TRINKET
@@ -123,9 +120,7 @@ function Manager.postPickupInit(pickup)
 		if tab.Special then
 			Unlocked = tab.Special()
 		else
-			---@type Unlocks
-			local unlockData = EEVEEMOD.PERSISTENT_DATA.UnlockData["Eevee" .. Suffix]
-			Unlocked = unlockData[tab.Unlock].Unlock
+			Unlocked = EEVEEMOD.PERSISTENT_DATA.UnlockData["Eevee" .. Suffix][tab.Unlock].Unlock
 		end
 		
 		if not Unlocked then
@@ -157,13 +152,10 @@ function Manager.postPickupInit(pickup)
 	end
 end
 
----@param player EntityPlayer
----@param itemID CollectibleType
 local function IsPocketBirthright(player, itemID)
 	return player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and player:GetPlayerType() == EEVEEMOD.BirthrightToPlayerType[itemID] and player:GetActiveItem(ActiveSlot.SLOT_POCKET) == itemID
 end
 
----@param player EntityPlayer
 function Manager.postPlayerUpdate(player)
 	for item, tab in pairs(itemToUnlock) do
 		local HasIt = player:HasCollectible(item)
@@ -175,9 +167,7 @@ function Manager.postPlayerUpdate(player)
 			if tab.Special then
 				Unlocked = tab.Special()
 			else
-				---@type Unlocks
-				local unlockData = EEVEEMOD.PERSISTENT_DATA.UnlockData["Eevee" .. Suffix]
-				Unlocked = unlockData[tab.Unlock].Unlock
+				Unlocked = EEVEEMOD.PERSISTENT_DATA.UnlockData["Eevee" .. Suffix][tab.Unlock].Unlock
 			end
 
 			if not Unlocked and not IsPocketBirthright(player, item) then

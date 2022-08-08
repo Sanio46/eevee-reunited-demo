@@ -2,7 +2,6 @@ local pokeyMans = {}
 
 --TODO: Spawn Brother Bobby as a temporary helper when you have no friends :(
 
----@param player EntityPlayer
 function pokeyMans:OnChallengeInit(player)
 	local challenge = Isaac.GetChallenge()
 
@@ -69,7 +68,6 @@ function pokeyMans:SpawnStarters()
 	level:GetCurrentRoom():Update()
 end
 
----@param npc EntityNPC
 function pokeyMans:StarterNPCUpdate(npc)
 	local data = npc:GetData()
 
@@ -100,7 +98,6 @@ function pokeyMans:StarterNPCUpdate(npc)
 	end
 end
 
----@param collectible EntityPickup
 function pokeyMans:ReplaceItemsOnInit(collectible)
 	local challenge = Isaac.GetChallenge()
 
@@ -119,11 +116,10 @@ function pokeyMans:ReplaceItemsOnInit(collectible)
 	collectible:IsShopItem()
 end
 
----@param collider Entity
-function pokeyMans:PrePickupCollision(_, collider)
+function pokeyMans:PrePickupCollision(pickup, collider)
 	local challenge = Isaac.GetChallenge()
 	if challenge ~= EEVEEMOD.Challenge.POKEY_MANS_CRYSTAL
-		or not collider:ToPlayer()
+		or collider.Type ~= EntityType.ENTITY_PLAYER
 		or EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal == true then
 		return
 	end
