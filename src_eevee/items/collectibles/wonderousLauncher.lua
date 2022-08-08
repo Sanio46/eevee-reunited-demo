@@ -38,15 +38,15 @@ local throwableSpells = {
 	[PoopSpellType.SPELL_BOMB] = true
 }
 
----@type table<PoopSpellType, PoopVariant>
+---@type table<PoopSpellType, integer>
 local spellToPoopVariant = {
-	[PoopSpellType.SPELL_POOP] = 10,
-	[PoopSpellType.SPELL_STONE] = 11,
-	[PoopSpellType.SPELL_CORNY] = 12,
-	[PoopSpellType.SPELL_BURNING] = 13,
-	[PoopSpellType.SPELL_STINKY] = 14,
-	[PoopSpellType.SPELL_BLACK] = 15,
-	[PoopSpellType.SPELL_HOLY] = 16,
+	[PoopSpellType.SPELL_POOP] = VeeHelper.PoopVariant.POOP_BB,
+	[PoopSpellType.SPELL_STONE] = VeeHelper.PoopVariant.STONE,
+	[PoopSpellType.SPELL_CORNY] = VeeHelper.PoopVariant.CORNY,
+	[PoopSpellType.SPELL_BURNING] = VeeHelper.PoopVariant.BURNING,
+	[PoopSpellType.SPELL_STINKY] = VeeHelper.PoopVariant.STINKY,
+	[PoopSpellType.SPELL_BLACK] = VeeHelper.PoopVariant.BLACK,
+	[PoopSpellType.SPELL_HOLY] = VeeHelper.PoopVariant.HOLY,
 }
 
 ---@param player EntityPlayer
@@ -83,14 +83,13 @@ local function HasAmmoForPickup(player, discType)
 end
 
 ---@param player EntityPlayer
----@return DiscCoinVariant
 local function GetCoinDiscVariant(player)
 	local numCoins = player:GetNumCoins()
-	local type = 1
+	local type = DiscCoinVariant.COIN_PENNY
 	if numCoins >= DIME_DISC_REQUIREMENT then
-		type = 3
+		type = DiscCoinVariant.COIN_DIME
 	elseif numCoins >= NICKEL_DISC_REQUIREMENT then
-		type = 2
+		type = DiscCoinVariant.COIN_NICKEL
 	end
 	return type
 end

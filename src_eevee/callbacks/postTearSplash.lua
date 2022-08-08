@@ -55,9 +55,10 @@ function postTearSplash:OnTearUpdate(tear)
 	if tear.Height > -5 then
 		return
 	end
+	local data = tear:GetData()
 
-	if not tear:GetData().TearDeaded and tear:IsDead() then
-		tear:GetData().TearDeaded = true
+	if not data.TearDeaded and tear:IsDead() then
+		data.TearDeaded = true
 		postTearSplash:main(tear, "Wall")
 	end
 end

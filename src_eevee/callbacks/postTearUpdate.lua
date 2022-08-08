@@ -11,7 +11,7 @@ function postTearUpdate:main(tear)
 	swiftAttack:SwiftAttackUpdate(tear)
 	swiftTear:SPEEEN(tear)
 	swiftTear:RemoveSpiritProjectile(tear)
-	ember:CreateEmberTrail(tear)
+	--ember:CreateEmberTrail(tear)
 	wonderousLauncher:OnPoopDiscUpdate(tear)
 	customTearVariants:OnCustomTearUpdate(tear)
 end

@@ -79,11 +79,12 @@ function swiftBase:InitSwiftWeapon(swiftData, weapon)
 		if swiftData.ActiveWeapons == nil then
 			swiftData.ActiveWeapons = {} --Otherwise all swift instances point to the one made by swiftWeaponData
 		end
-		swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
 		swiftBase:AddSwiftTrail(weapon, swiftData.Player)
 		swiftBase:PlaySwiftFireSFX(weapon)
+		swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
 		table.insert(swiftData.ActiveWeapons, weapon)
 	end
+
 	return swiftBase.Weapons[ptrHashWeapon]
 end
 
@@ -130,6 +131,7 @@ function swiftBase:PlaySwiftFireSFX(weapon)
 	if weapon:ToTear() then
 		swiftBase:SwiftStarFireSFX()
 	elseif weapon:ToEffect() then
+		EEVEEMOD.sfx:Stop(EEVEEMOD.SoundEffect.SWIFT_FIRE)
 		if weapon.Variant == EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT then
 			EEVEEMOD.sfx:Play(SoundEffect.SOUND_LASERRING_WEAK, 0.7, 0, false, 3, 0)
 		elseif weapon.Variant == EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL then
@@ -201,7 +203,7 @@ end
 ---@param weapon Weapon
 function swiftBase:IsSwiftLaserEffect(weapon)
 	local variant = nil
-	if weapon.Type ~= EntityType.ENTITY_weapon then return end
+	if weapon.Type ~= EntityType.ENTITY_EFFECT then return end
 
 	if weapon.Variant == EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT then
 		variant = "tech"
@@ -238,15 +240,12 @@ function swiftBase:AddSwiftTrail(weapon, player)
 		end
 	end
 	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
-	if swiftWeapon ~= nil then
-		swiftWeapon.Trail = trail
-	end
+
 	trail.Parent = weapon
 	data.SwiftTrail = true
 	data.TrailColor = tC
 	trail:SetColor(tC, -1, 1, false, false)
 	trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 15, 1, true, false)
-	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
 	if swiftWeapon then
 		swiftWeapon.Trail = trail
 	end

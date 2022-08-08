@@ -50,18 +50,28 @@ end
 function postEffectUpdate:init(EeveeReunited)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, postEffectUpdate.main)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, swiftAttack.SwiftTrailUpdate, EffectVariant.SPRITE_TRAIL)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, pokeball.PokeballEffectUpdate, EEVEEMOD.EffectVariant.POKEBALL)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeGhost.KillOnVadeRetro, EEVEEMOD.EffectVariant.EEVEE_GHOST)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeBirthright.OnEffectUpdate, EEVEEMOD.EffectVariant.TAIL_WHIP)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, pokeball.PokeballEffectUpdate,
+		EEVEEMOD.EffectVariant.POKEBALL)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeGhost.KillOnVadeRetro,
+		EEVEEMOD.EffectVariant.EEVEE_GHOST)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeBirthright.OnEffectUpdate,
+		EEVEEMOD.EffectVariant.TAIL_WHIP)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeSFX.FindDeadPlayerEffect, EffectVariant.DEVIL)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, wonderousLauncher.FireHandling, EEVEEMOD.EffectVariant.WONDEROUS_LAUNCHER)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, postEffectUpdate.TechDotAnimation, EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, postEffectUpdate.BrimstoneSwirlAnimation, EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, lockOnSpecs.DestroySpecsPickup, EEVEEMOD.EffectVariant.LOCKON_SPECS_DROP)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, wonderousLauncher.FireHandling,
+		EEVEEMOD.EffectVariant.WONDEROUS_LAUNCHER)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, postEffectUpdate.TechDotAnimation,
+		EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, postEffectUpdate.BrimstoneSwirlAnimation,
+		EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, lockOnSpecs.DestroySpecsPickup,
+		EEVEEMOD.EffectVariant.LOCKON_SPECS_DROP)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, triggerOnFire.OnTargetEffectUpdate, EffectVariant.TARGET)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, badEgg.RemoveGlitchOnAnimEnd, EEVEEMOD.EffectVariant.BAD_EGG_GLITCH)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, shinyCharm.ShinyParticleEffectUpdate, EEVEEMOD.EffectVariant.SHINY_SPARKLE)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, swiftAttack.RemoveAntiGravPlaceholder, EEVEEMOD.EffectVariant.ANTI_GRAV_PARENT)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, badEgg.RemoveGlitchOnAnimEnd,
+		EEVEEMOD.EffectVariant.BAD_EGG_GLITCH)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, shinyCharm.ShinyParticleEffectUpdate,
+		EEVEEMOD.EffectVariant.SHINY_SPARKLE)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, swiftAttack.RemoveAntiGravPlaceholder,
+		EEVEEMOD.EffectVariant.ANTI_GRAV_PARENT)
 end
 
 return postEffectUpdate

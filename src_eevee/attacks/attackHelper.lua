@@ -139,6 +139,7 @@ end
 
 ---@param player EntityPlayer
 ---@param direction Vector
+---@return Vector[]
 function attackHelper:GetExtraFireDirections(player, direction)
 	local directions = {}
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_LOKIS_HORNS)

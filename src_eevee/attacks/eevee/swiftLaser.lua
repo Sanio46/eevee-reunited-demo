@@ -97,6 +97,7 @@ end
 ---@param swiftWeapon SwiftWeapon
 function swiftLaser:FireSwiftLaser(swiftData, swiftWeapon)
 	local player = swiftData.Player
+	
 	if SwiftLaserType(player) == "techX" then
 		swiftLaser:FireTechXLaser(swiftData, swiftWeapon)
 	elseif SwiftLaserType(player) == "brim" then
