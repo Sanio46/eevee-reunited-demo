@@ -32,6 +32,8 @@ function postPeffectUpdate:main(player)
 	lilithbr:OnPeffectUpdate(player)
 	sneakScarf:ConfuseOutOfRangeEnemies(player)
 	strangeEgg:ChargeOnlyOnRoomClear(player) --Unused
+
+	triggerOnFire:StopIgnoreItemNextFrame(player)
 end
 
 function postPeffectUpdate:init(EeveeReunited)

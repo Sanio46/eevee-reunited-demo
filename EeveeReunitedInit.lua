@@ -95,6 +95,7 @@ function EeveeReunited:init(j)
 		"postNewRoom",
 		"getShaderParams",
 		"executeCmd",
+		"preUseItem",
 		"postNpcInit",
 		"preNpcCollision",
 		"postPlayerUpdate",
@@ -244,6 +245,6 @@ EeveeReunited:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, EeveeReunited.postFire
 function EeveeReunited:postEntCheckInit(entity)
 	entChecks = entChecks + 1
 end
-EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, EeveeReunited.postEntCheckInit, EffectVariant.RIFT) --Change this to whatever you're checking ]]
+EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, EeveeReunited.postEntCheckInit, EffectVariant.BLUE_FLAME) --Change this to whatever you're checking ]]
 
 return EeveeReunited
