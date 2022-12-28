@@ -4,21 +4,23 @@ local shinyCharm = require("src_eevee.items.collectibles.shinyCharm")
 local pokeball = require("src_eevee.items.pickups.pokeball")
 local strangeEgg = require("src_eevee.items.collectibles.strangeEgg")
 
+---@param npc EntityNPC
 function postEntityKill:OnNPCDeath(npc)
 	shinyCharm:PostShinyKill(npc)
 end
 
+---@param familiar EntityFamiliar
 function postEntityKill:OnFamiliarDeath(familiar)
 	pokeball:OnMasterBallWispDeath(familiar)
 	strangeEgg:OnStrangeEggWispDeath(familiar)
 end
 
+---@param ent Entity
 function postEntityKill:main(ent)
 	if ent:ToNPC() then
 		local npc = ent:ToNPC()
 		postEntityKill:OnNPCDeath(npc)
-	end
-	if ent:ToFamiliar() then
+	elseif ent:ToFamiliar() then
 		local familiar = ent:ToFamiliar()
 		postEntityKill:OnFamiliarDeath(familiar)
 	end

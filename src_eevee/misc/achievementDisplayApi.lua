@@ -7,7 +7,7 @@ local game = Game()
 local sound = SFXManager()
 local AchievementQueue = {}
 local AchievementSpr = Sprite()
-AchievementSpr:Load("gfx/ui/achievement display api/achievements.anm2")
+AchievementSpr:Load("gfx/ui/achievement display api/achievements.anm2", true)
 AchievementSpr.PlaybackSpeed = 0.5
 
 local function GetScreenSize() -- By Kilburn himself.

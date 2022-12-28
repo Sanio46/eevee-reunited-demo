@@ -1,9 +1,11 @@
 local wonderousLauncher = {}
 
-local cooldownDuration = 20
-local shootDuration = 15
-local dimeDisc = 50
-local nickelDisc = 25
+local attackHelper = require("src_eevee.attacks.attackHelper")
+
+local COOLDOWN_DURATION = 20
+local SHOOT_DURATION = 15
+local DIME_DISC_REQUIREMENT = 50
+local NICKEL_DISC_REQUIREMENT = 25
 
 local coinVariantToString = {
 	"coin",
@@ -11,12 +13,20 @@ local coinVariantToString = {
 	"dime",
 }
 
+---@class DiscType
 local DiscType = {
 	COIN = 1,
 	BOMB = 2,
 	KEY = 3,
 	POOP = 4,
 	NUM_DISCS = 5,
+}
+
+---@class DiscCoinVariant
+local DiscCoinVariant = {
+	COIN_PENNY = 1,
+	COIN_NICKEL = 2,
+	COIN_DIME = 3
 }
 
 local throwableSpells = {
@@ -30,16 +40,19 @@ local throwableSpells = {
 	[PoopSpellType.SPELL_BOMB] = true
 }
 
+---@type table<PoopSpellType, integer>
 local spellToPoopVariant = {
-	[PoopSpellType.SPELL_POOP] = 10,
-	[PoopSpellType.SPELL_STONE] = 11,
-	[PoopSpellType.SPELL_CORNY] = 12,
-	[PoopSpellType.SPELL_BURNING] = 13,
-	[PoopSpellType.SPELL_STINKY] = 14,
-	[PoopSpellType.SPELL_BLACK] = 15,
-	[PoopSpellType.SPELL_HOLY] = 16,
+	[PoopSpellType.SPELL_POOP] = VeeHelper.PoopVariant.POOP_BB,
+	[PoopSpellType.SPELL_STONE] = VeeHelper.PoopVariant.STONE,
+	[PoopSpellType.SPELL_CORNY] = VeeHelper.PoopVariant.CORNY,
+	[PoopSpellType.SPELL_BURNING] = VeeHelper.PoopVariant.BURNING,
+	[PoopSpellType.SPELL_STINKY] = VeeHelper.PoopVariant.STINKY,
+	[PoopSpellType.SPELL_BLACK] = VeeHelper.PoopVariant.BLACK,
+	[PoopSpellType.SPELL_HOLY] = VeeHelper.PoopVariant.HOLY,
 }
 
+---@param player EntityPlayer
+---@param discType DiscType
 local function HasAmmoForPickup(player, discType)
 	local hasAmmo = false
 
@@ -71,17 +84,19 @@ local function HasAmmoForPickup(player, discType)
 	return hasAmmo
 end
 
+---@param player EntityPlayer
 local function GetCoinDiscVariant(player)
 	local numCoins = player:GetNumCoins()
-	local type = 1
-	if numCoins >= dimeDisc then
-		type = 3
-	elseif numCoins >= nickelDisc then
-		type = 2
+	local type = DiscCoinVariant.COIN_PENNY
+	if numCoins >= DIME_DISC_REQUIREMENT then
+		type = DiscCoinVariant.COIN_DIME
+	elseif numCoins >= NICKEL_DISC_REQUIREMENT then
+		type = DiscCoinVariant.COIN_NICKEL
 	end
 	return type
 end
 
+---@param player EntityPlayer
 local function UpdateWonderDiscSprite(player)
 	local data = player:GetData()
 	local type = "coin"
@@ -115,6 +130,8 @@ local function UpdateWonderDiscSprite(player)
 	data.WonderLauncher:GetSprite():LoadGraphics()
 end
 
+---@param sprite Sprite
+---@return string
 local function GetLauncherDirection(sprite)
 	local DirAngles = {
 		[-90] = "Up",
@@ -132,6 +149,7 @@ local function GetLauncherDirection(sprite)
 	return dir
 end
 
+---@param launcher EntityEffect
 local function SetAnimState(launcher, state)
 	local data = launcher:GetData()
 	local sprite = launcher:GetSprite()
@@ -140,31 +158,36 @@ local function SetAnimState(launcher, state)
 	data.AnimDir = GetLauncherDirection(sprite)
 	sprite:Play(data.AnimState .. data.AnimDir, true)
 	if state == "Reload" and data.ShootCooldown == nil then
-		data.ShootCooldown = cooldownDuration
+		data.ShootCooldown = COOLDOWN_DURATION
 	end
 end
 
+---@param player EntityPlayer
 local function SpawnWonderLauncher(player)
-	local launcher = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.WONDEROUS_LAUNCHER, 0, player.Position, Vector.Zero, player):ToEffect()
+	local launcher = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.WONDEROUS_LAUNCHER, 0, player.Position,
+		Vector.Zero, player):ToEffect()
 	launcher.Parent = player
 	launcher.RenderZOffset = 101
-	launcher:GetData().ShootCooldown = cooldownDuration
+	launcher:GetData().ShootCooldown = COOLDOWN_DURATION
 	launcher:GetData().CanShoot = true
 	SetAnimState(launcher, "Idle")
 	player:GetData().WonderLauncher = launcher
 	UpdateWonderDiscSprite(player)
 end
 
+---@param player EntityPlayer
 local function RemoveWonderLauncher(player)
 	local data = player:GetData()
 	data.WonderLauncher:Remove()
 	data.WonderLauncher = nil
-	if not player:CanShoot() then
+	if not player:CanShoot() and player:GetPlayerType() ~= EEVEEMOD.PlayerType.EEVEE then
 		VeeHelper.SetCanShoot(player, true)
 	end
 end
 
-function wonderousLauncher:OnUse(itemID, itemRNG, player, flags, slot, varData)
+---@param itemID CollectibleType
+---@param player EntityPlayer
+function wonderousLauncher:OnUse(itemID, _, player, _, _, _)
 	local data = player:GetData()
 
 	if itemID == EEVEEMOD.CollectibleType.WONDEROUS_LAUNCHER then
@@ -180,13 +203,15 @@ function wonderousLauncher:OnUse(itemID, itemRNG, player, flags, slot, varData)
 	end
 end
 
+---@param player EntityPlayer
 function wonderousLauncher:OrbitPlayer(player)
 	local data = player:GetData()
 
 	if not data.WonderLauncher or EEVEEMOD.game:IsPaused() then return end
 
 	local sprite = data.WonderLauncher:GetSprite()
-	local fireDir = player:GetFireDirection() ~= Direction.NO_DIRECTION and player:GetShootingInput() or VeeHelper.HeadDirectionToVector(player)
+	local fireDir = player:GetFireDirection() ~= Direction.NO_DIRECTION and player:GetShootingInput() or
+		attackHelper:HeadDirectionToVector(player)
 	local vecRotation = Vector.FromAngle(sprite.Rotation)
 	sprite.Rotation = VeeHelper.LerpAngleDegrees(sprite.Rotation, fireDir:GetAngleDegrees(), 0.3)
 	data.WonderLauncher:FollowParent(player)
@@ -194,6 +219,7 @@ function wonderousLauncher:OrbitPlayer(player)
 	sprite.Offset = Vector(0, -10)
 end
 
+---@param player EntityPlayer
 function wonderousLauncher:SwapThroughPickups(player)
 	local data = player:GetData()
 
@@ -208,7 +234,7 @@ function wonderousLauncher:SwapThroughPickups(player)
 	if not data.WonderLauncher or data.WonderLauncher:GetData().CanShoot == false or EEVEEMOD.game:IsPaused() then return end
 
 	if Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) and not data.CycleCooldown then
-		data.CycleCooldown = cooldownDuration
+		data.CycleCooldown = COOLDOWN_DURATION
 		local curDisc = data.WonderDiscType
 		if data.WonderDiscType then
 			for i = 1, 3 do
@@ -228,6 +254,8 @@ function wonderousLauncher:SwapThroughPickups(player)
 	end
 end
 
+---@param player EntityPlayer
+---@param buttonAction ButtonAction
 function wonderousLauncher:ForcePoop(player, _, buttonAction)
 	local data = player:GetData()
 
@@ -238,6 +266,7 @@ function wonderousLauncher:ForcePoop(player, _, buttonAction)
 	end
 end
 
+---@param player EntityPlayer
 function wonderousLauncher:StopPoopAnimation(player)
 	local data = player:GetData()
 	if data.WonderDestroyPoopAnimation and VeeHelper.IsSpritePlayingAnims(player:GetSprite(), VeeHelper.PickupAnimations) then
@@ -246,6 +275,7 @@ function wonderousLauncher:StopPoopAnimation(player)
 	end
 end
 
+---@param player EntityPlayer
 function wonderousLauncher:RemoveHeldPoopSpell(player)
 	local data = player:GetData()
 	if data.WonderDestroyPoop == nil then return end
@@ -282,6 +312,7 @@ function wonderousLauncher:RemoveHeldPoopSpell(player)
 	UpdateWonderDiscSprite(player)
 end
 
+---@param tear EntityTear
 function wonderousLauncher:OnPoopDiscUpdate(tear)
 	local data = tear:GetData()
 	if not data.PoopSpellDisc then return end
@@ -289,6 +320,7 @@ function wonderousLauncher:OnPoopDiscUpdate(tear)
 	tear:GetSprite().Rotation = tear.Velocity:GetAngleDegrees()
 end
 
+---@param tear EntityTear
 function wonderousLauncher:OnPoopDiscDestroy(tear)
 	local data = tear:GetData()
 	if not data.PoopSpellDisc then return end
@@ -298,6 +330,7 @@ function wonderousLauncher:OnPoopDiscDestroy(tear)
 	EEVEEMOD.sfx:Play(SoundEffect.SOUND_PLOP)
 end
 
+---@param tear EntityTear
 function wonderousLauncher:OnCoinDiscDestroy(tear)
 	if tear.Variant ~= EEVEEMOD.TearVariant.WONDERCOIN then return end
 
@@ -306,14 +339,15 @@ function wonderousLauncher:OnCoinDiscDestroy(tear)
 	EEVEEMOD.sfx:Play(SoundEffect.SOUND_POT_BREAK)
 
 	for _ = 1, 6 do
-		local vel = Vector(3, 0):Rotated(EEVEEMOD.RandomNum(360))
-		local gibs = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.COIN_PARTICLE, 0, tear.Position, vel, nil)
+		local vel = Vector(3, 0):Rotated(VeeHelper.RandomNum(360))
+		local gibs = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.COIN_PARTICLE, 0, tear.Position, vel, tear)
 		local sprite = gibs:GetSprite()
 		sprite:ReplaceSpritesheet(0, "gfx/effects/wondercoin_gibs_" .. data.WonderCoinVariant .. ".png")
 		sprite:LoadGraphics()
 	end
 end
 
+---@type table<DiscType, CollectibleType>
 local discTypeToItemID = {
 	[DiscType.COIN] = CollectibleType.COLLECTIBLE_WOODEN_NICKEL,
 	[DiscType.BOMB] = CollectibleType.COLLECTIBLE_MR_BOOM,
@@ -321,6 +355,7 @@ local discTypeToItemID = {
 	[DiscType.POOP] = CollectibleType.COLLECTIBLE_POOP
 }
 
+---@param player EntityPlayer
 local function SpawnItemWisp(player, discType)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_BOOK_OF_VIRTUES) then
 		return
@@ -335,6 +370,7 @@ local function SpawnItemWisp(player, discType)
 	end
 end
 
+---@param familiar EntityFamiliar
 function wonderousLauncher:RemoveDeadLauncherWisps(familiar)
 	local player = familiar.Player
 
@@ -353,6 +389,8 @@ function wonderousLauncher:RemoveDeadLauncherWisps(familiar)
 	end
 end
 
+---@param launcher EntityEffect
+---@param player EntityPlayer
 function wonderousLauncher:FireDisc(launcher, player)
 	local dataPlayer = player:GetData()
 	local dir = Vector.FromAngle(launcher:GetSprite().Rotation)
@@ -433,15 +471,17 @@ function wonderousLauncher:FireDisc(launcher, player)
 	SpawnItemWisp(player, dataPlayer.WonderDiscType)
 end
 
+---@param launcher EntityEffect
+---@param player EntityPlayer
 local function LauncherTimers(launcher, player)
 	local data = launcher:GetData()
 
-	if data.ShootDuration ~= nil then
-		if data.ShootDuration > 0 then
-			data.ShootDuration = data.ShootDuration - 1
+	if data.SHOOT_DURATION ~= nil then
+		if data.SHOOT_DURATION > 0 then
+			data.SHOOT_DURATION = data.SHOOT_DURATION - 1
 		else
-			data.ShootDuration = nil
-			data.ShootCooldown = cooldownDuration
+			data.SHOOT_DURATION = nil
+			data.ShootCooldown = COOLDOWN_DURATION
 			if HasAmmoForPickup(player, player:GetData().WonderDiscType) then
 				SetAnimState(launcher, "Reload")
 			else
@@ -459,8 +499,9 @@ local function LauncherTimers(launcher, player)
 	end
 end
 
+---@param launcher EntityEffect
 function wonderousLauncher:FireHandling(launcher)
-	if VeeHelper.EntitySpawnedByPlayer(launcher, false) then
+	if VeeHelper.EntitySpawnedByPlayer(launcher) then
 		local player = launcher.SpawnerEntity:ToPlayer()
 		local sprite = launcher:GetSprite()
 		local data = launcher:GetData()
@@ -475,13 +516,13 @@ function wonderousLauncher:FireHandling(launcher)
 
 		if player:GetFireDirection() ~= Direction.NO_DIRECTION then
 			if data.CanShoot == true
-				and not data.ShootDuration
+				and not data.SHOOT_DURATION
 				and not data.ShootCooldown
 				and HasAmmoForPickup(player, player:GetData().WonderDiscType)
 				and data.AnimState ~= "Reload"
 			then
 				data.CanShoot = false
-				data.ShootDuration = shootDuration
+				data.SHOOT_DURATION = SHOOT_DURATION
 				SetAnimState(launcher, "Shoot")
 			end
 		end
@@ -495,6 +536,7 @@ function wonderousLauncher:FireHandling(launcher)
 	end
 end
 
+---@param player EntityPlayer
 local function DiscCoinTrackUpdate(player)
 	local data = player:GetData()
 	local curType = GetCoinDiscVariant(player)
@@ -507,6 +549,7 @@ local function DiscCoinTrackUpdate(player)
 	return shouldUpdate
 end
 
+---@param player EntityPlayer
 function wonderousLauncher:ReloadOnNewAmmo(player)
 	local data = player:GetData()
 	if data.WonderLauncher then
@@ -528,6 +571,7 @@ function wonderousLauncher:ReloadOnNewAmmo(player)
 	end
 end
 
+---@param player EntityPlayer
 function wonderousLauncher:OnPlayerUpdate(player)
 	wonderousLauncher:SwapThroughPickups(player)
 	wonderousLauncher:OrbitPlayer(player)
@@ -543,6 +587,7 @@ function wonderousLauncher:OnPlayerUpdate(player)
 	end
 end
 
+---@param player EntityPlayer
 function wonderousLauncher:OnNewRoom(player)
 	local data = player:GetData()
 

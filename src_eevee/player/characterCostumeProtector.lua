@@ -3,6 +3,13 @@ local ccp = {}
 local baseCostumePath = "gfx/characters/"
 local baseCharacterPath = "gfx/characters/costumes/"
 local baseCostumeSuffixPath = "gfx/characters/costumes_"
+local Outfit = {
+	NONE = "",
+	CHRISTMAS = "christmas"
+}
+local curOutfit = Outfit.CHRISTMAS
+
+---@type table<PlayerType, boolean>
 local playerToProtect = {
 	[EEVEEMOD.PlayerType.EEVEE] = true,
 	--[[ [EEVEEMOD.PlayerType.FLAREON] = true,
@@ -14,6 +21,7 @@ local playerToProtect = {
 	[EEVEEMOD.PlayerType.LEAFEON] = true,
 	[EEVEEMOD.PlayerType.SYLVEON] = true, ]]
 }
+---@type table<PlayerType, string>
 local playerCostume = {
 	[EEVEEMOD.PlayerType.EEVEE] = "gfx/characters/costume_eevee",
 	--[[ [EEVEEMOD.PlayerType.FLAREON] = "gfx/characters/costume_flareon",
@@ -25,6 +33,7 @@ local playerCostume = {
 	[EEVEEMOD.PlayerType.LEAFEON] = "gfx/characters/costume_leafeon",
 	[EEVEEMOD.PlayerType.SYLVEON] = "gfx/characters/costume_sylveon", ]]
 }
+---@type table<PlayerType, string>
 local playerSpritesheet = {
 	[EEVEEMOD.PlayerType.EEVEE] = baseCharacterPath .. "character_eevee",
 	--[[ [EEVEEMOD.PlayerType.FLAREON] = baseCharacterPath .. "character_flareon",
@@ -36,6 +45,7 @@ local playerSpritesheet = {
 	[EEVEEMOD.PlayerType.LEAFEON] = baseCharacterPath .. "character_leafeon",
 	[EEVEEMOD.PlayerType.SYLVEON] = baseCharacterPath .. "character_sylveon", ]]
 }
+---@type table<CollectibleType, boolean>
 local costumeList = {
 	[CollectibleType.COLLECTIBLE_SAD_ONION] = false,
 	[CollectibleType.COLLECTIBLE_INNER_EYE] = false,
@@ -316,6 +326,7 @@ local costumeList = {
 	[CollectibleType.COLLECTIBLE_GLYPH_OF_BALANCE] = true,
 	[CollectibleType.COLLECTIBLE_ANALOG_STICK] = false,
 	[CollectibleType.COLLECTIBLE_CONTAGION] = false,
+	[CollectibleType.COLLECTIBLE_METRONOME] = false,
 	[CollectibleType.COLLECTIBLE_JACOBS_LADDER] = true,
 	[CollectibleType.COLLECTIBLE_GHOST_PEPPER] = true,
 	[CollectibleType.COLLECTIBLE_EUTHANASIA] = true,
@@ -425,7 +436,7 @@ local costumeList = {
 	[CollectibleType.COLLECTIBLE_SPIRIT_SHACKLES] = true,
 	[CollectibleType.COLLECTIBLE_CRACKED_ORB] = true,
 	[CollectibleType.COLLECTIBLE_ASTRAL_PROJECTION] = true,
-	[CollectibleType.COLLECTIBLE_C_SECTION] = false,
+	[CollectibleType.COLLECTIBLE_C_SECTION] = true,
 	[CollectibleType.COLLECTIBLE_MONTEZUMAS_REVENGE] = false,
 	[CollectibleType.COLLECTIBLE_SOUL_LOCKET] = true,
 	[CollectibleType.COLLECTIBLE_INNER_CHILD] = true,
@@ -440,6 +451,7 @@ local costumeList = {
 	[CollectibleType.COLLECTIBLE_STYE] = false,
 	[CollectibleType.COLLECTIBLE_MOMS_RING] = true
 }
+---@type table<NullItemID, boolean>
 local nullEffectsList = {
 	[NullItemID.ID_PUBERTY] = false,
 	[NullItemID.ID_I_FOUND_PILLS] = true,
@@ -502,11 +514,13 @@ local nullEffectsList = {
 	[NullItemID.ID_DOUBLE_GUPPYS_EYE] = true,
 	[NullItemID.ID_DOUBLE_GLASS_EYE] = true
 }
+---@type table<TrinketType, boolean>
 local trinketCostumeList = {
 	[TrinketType.TRINKET_RED_PATCH] = false,
 	[TrinketType.TRINKET_TICK] = false,
 	[TrinketType.TRINKET_AZAZELS_STUMP] = true,
 }
+---@type table<CollectibleType, boolean>
 local activeItemCostumes = {
 	[CollectibleType.COLLECTIBLE_BIBLE] = true,
 	[CollectibleType.COLLECTIBLE_BOOK_OF_BELIAL] = true,
@@ -522,6 +536,7 @@ local activeItemCostumes = {
 	[CollectibleType.COLLECTIBLE_D100] = true,
 	[CollectibleType.COLLECTIBLE_D4] = true,
 	[CollectibleType.COLLECTIBLE_MEGA_BLAST] = true,
+	[CollectibleType.COLLECTIBLE_METRONOME] = true,
 	[CollectibleType.COLLECTIBLE_SHARP_STRAW] = true,
 	[CollectibleType.COLLECTIBLE_DELIRIOUS] = true,
 	[CollectibleType.COLLECTIBLE_SACRIFICIAL_ALTAR] = true,
@@ -534,11 +549,13 @@ local activeItemCostumes = {
 	[CollectibleType.COLLECTIBLE_BERSERK] = true,
 	[CollectibleType.COLLECTIBLE_LEMEGETON] = true
 }
+---@type table<PillEffect, NullItemID>
 local pillCostumes = {
 	[PillEffect.PILLEFFECT_I_FOUND_PILLS] = NullItemID.ID_I_FOUND_PILLS,
 	[PillEffect.PILLEFFECT_PUBERTY] = NullItemID.ID_PUBERTY,
 	[PillEffect.PILLEFFECT_WIZARD] = NullItemID.ID_WIZARD,
 }
+---@type table<PlayerForm, NullItemID>
 local playerFormToNullItemID = {
 	[PlayerForm.PLAYERFORM_GUPPY] = NullItemID.ID_GUPPY,
 	[PlayerForm.PLAYERFORM_LORD_OF_THE_FLIES] = NullItemID.ID_LORD_OF_THE_FLIES,
@@ -554,6 +571,7 @@ local playerFormToNullItemID = {
 	[PlayerForm.PLAYERFORM_ADULTHOOD] = NullItemID.ID_ADULTHOOD,
 	[PlayerForm.PLAYERFORM_SPIDERBABY] = NullItemID.ID_SPIDERBABY,
 }
+---@type string[]
 local costumeTypeList = {
 	"",
 	"_azazel",
@@ -571,6 +589,7 @@ local costumeTypeList = {
 	"_uranus",
 	"_neptunus"
 }
+---@type string[]
 local allModCostumes = {
 	"costume_eevee",
 	"costume_eevee_azazel",
@@ -597,6 +616,7 @@ local allModCostumes = {
 	"edited_216_ceremonialrobes",
 	"edited_222_antigravity",
 	"edited_231_balloftar",
+	"edited_260_blackcandle",
 	"edited_375_hosthat",
 	"edited_420_blackpowder",
 	"edited_428_pjs",
@@ -607,15 +627,15 @@ local allModCostumes = {
 	"edited_045x_pluto",
 	"edited_n030_boomerang",
 	"costume_eevee_mushroomhat",
-	"costume_collectible_sneakscarf",
-	"costume_collectible_shinycharm",
-	"costume_collectible_blackglasses",
 }
 
 --------------
 --  LOCALS  --
 --------------
 
+---@param player EntityPlayer
+---@param nullID NullItemID
+---@param costumePath string
 function ccp:TryAddNullCostume(player, nullID, costumePath)
 	if nullID ~= nil and nullID ~= -1 then
 		player:AddNullCostume(nullID)
@@ -624,6 +644,8 @@ function ccp:TryAddNullCostume(player, nullID, costumePath)
 	end
 end
 
+---@param player EntityPlayer
+---@param itemID CollectibleType
 function ccp:CanRemoveCollectibleCostume(player, itemID)
 	if (player:HasCollectible(itemID) or player:GetEffects():HasCollectibleEffect(itemID))
 		and not activeItemCostumes[itemID]
@@ -634,6 +656,7 @@ function ccp:CanRemoveCollectibleCostume(player, itemID)
 	end
 end
 
+---@param player EntityPlayer
 local function RemoveBlacklistedCostumes(player)
 	local playerEffects = player:GetEffects()
 	local data = player:GetData()
@@ -643,7 +666,7 @@ local function RemoveBlacklistedCostumes(player)
 		local itemCostume = Isaac.GetItemConfig():GetCollectible(itemID)
 		if ccp:CanRemoveCollectibleCostume(player, itemID)
 			and costumeList[itemID] == false then
-			player:RemoveCostume(itemCostume, false)
+			player:RemoveCostume(itemCostume)
 		end
 	end
 
@@ -731,6 +754,7 @@ local EditedCostumes = {
 	[CollectibleType.COLLECTIBLE_CEREMONIAL_ROBES] = true,
 	[CollectibleType.COLLECTIBLE_ANTI_GRAVITY] = true,
 	[CollectibleType.COLLECTIBLE_BALL_OF_TAR] = true,
+	[CollectibleType.COLLECTIBLE_BLACK_CANDLE] = true,
 	[CollectibleType.COLLECTIBLE_HOST_HAT] = true,
 	[CollectibleType.COLLECTIBLE_BLACK_POWDER] = true,
 	[CollectibleType.COLLECTIBLE_PJS] = true,
@@ -741,6 +765,7 @@ local EditedCostumes = {
 	--[CollectibleType.COLLECTIBLE_PLUTO] = true,
 }
 
+---@param player EntityPlayer
 local function AddItemSpecificCostumes(player)
 	local playerType = player:GetPlayerType()
 	local playerEffects = player:GetEffects()
@@ -755,9 +780,9 @@ local function AddItemSpecificCostumes(player)
 
 			if player:HasCollectible(itemID) and data.CCP.UniqueHairCostumesActive[itemID] == false then
 				data.CCP.UniqueHairCostumesActive[itemID] = true
-				if VeeHelper.IsNewRunAndNotJustContinued() then
-					ccp:TryAddNullCostume(player, itemCostume, basePath .. costumePath .. ".anm2")
-				end
+				--if not VeeHelper.GameContinuedOnPlayerInit() then
+				ccp:TryAddNullCostume(player, itemCostume, basePath .. costumePath .. ".anm2")
+				--end
 			elseif not player:HasCollectible(itemID) and data.CCP.UniqueHairCostumesActive[itemID] == true then
 				player:TryRemoveNullCostume(itemCostume)
 				data.CCP.UniqueHairCostumesActive[itemID] = false
@@ -774,10 +799,10 @@ local function AddItemSpecificCostumes(player)
 
 				if player:HasCollectible(itemID) and data.CCP.EditedCostumesActive[itemID] == false then
 					data.CCP.EditedCostumesActive[itemID] = true
-					if VeeHelper.IsNewRunAndNotJustContinued() then
-						player:RemoveCostume(itemConfig)
-						ccp:TryAddNullCostume(player, itemCostume, costumePath)
-					end
+					--if not VeeHelper.GameContinuedOnPlayerInit() then
+					player:RemoveCostume(itemConfig)
+					ccp:TryAddNullCostume(player, itemCostume, costumePath)
+					--end
 				elseif not player:HasCollectible(itemID) and data.CCP.EditedCostumesActive[itemID] == true then
 					player:TryRemoveNullCostume(itemCostume)
 					data.CCP.EditedCostumesActive[itemID] = false
@@ -795,7 +820,7 @@ local function AddItemSpecificCostumes(player)
 		player:AddCostume(azyTrinketCostume, false)
 	else
 		player:TryRemoveNullCostume(azyCustomCostume)
-		player:RemoveCostume(azyTrinketCostume, false)
+		player:RemoveCostume(azyTrinketCostume)
 	end
 
 	--Delirious
@@ -856,21 +881,23 @@ local function AddItemSpecificCostumes(player)
 	local mushroomPath = basePath .. "mushroomhat.anm2"
 	local mushroomCustomCostume = Isaac.GetCostumeIdByPath(mushroomPath)
 	if player:HasPlayerForm(PlayerForm.PLAYERFORM_MUSHROOM) and not data.CCP.MushroomCostume then
-		if VeeHelper.IsNewRunAndNotJustContinued() then
-			ccp:TryAddNullCostume(player, mushroomCustomCostume, mushroomPath)
-			data.CCP.MushroomCostume = true
-		end
+		data.CCP.MushroomCostume = true
+		--if not VeeHelper.GameContinuedOnPlayerInit() then
+		ccp:TryAddNullCostume(player, mushroomCustomCostume, mushroomPath)
+		--end
 	elseif not player:HasPlayerForm(PlayerForm.PLAYERFORM_MUSHROOM) and data.CCP.MushroomCostume then
 		player:TryRemoveNullCostume(mushroomCustomCostume)
 		data.CCP.MushroomCostume = nil
 	end
 end
 
+---@param player EntityPlayer
 local function RemoveModdedCostumes(player)
 	local ModdedNullCostumeIDStart = NullItemID.NUM_NULLITEMS + 1
 	local ModdedCollectibleCostumeIDStart = CollectibleType.NUM_COLLECTIBLES + 1
 	local MaxNullItemIDs = Isaac.GetItemConfig():GetNullItems().Size - 1
 	local MaxCollectibles = Isaac.GetItemConfig():GetCollectibles().Size - 1
+
 	for id = ModdedNullCostumeIDStart, MaxNullItemIDs do
 		local notSupported = true
 		for i = 1, #allModCostumes do
@@ -885,12 +912,17 @@ local function RemoveModdedCostumes(player)
 	end
 	for id = ModdedCollectibleCostumeIDStart, MaxCollectibles do
 		local itemConfigID = Isaac.GetItemConfig():GetCollectible(id)
-		if player:HasCollectible(id) and ItemConfig.Config.ShouldAddCostumeOnPickup(itemConfigID) then
+		if player:HasCollectible(id)
+			and ItemConfig.Config.ShouldAddCostumeOnPickup(itemConfigID)
+			and not EEVEEMOD.CollectiblesWithCostumes[id]
+		then
 			player:RemoveCostume(itemConfigID)
 		end
 	end
 end
 
+---@param player EntityPlayer
+---@param playerType PlayerType
 local function TryRemoveOldCostume(player, playerType)
 	local basePath = playerCostume[playerType]
 	if basePath ~= nil then
@@ -902,6 +934,9 @@ end
 --  MAIN STUFF  --
 ------------------
 
+---@param player EntityPlayer
+---@param sprite Sprite
+---@param spritesheetPath string
 function ccp:UpdatePlayerSpritesheet(player, sprite, spritesheetPath)
 	local playerType = player:GetPlayerType()
 	local spritesheetPath = spritesheetPath or playerSpritesheet[playerType] .. VeeHelper.SkinColor(player) .. ".png"
@@ -913,6 +948,7 @@ function ccp:UpdatePlayerSpritesheet(player, sprite, spritesheetPath)
 	sprite:LoadGraphics()
 end
 
+---@param player EntityPlayer
 function ccp:ReapplyBaseCostume(player)
 	local playerType = player:GetPlayerType()
 
@@ -922,6 +958,7 @@ function ccp:ReapplyBaseCostume(player)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:MainResetPlayerCostumes(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
@@ -936,6 +973,7 @@ function ccp:MainResetPlayerCostumes(player)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:ResetPlayerCostumes(player)
 	local data = player:GetData()
 	local playerEffects = player:GetEffects()
@@ -966,7 +1004,7 @@ function ccp:ResetPlayerCostumes(player)
 				and costumeList[itemID] == false
 			then
 				local itemCostume = Isaac.GetItemConfig():GetCollectible(itemID)
-				player:AddCostume(itemCostume)
+				player:AddCostume(itemCostume, false)
 			end
 		end
 
@@ -987,7 +1025,7 @@ function ccp:ResetPlayerCostumes(player)
 				and data.CCP.TrinketActive[trinketID]
 				and trinketCostumeList[trinketID] == false then
 				local trinketCostume = Isaac.GetItemConfig():GetTrinket(trinketID)
-				player:AddCostume(trinketCostume)
+				player:AddCostume(trinketCostume, false)
 			end
 		end
 
@@ -1003,6 +1041,19 @@ function ccp:ResetPlayerCostumes(player)
 	data.CCP = nil
 end
 
+---@param player EntityPlayer
+local function OutfitAdjustments(player)
+	if curOutfit == Outfit.NONE then
+		playerSpritesheet[EEVEEMOD.PlayerType.EEVEE] = baseCharacterPath .. "character_eevee"
+	elseif curOutfit == Outfit.CHRISTMAS then
+		table.insert(allModCostumes, "costume_eevee_christmashat")
+		ccp:TryAddNullCostume(player, EEVEEMOD.NullCostume.CHRISTMAS_HAT, baseCostumePath .. "costume_eevee_christmashat.anm2")
+		playerSpritesheet[EEVEEMOD.PlayerType.EEVEE] = baseCharacterPath .. "outfits/character_eevee_christmas"
+		ccp:UpdatePlayerSpritesheet(player, player:GetSprite(), playerSpritesheet[EEVEEMOD.PlayerType.EEVEE] .. ".png")
+	end
+end
+
+---@param player EntityPlayer
 function ccp:InitPlayerCostume(player)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
@@ -1036,11 +1087,13 @@ function ccp:InitPlayerCostume(player)
 			local basePath = playerCostume[playerType]
 			local charCostume = Isaac.GetCostumeIdByPath(basePath .. ".anm2")
 			player:AddNullCostume(charCostume)
+			OutfitAdjustments(player)
 			ccp:MainResetPlayerCostumes(player)
 		end
 	end
 end
 
+---@param player EntityPlayer
 function ccp:DeinitPlayerCostume(player)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
@@ -1058,6 +1111,7 @@ function ccp:DeinitPlayerCostume(player)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:MiscCostumeResets(player)
 	local data = player:GetData()
 	local playerEffects = player:GetEffects()
@@ -1117,6 +1171,7 @@ end
 --  da spooky ghost  --
 -----------------------
 
+---@param player EntityPlayer
 function ccp:CanAstralProjectionTrigger(player)
 	local playerEffects = player:GetEffects()
 	local data = player:GetData()
@@ -1127,6 +1182,7 @@ function ccp:CanAstralProjectionTrigger(player)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:AstralProjectionUpdate(player)
 	local playerEffects = player:GetEffects()
 	local data = player:GetData()
@@ -1146,8 +1202,8 @@ function ccp:AstralProjectionUpdate(player)
 	end
 end
 
-function ccp:AstralProjectionOnHit(ent, amount, flags, source, countdown)
-	local player = ent:ToPlayer()
+---@param player EntityPlayer
+function ccp:AstralProjectionOnHit(player, _, _, _, _)
 	local playerType = player:GetPlayerType()
 	local playerEffects = player:GetEffects()
 	local data = player:GetData()
@@ -1157,7 +1213,8 @@ function ccp:AstralProjectionOnHit(ent, amount, flags, source, countdown)
 		and data.CCP
 		and data.CCP.AP_CanTrigger then
 		if not hasProjectionEffect and not data.CCP.AP_Disabled then
-			data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath .. EEVEEMOD.PlayerTypeToString[playerType] .. "/character_012_thelost.png"
+			data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath ..
+				EEVEEMOD.PlayerTypeToString[playerType] .. "/character_012_thelost.png"
 			data.CCP.AP_Disabled = true
 		elseif hasProjectionEffect and data.CCP.AP_Disabled then
 			data.CCP.DelaySpritesheetChange = ""
@@ -1165,6 +1222,7 @@ function ccp:AstralProjectionOnHit(ent, amount, flags, source, countdown)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:OnLostCurse(player)
 	local playerType = player:GetPlayerType()
 	local playerEffects = player:GetEffects()
@@ -1172,7 +1230,8 @@ function ccp:OnLostCurse(player)
 	local hasLostCurse = playerEffects:HasNullEffect(NullItemID.ID_LOST_CURSE)
 
 	if hasLostCurse and not data.CCP.LostCurse then
-		data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath .. EEVEEMOD.PlayerTypeToString[playerType] .. "/character_012_thelost.png"
+		data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath ..
+			EEVEEMOD.PlayerTypeToString[playerType] .. "/character_012_thelost.png"
 		data.CCP.LostCurse = true
 	elseif not hasLostCurse and data.CCP.LostCurse then
 		data.CCP.DelaySpritesheetChange = ""
@@ -1180,6 +1239,7 @@ function ccp:OnLostCurse(player)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:OnSpiritShackles(player)
 	local playerType = player:GetPlayerType()
 	local playerEffects = player:GetEffects()
@@ -1187,7 +1247,8 @@ function ccp:OnSpiritShackles(player)
 	local isShacklesSoul = playerEffects:HasNullEffect(NullItemID.ID_SPIRIT_SHACKLES_SOUL)
 
 	if isShacklesSoul and not data.CCP.ShacklesGhost then
-		data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath .. EEVEEMOD.PlayerTypeToString[playerType] .. "/character_018_thesoul.png"
+		data.CCP.DelaySpritesheetChange = baseCostumeSuffixPath ..
+			EEVEEMOD.PlayerTypeToString[playerType] .. "/character_018_thesoul.png"
 		data.CCP.ShacklesGhost = true
 	elseif not isShacklesSoul and data.CCP.ShacklesGhost then
 		data.CCP.DelaySpritesheetChange = ""
@@ -1199,6 +1260,8 @@ end
 --  RESETTING COSTUME ON SPECIFIC TRIGGERS  --
 ----------------------------------------------
 
+---@param itemID CollectibleType
+---@param player EntityPlayer
 function ccp:ResetCostumeOnItem(itemID, _, player, _, _, _)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
@@ -1221,6 +1284,8 @@ function ccp:ResetCostumeOnItem(itemID, _, player, _, _, _)
 	end
 end
 
+---@param pillID PillEffect
+---@param player EntityPlayer
 function ccp:ResetCostumeOnPill(pillID, player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
@@ -1237,6 +1302,7 @@ function ccp:ResetCostumeOnPill(pillID, player)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:ReapplyHairOnCoopRevive(player)
 	local data = player:GetData()
 	if player:IsCoopGhost() and not data.CCP.WaitOnCoopRevive then
@@ -1247,6 +1313,7 @@ function ccp:ReapplyHairOnCoopRevive(player)
 	end
 end
 
+---@param player EntityPlayer
 local function LoadPlayerAndCostumeSprites(player)
 	local playerType = player:GetPlayerType()
 	local pSprite = player:GetSprite():GetFilename()
@@ -1270,6 +1337,7 @@ local function LoadPlayerAndCostumeSprites(player)
 	ccp:UpdatePlayerSpritesheet(player, data.CCP.MineshaftBody, spritesheetPath)
 end
 
+---@param player EntityPlayer
 function ccp:RestoreCostumeInMineshaft(player)
 	local playerType = player:GetPlayerType()
 	local pSprite = player:GetSprite()
@@ -1313,6 +1381,7 @@ function ccp:RestoreCostumeInMineshaft(player)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:ResetOnMissingNoNewFloor(player)
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_MISSING_NO) then
 		ccp:MainResetPlayerCostumes(player)
@@ -1320,6 +1389,7 @@ function ccp:ResetOnMissingNoNewFloor(player)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:ModelingClay(player)
 	local data = player:GetData()
 	local itemID = player:GetModelingClayEffect()
@@ -1335,6 +1405,7 @@ function ccp:ModelingClay(player)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:DelayInCostumeReset(player)
 	local data = player:GetData()
 
@@ -1374,7 +1445,8 @@ function ccp:DelayInCostumeReset(player)
 
 	if data.CCP.DelaySpritesheetChange then
 		if data.CCP.DelaySpritesheetChange == "" then
-			ccp:UpdatePlayerSpritesheet(player, player:GetSprite())
+			ccp:UpdatePlayerSpritesheet(player, player:GetSprite(),
+				baseCharacterPath .. "character_" .. EEVEEMOD.PlayerTypeToString[player:GetPlayerType()] .. ".png")
 		else
 			ccp:UpdatePlayerSpritesheet(player, player:GetSprite(), data.CCP.DelaySpritesheetChange)
 		end
@@ -1397,12 +1469,14 @@ end
 local TimeTillGnawed = 60
 local ShoopDuration = 60
 
+---@param player EntityPlayer
 function ccp:GnawedLeaf(player)
 	local data = player:GetData()
 
 	if not data.CCP or not player:HasCollectible(CollectibleType.COLLECTIBLE_GNAWED_LEAF) then return end
 
-	if VeeHelper.PlayerStandingStill(player) and player:GetFireDirection() == Direction.NO_DIRECTION and not data.CCP.EeveeGnawed then
+	if VeeHelper.PlayerStandingStill(player) and player:GetFireDirection() == Direction.NO_DIRECTION and
+		not data.CCP.EeveeGnawed then
 
 		if not data.CCP.GnawedTimer then
 			data.CCP.GnawedTimer = TimeTillGnawed
@@ -1440,6 +1514,7 @@ function ccp:GnawedOnLoad()
 	end
 end
 
+---@param player EntityPlayer
 function ccp:ToggleShoop(player)
 	local data = player:GetData()
 
@@ -1468,6 +1543,7 @@ function ccp:ToggleShoop(player)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:ToggleBoomerang(player)
 	local data = player:GetData()
 
@@ -1498,6 +1574,7 @@ function ccp:ToggleBoomerang(player)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:OnShoop(_, _, player, _, _, _)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
@@ -1506,6 +1583,7 @@ function ccp:OnShoop(_, _, player, _, _, _)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:OnBoomerang(_, _, player, _, _, _)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
@@ -1514,6 +1592,7 @@ function ccp:OnBoomerang(_, _, player, _, _, _)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:StopBoomerangShoopOnNewRoom(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
@@ -1529,11 +1608,36 @@ function ccp:StopBoomerangShoopOnNewRoom(player)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:ReapplyBabylonBodyOnNewRoom(player)
 	local data = player:GetData()
-	
+
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_WHORE_OF_BABYLON) then
 		data.CCP.DelayBabylonCheck = true
+	end
+end
+
+---@param player EntityPlayer
+function ccp:AntiBrimPogBaldness(player)
+	if not Poglite then return end
+	local data = player:GetData()
+	local costumePath = "gfx/characters/costume_eevee_brimstone_pogginghair.anm2"
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then
+		if player:GetCollectibleNum(CollectibleType.COLLECTIBLE_BRIMSTONE) >= 2 then
+			string.gsub(costumePath, "brimstone", "brimstone2")
+		end
+
+		if not data.EeveeBrimPog and Poglite.WePoggin then
+			data.EeveeBrimPog = true
+			ccp:TryAddNullCostume(player, Isaac.GetCostumeIdByPath(costumePath), costumePath )
+		elseif data.EeveeBrimPog and not Poglite.WePoggin then
+			player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(costumePath))
+			data.EeveeBrimPog = false
+		end
+	elseif data.EeveeBrimPog then
+		data.EeveeBrimPog = nil
+		player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(costumePath))
+		player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(string.gsub(costumePath, "brimstone", "brimstone2")))
 	end
 end
 
@@ -1541,10 +1645,12 @@ end
 --  INITIATING CALLBACKS  --
 ----------------------------
 
+---@param player EntityPlayer
 function ccp:OnPlayerInit(player)
 	ccp:InitPlayerCostume(player)
 end
 
+---@param player EntityPlayer
 function ccp:OnPeffectUpdate(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
@@ -1566,6 +1672,7 @@ function ccp:OnPeffectUpdate(player)
 	ccp:OnSpiritShackles(player)
 end
 
+---@param player EntityPlayer
 function ccp:OnPlayerUpdate(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
@@ -1575,14 +1682,16 @@ function ccp:OnPlayerUpdate(player)
 	ccp:ToggleShoop(player)
 	ccp:ToggleBoomerang(player)
 	ccp:GnawedLeaf(player)
+	ccp:AntiBrimPogBaldness(player)
 end
 
+---@param player EntityPlayer
 function ccp:OnNewRoom(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()
 
 	if playerToProtect[playerType] ~= true or not data.CCP then return end
-	
+
 	ccp:CanAstralProjectionTrigger(player)
 	ccp:StopBoomerangShoopOnNewRoom(player)
 	ccp:ReapplyBabylonBodyOnNewRoom(player)
@@ -1593,6 +1702,7 @@ function ccp:OnNewRoom(player)
 	end
 end
 
+---@param player EntityPlayer
 function ccp:OnNewLevel(player)
 	local playerType = player:GetPlayerType()
 	local data = player:GetData()

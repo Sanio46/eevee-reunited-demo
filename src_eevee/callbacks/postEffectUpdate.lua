@@ -6,6 +6,7 @@ local eeveeSFX = require("src_eevee.player.eeveeSFX")
 local pokeball = require("src_eevee.items.pickups.pokeball")
 local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
+local swiftKnife = require("src_eevee.attacks.eevee.swiftKnife")
 local wonderousLauncher = require("src_eevee.items.collectibles.wonderousLauncher")
 local triggerOnFire = require("src_eevee.items.triggerOnFire")
 local lockOnSpecs = require("src_eevee.items.trinkets.lockOnSpecs")
@@ -17,7 +18,7 @@ function postEffectUpdate:main(effect)
 	if swiftBase:IsSwiftLaserEffect(effect)
 		or effect.Variant == EffectVariant.EVIL_EYE then
 		if effect.Variant == EffectVariant.EVIL_EYE then
-			swiftAttack:InitSwiftEvilEye(effect)
+			--swiftAttack:InitSwiftEvilEye(effect)
 		end
 
 		swiftAttack:SwiftAttackUpdate(effect)
@@ -50,17 +51,29 @@ end
 function postEffectUpdate:init(EeveeReunited)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, postEffectUpdate.main)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, swiftAttack.SwiftTrailUpdate, EffectVariant.SPRITE_TRAIL)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, pokeball.PokeballEffectUpdate, EEVEEMOD.EffectVariant.POKEBALL)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeGhost.KillOnVadeRetro, EEVEEMOD.EffectVariant.EEVEE_GHOST)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeBirthright.OnEffectUpdate, EEVEEMOD.EffectVariant.TAIL_WHIP)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, pokeball.PokeballEffectUpdate,
+		EEVEEMOD.EffectVariant.POKEBALL)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeGhost.EeveeGhostUpdate,
+		EEVEEMOD.EffectVariant.EEVEE_GHOST)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeBirthright.OnEffectUpdate,
+		EEVEEMOD.EffectVariant.TAIL_WHIP)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeSFX.FindDeadPlayerEffect, EffectVariant.DEVIL)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, wonderousLauncher.FireHandling, EEVEEMOD.EffectVariant.WONDEROUS_LAUNCHER)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, postEffectUpdate.TechDotAnimation, EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, postEffectUpdate.BrimstoneSwirlAnimation, EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, lockOnSpecs.DestroySpecsPickup, EEVEEMOD.EffectVariant.LOCKON_SPECS_DROP)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, wonderousLauncher.FireHandling,
+		EEVEEMOD.EffectVariant.WONDEROUS_LAUNCHER)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, postEffectUpdate.TechDotAnimation,
+		EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, postEffectUpdate.BrimstoneSwirlAnimation,
+		EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, lockOnSpecs.DestroySpecsPickup,
+		EEVEEMOD.EffectVariant.LOCKON_SPECS_DROP)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, triggerOnFire.OnTargetEffectUpdate, EffectVariant.TARGET)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, badEgg.RemoveGlitchOnAnimEnd, EEVEEMOD.EffectVariant.BAD_EGG_GLITCH)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, shinyCharm.ShinyParticleEffectUpdate, EEVEEMOD.EffectVariant.SHINY_SPARKLE)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, badEgg.RemoveGlitchOnAnimEnd,
+		EEVEEMOD.EffectVariant.BAD_EGG_GLITCH)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, shinyCharm.ShinyParticleEffectUpdate,
+		EEVEEMOD.EffectVariant.SHINY_SPARKLE)
+	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, swiftAttack.RemoveAntiGravPlaceholder,
+		EEVEEMOD.EffectVariant.ANTI_GRAV_PARENT)
+		EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, swiftKnife.KillGodheadAura, EEVEEMOD.EffectVariant.CUSTOM_TEAR_HALO)
 end
 
 return postEffectUpdate

@@ -1,5 +1,6 @@
 local eeveeGhost = {}
 
+---@param player EntityPlayer
 function eeveeGhost:SpawnGhostEffect(player)
 	local playerType = player:GetPlayerType()
 	local sprite = player:GetSprite()
@@ -14,20 +15,33 @@ function eeveeGhost:SpawnGhostEffect(player)
 		)
 	then
 		if not data.EeveeGhostSpawned then
-			local ghostEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.EEVEE_GHOST, 0, player.Position, Vector.Zero, player)
-			ghostEffect:GetSprite():Play(sprite:GetAnimation(), true)
+			---@type EntityEffect
+			local ghostEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.EEVEE_GHOST, 0, player.Position,
+				Vector.Zero, player):ToEffect()
+			local sprite = ghostEffect:GetSprite()
+			sprite:Play(sprite:GetAnimation(), true)
 			data.EeveeGhostSpawned = true
+		else
+			if #Isaac.FindByType(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.EEVEE_GHOST) == 0 then
+				data.EeveeGhostSpawned = false
+			end
 		end
 	end
 end
 
-function eeveeGhost:KillOnVadeRetro(effect)
-	if VeeHelper.EntitySpawnedByPlayer(effect, false) then
+---@param effect EntityEffect
+function eeveeGhost:EeveeGhostUpdate(effect)
+	if VeeHelper.EntitySpawnedByPlayer(effect) then
 		local player = effect.SpawnerEntity:ToPlayer()
 		local sprite = effect:GetSprite()
+		local pSprite = player:GetSprite()
 		local playerType = player:GetPlayerType()
 
-		sprite:SetAnimation(sprite:GetAnimation(), false) --For like a really specific instance if the death animation changes mid-animation that i saw thanks to a twitter video 
+		sprite:SetAnimation(pSprite:GetAnimation(), false) --For like a really specific instance if the death animation changes mid-animation that i saw thanks to a twitter video
+		
+		if sprite:IsFinished(sprite:GetAnimation()) then
+			effect:Remove()
+		end
 
 		if EEVEEMOD.IsPlayerEeveeOrEvolved[playerType]
 			and player:IsDead()

@@ -2,6 +2,8 @@
 	<costume anm2path="costume_eevee.anm2" hasSkinAlt="true" type="none" />
 	<costume anm2path="costume_eevee_brimstone.anm2" priority="23" skinColor="1" overwriteColor="true" type="none" />
 	<costume anm2path="costume_eevee_brimstone2.anm2" priority="24" skinColor="1" overwriteColor="true" type="none" />
+	<costume anm2path="costume_eevee_brimstone_pogginghair.anm2" priority="25" skinColor="1" overwriteColor="true" type="none" />
+	<costume anm2path="costume_eevee_brimstone2_pogginghair.anm2" priority="26" skinColor="1" overwriteColor="true" type="none" />
 	<costume anm2path="costume_eevee_whoreofbabylon.anm2" priority="1" skinColor="1" overwriteColor="true" type="none" />
 	<costume anm2path="costume_eevee_azazel.anm2" priority="23" skinColor="1" overwriteColor="true" type="none" />
 	<costume anm2path="costume_eevee_libra.anm2" hasSkinAlt="true" type="none" />
@@ -14,6 +16,7 @@
 	<costume anm2path="costume_eevee_toothandnail.anm2" priority="51" skinColor="5" overwriteColor="true" type="none" />
 	<costume anm2path="costume_eevee_lostcurse.anm2" priority="99" skinColor="0" overwriteColor="true" type="none" />
 	<costume anm2path="costume_eevee_pog.anm2" hasSkinAlt="true" priority="100" type="none"/>
+	<costume anm2path="costume_eevee_disappointed.anm2" hasSkinAlt="true" priority="99" type="none"/>
 	<costume anm2path="edited_028_the belt.anm2" type="none" />
 	<costume anm2path="edited_030_moms heels.anm2" type="none" />
 	<costume anm2path="edited_046_lucky foot.anm2" type="none" />
@@ -24,6 +27,7 @@
 	<costume anm2path="edited_216_ceremonialrobes.anm2" type="none" />
 	<costume anm2path="edited_222_antigravity.anm2" type="none" skinColor="2" overwriteColor="true" />
 	<costume anm2path="edited_231_balloftar.anm2" type="none" skinColor="1" overwriteColor="true" />
+	<costume anm2path="edited_260_blackcandle.anm2" type="none" />
 	<costume anm2path="edited_375_hosthat.anm2" type="none" />
 	<costume anm2path="edited_420_blackpowder.anm2" type="none" />
 	<costume anm2path="edited_428_pjs.anm2" type="none" hasSkinAlt="true" />
@@ -34,7 +38,10 @@
 	<costume anm2path="edited_045x_pluto.anm2" type="none" priority="10" hasSkinAlt="true" />
 	<costume anm2path="edited_n030_boomerang.anm2" type="none" priority="100" hasSkinAlt="true" />
 	<costume anm2path="costume_eevee_mushroomhat.anm2" type="none" priority="19" />
-	<costume anm2path="costume_collectible_sneakscarf.anm2" type="passive" id="0" />
-	<costume anm2path="costume_collectible_shinycharm.anm2" type="passive" id="1" />
-	<costume anm2path="costume_collectible_blackglasses.anm2" type="passive" id="2" />
+	<costume id="0" anm2path="costume_collectible_sneakscarf.anm2" type="passive"  />
+	<costume id="1" anm2path="costume_collectible_shinycharm.anm2" type="passive" />
+	<costume id="2" anm2path="costume_collectible_blackglasses.anm2" type="passive" />
+	<costume anm2path="costume_collectible_tailwhip.anm2" type="none" priority="100" hasSkinAlt="true" />
+	<costume anm2path="costume_trainer_cap.anm2" type="none" priority="1" />
+	<costume anm2path="costume_eevee_christmashat.anm2" type="none" priority="1" />
 </costumes>

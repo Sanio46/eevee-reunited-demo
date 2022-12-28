@@ -3,18 +3,9 @@ local eeveeStats = {}
 local statsEevee = {
 	[CacheFlag.CACHE_SPEED] = 0,
 	[CacheFlag.CACHE_FIREDELAY] = 1,
-	[CacheFlag.CACHE_DAMAGE] = 0.8,
+	[CacheFlag.CACHE_DAMAGE] = 0.9,
 	[CacheFlag.CACHE_RANGE] = 3,
 	[CacheFlag.CACHE_SHOTSPEED] = 0.2,
-	[CacheFlag.CACHE_LUCK] = 0,
-}
-
-local statsDefault = {
-	[CacheFlag.CACHE_SPEED] = 0,
-	[CacheFlag.CACHE_FIREDELAY] = 1,
-	[CacheFlag.CACHE_DAMAGE] = 1,
-	[CacheFlag.CACHE_RANGE] = 0,
-	[CacheFlag.CACHE_SHOTSPEED] = 0,
 	[CacheFlag.CACHE_LUCK] = 0,
 }
 
@@ -30,6 +21,8 @@ local statsEeveelutions = {
 	[EEVEEMOD.PlayerType.SYLVEON] = statsDefault, ]]
 }
 
+---@param player EntityPlayer
+---@param cacheFlag CacheFlag
 function eeveeStats:OnCache(player, cacheFlag)
 	local playerType = player:GetPlayerType()
 	if EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] then
@@ -37,7 +30,7 @@ function eeveeStats:OnCache(player, cacheFlag)
 			player.MoveSpeed = player.MoveSpeed + statsEeveelutions[playerType][cacheFlag]
 		end
 		if cacheFlag == CacheFlag.CACHE_FIREDELAY then
-			player.MaxFireDelay = player.MaxFireDelay * statsEeveelutions[playerType][cacheFlag]
+			player.MaxFireDelay = math.floor((player.MaxFireDelay * statsEeveelutions[playerType][cacheFlag]) + 0.5)
 		end
 		if cacheFlag == CacheFlag.CACHE_DAMAGE then
 			player.Damage = player.Damage * statsEeveelutions[playerType][cacheFlag]
@@ -57,6 +50,7 @@ function eeveeStats:OnCache(player, cacheFlag)
 		if cacheFlag == CacheFlag.CACHE_TEARFLAG then
 			if player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
 				or player:HasWeaponType(WeaponType.WEAPON_LASER) then
+				---@diagnostic disable-next-line: assign-type-mismatch
 				player.TearFlags = player.TearFlags | TearFlags.TEAR_HOMING | TearFlags.TEAR_SPECTRAL
 			end
 		end

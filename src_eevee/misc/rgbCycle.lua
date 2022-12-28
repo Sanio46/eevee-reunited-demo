@@ -1,90 +1,149 @@
 local rgbCycle = {}
 
---Total credit to patczuch, creator of the RGB Tainted Apollyon mod!
+--Credit to patczuch for the color changing code, creator of the RGB Tainted Apollyon mod!
+--Adjustments to the system to apply global RGB or per entity custom colors
 
-local redChangeAmount = 1
-local greenChangeAmount = 1
-local blueChangeAmount = 1
-local colorsToCycle = { { 0, 0, 0 }, { 255, 255, 255 } }
-local currentColor = 1
-local rgb = true
+local rGlobal = 255
+local gGlobal = 0
+local bGlobal = 0
+
+local colorsToCycle = {
+	[EEVEEMOD.ColorCycle.RGB] = { { 0, 0, 0 }, { 255, 255, 255 } },
+	[EEVEEMOD.ColorCycle.CONTINUUM] = { { 170, 0, 255 }, { 255, 255, 255 }, { 0, 0, 0 } }
+}
 local rgbSpeed = 10
-local setR = 0
-local setG = 0
-local setB = 0
-local defaultCycle = true
-local lastDefaultCycle = false
-local refresh = false
+
+---@type table<Entity, ColorCycle>[]
+local entsToColorCycle = {}
+
+---@param player EntityPlayer
+function rgbCycle:shouldApplyColorCycle(player)
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE)
+		or player:HasCollectible(CollectibleType.COLLECTIBLE_CONTINUUM)
+	then
+		return true
+	end
+	return false
+end
+
+---@param ent Entity
+---@param colorCycle ColorCycle
+function rgbCycle:applyColorCycle(ent, colorCycle)
+	local data = ent:GetData()
+	data.EeveeEntHasColorCycle = true
+	table.insert(entsToColorCycle, { ent, colorCycle })
+end
+
+local function ConvertToFloat(num)
+	return math.floor(num) / 255
+end
 
 function rgbCycle:cycleRGB()
-	if defaultCycle then
-		if EEVEEMOD.RGB.R > 0 and EEVEEMOD.RGB.B == 0 then
-			EEVEEMOD.RGB.R = EEVEEMOD.RGB.R - 1
-			EEVEEMOD.RGB.G = EEVEEMOD.RGB.G + 1
+	for _ = 1, rgbSpeed do
+		if rGlobal > 0 and bGlobal == 0 then
+			rGlobal = rGlobal - 1
+			gGlobal = gGlobal + 1
 		end
-		if EEVEEMOD.RGB.G > 0 and EEVEEMOD.RGB.R == 0 then
-			EEVEEMOD.RGB.G = EEVEEMOD.RGB.G - 1
-			EEVEEMOD.RGB.B = EEVEEMOD.RGB.B + 1
+		if gGlobal > 0 and rGlobal == 0 then
+			gGlobal = gGlobal - 1
+			bGlobal = bGlobal + 1
 		end
-		if EEVEEMOD.RGB.B > 0 and EEVEEMOD.RGB.G == 0 then
-			EEVEEMOD.RGB.R = EEVEEMOD.RGB.R + 1
-			EEVEEMOD.RGB.B = EEVEEMOD.RGB.B - 1
+		if bGlobal > 0 and gGlobal == 0 then
+			rGlobal = rGlobal + 1
+			bGlobal = bGlobal - 1
 		end
-		currentColor = 1
-	else
-		if EEVEEMOD.RGB.R > colorsToCycle[currentColor][1] then
-			EEVEEMOD.RGB.R = EEVEEMOD.RGB.R - redChangeAmount
-		end
-		if EEVEEMOD.RGB.R < colorsToCycle[currentColor][1] then
-			EEVEEMOD.RGB.R = EEVEEMOD.RGB.R + redChangeAmount
-		end
-		if EEVEEMOD.RGB.G > colorsToCycle[currentColor][2] then
-			EEVEEMOD.RGB.G = EEVEEMOD.RGB.G - greenChangeAmount
-		end
-		if EEVEEMOD.RGB.G < colorsToCycle[currentColor][2] then
-			EEVEEMOD.RGB.G = EEVEEMOD.RGB.G + greenChangeAmount
-		end
-		if EEVEEMOD.RGB.B > colorsToCycle[currentColor][3] then
-			EEVEEMOD.RGB.B = EEVEEMOD.RGB.B - blueChangeAmount
-		end
-		if EEVEEMOD.RGB.B < colorsToCycle[currentColor][3] then
-			EEVEEMOD.RGB.B = EEVEEMOD.RGB.B + blueChangeAmount
-		end
+	end
+	for i, ents in ipairs(entsToColorCycle) do
+		---@type Entity
+		local ent = ents[1]
+		---@type ColorCycle
+		local colorCycle = ents[2]
 
-		if (math.floor(EEVEEMOD.RGB.R) == colorsToCycle[currentColor][1] and math.floor(EEVEEMOD.RGB.G) == colorsToCycle[currentColor][2] and math.floor(EEVEEMOD.RGB.B) == colorsToCycle[currentColor][3]) or refresh then
-			local prevColor = currentColor
-			currentColor = currentColor + 1
-			if #colorsToCycle < currentColor then
-				currentColor = 1
+		if not ent:Exists() then
+			table.remove(entsToColorCycle, i)
+		elseif colorCycle == EEVEEMOD.ColorCycle.RGB then
+			ent:SetColor(Color(ConvertToFloat(rGlobal), ConvertToFloat(gGlobal), ConvertToFloat(bGlobal), ent.Color.A, 0, 0, 0),
+				-1, 15, false, false)
+		end
+	end
+end
+
+function rgbCycle:cycleCustomColor()
+	for i, ents in ipairs(entsToColorCycle) do
+		---@type Entity
+		local ent = ents[1]
+		---@type ColorCycle
+		local colorCycle = ents[2]
+
+		if not ent:Exists() then
+			table.remove(entsToColorCycle, i)
+		elseif colorCycle ~= EEVEEMOD.ColorCycle.RGB then
+			local data = ent:GetData()
+			local curColorCycle = colorsToCycle[colorCycle]
+			if not data.EeveeCCC then
+				data.EeveeCCC = { --CustomColorCycle
+					r = curColorCycle[colorCycle][1] - 10,
+					g = curColorCycle[colorCycle][2] - 10,
+					b = curColorCycle[colorCycle][3] - 10,
+					rChangeNum = 1,
+					gChangeNum = 1,
+					bChangeNum = 1,
+					curColor = 1
+				}
 			end
-			redChangeAmount = math.abs(colorsToCycle[currentColor][1] - colorsToCycle[prevColor][1]) / 255
-			greenChangeAmount = math.abs(colorsToCycle[currentColor][2] - colorsToCycle[prevColor][2]) / 255
-			blueChangeAmount = math.abs(colorsToCycle[currentColor][3] - colorsToCycle[prevColor][3]) / 255
-			refresh = false
+			for i = 1, 10 do
+				if data.EeveeCCC.r > curColorCycle[data.EeveeCCC.curColor][1] then
+					data.EeveeCCC.r = data.EeveeCCC.r - data.EeveeCCC.rChangeNum
+				end
+				if data.EeveeCCC.r < curColorCycle[data.EeveeCCC.curColor][1] then
+					data.EeveeCCC.r = data.EeveeCCC.r + data.EeveeCCC.rChangeNum
+				end
+				if data.EeveeCCC.g > curColorCycle[data.EeveeCCC.curColor][2] then
+					data.EeveeCCC.g = data.EeveeCCC.g - data.EeveeCCC.gChangeNum
+				end
+				if data.EeveeCCC.g < curColorCycle[data.EeveeCCC.curColor][2] then
+					data.EeveeCCC.g = data.EeveeCCC.g + data.EeveeCCC.gChangeNum
+				end
+				if data.EeveeCCC.b > curColorCycle[data.EeveeCCC.curColor][3] then
+					data.EeveeCCC.b = data.EeveeCCC.b - data.EeveeCCC.bChangeNum
+				end
+				if data.EeveeCCC.b < curColorCycle[data.EeveeCCC.curColor][3] then
+					data.EeveeCCC.b = data.EeveeCCC.b + data.EeveeCCC.bChangeNum
+				end
+
+				if (
+					math.floor(data.EeveeCCC.r) == curColorCycle[data.EeveeCCC.curColor][1]
+						and math.floor(data.EeveeCCC.g) == curColorCycle[data.EeveeCCC.curColor][2]
+						and math.floor(data.EeveeCCC.b) == curColorCycle[data.EeveeCCC.curColor][3]
+					) then
+					local prevColor = data.EeveeCCC.curColor
+					data.EeveeCCC.curColor = data.EeveeCCC.curColor + 1
+					if #curColorCycle < data.EeveeCCC.curColor then
+						data.EeveeCCC.curColor = 1
+					end
+					data.EeveeCCC.rChangeNum = math.abs(curColorCycle[data.EeveeCCC.curColor][1] - curColorCycle[prevColor][1]) / 255
+					data.EeveeCCC.gChangeNum = math.abs(curColorCycle[data.EeveeCCC.curColor][2] - curColorCycle[prevColor][2]) / 255
+					data.EeveeCCC.bChangeNum = math.abs(curColorCycle[data.EeveeCCC.curColor][3] - curColorCycle[prevColor][3]) / 255
+				end
+			end
+			--[[ if ent.Type == EntityType.ENTITY_EFFECT and ent.Variant == EffectVariant.SPRITE_TRAIL then
+				ent.Color:SetColorize(data.EeveeCCC.r / 255, data.EeveeCCC.g / 255, data.EeveeCCC.b / 255, 1)
+			else ]]
+			ent:SetColor(Color(ConvertToFloat(data.EeveeCCC.r), ConvertToFloat(data.EeveeCCC.g), ConvertToFloat(data.EeveeCCC.b),
+				ent.Color.A, 0, 0, 0), -1, 15, false, false)
+			--end
 		end
 	end
 end
 
 function rgbCycle:onRender()
-	if defaultCycle ~= lastDefaultCycle then
-		if defaultCycle then
-			EEVEEMOD.RGB.R = 255
-			EEVEEMOD.RGB.G = 0
-			EEVEEMOD.RGB.B = 0
-		else
-			EEVEEMOD.RGB.R = colorsToCycle[currentColor][1]
-			EEVEEMOD.RGB.G = colorsToCycle[currentColor][2]
-			EEVEEMOD.RGB.B = colorsToCycle[currentColor][3]
-		end
-	end
-	lastDefaultCycle = defaultCycle
-	if rgbSpeed < 0 and EEVEEMOD.game:GetFrameCount() % -(rgbSpeed - 1) == 0 then
+	if EEVEEMOD.game:IsPaused() then return end
+	--[[ if rgbSpeed < 0 and EEVEEMOD.game:GetFrameCount() % -(rgbSpeed - 1) == 0 then
 		rgbCycle:cycleRGB()
-	elseif rgbSpeed > 0 then
-		for i = 1, rgbSpeed do
-			rgbCycle:cycleRGB()
-		end
-	end
+	elseif rgbSpeed > 0 then ]]
+	rgbCycle:cycleRGB()
+	--end
+	rgbCycle:cycleCustomColor()
 end
 
 return rgbCycle

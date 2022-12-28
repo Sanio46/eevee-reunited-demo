@@ -1,86 +1,63 @@
 local swiftBomb = {}
 
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
-local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
 
-local function AssignSwiftBombData(player, bomb, anglePos)
-	swiftBase:AssignSwiftBasicData(bomb, player, anglePos)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
+---@param swiftData SwiftInstance
+---@param swiftWeapon SwiftWeapon
+---@param direction Vector
+function swiftBomb:FireSwiftBomb(swiftData, swiftWeapon, direction)
+	local player = swiftData.Player
+	if not player then return end
+	local parent = swiftData.Parent
+	if not parent then return end
+	local bomb = player:FireBomb(swiftWeapon.WeaponEntity.Position, direction, player)
 
-	local bC = bomb:GetSprite().Color
-	swiftBase:SwiftTearFlags(bomb, false, false)
-	if swiftPlayer.Constant == true then
-		swiftBase:SwiftTearFlags(bomb, true, false)
-	end
+	bomb:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_HOMING)
+	swiftBase:AddSwiftTrail(bomb, swiftData.Player)
+	swiftBase:PlaySwiftFireSFX(bomb)
 	bomb.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
-	bomb:SetColor(Color(bC.R, bC.G, bC.B, 0, bC.RO, bC.GO, bC.BO), 15, 1, true, false)
 end
 
-function swiftBomb:FireSwiftBomb(bombParent, player, direction)
-	local bomb = player:FireBomb((bombParent.Position - player.TearsOffset), direction, player)
-	local pC = bombParent:GetSprite().Color
-	swiftBase:InitSwiftWeapon(bomb)
-	local ptrHashBomb = tostring(GetPtrHash(bomb))
-	local swiftBombWeapon = swiftBase.Weapon[ptrHashBomb]
-
-	swiftBombWeapon.HasFired = true
-	swiftBase:AddSwiftTrail(bomb, player)
-	swiftBase:SwiftTearFlags(bomb, true, true)
-	bomb:SetColor(Color(pC.R, pC.G, pC.B, 1, pC.RO, pC.GO, pC.BO), -1, 1, true, false)
-	if bombParent.FrameCount < 15 then
-		local invisTime = bombParent.FrameCount
-		bomb:SetColor(Color(pC.R, pC.G, pC.B, 0, pC.RO, pC.GO, pC.BO), 15 - invisTime, 1, true, false)
+---@param swiftData SwiftInstance
+---@param isMult boolean
+function swiftBomb:SpawnSwiftBomb(swiftData, isMult)
+	local player = swiftData.Player
+	if not player then return end
+	local parent = swiftData.Parent
+	if not parent then return end
+	local spawnPos = swiftBase:GetAdjustedStartingAngle(swiftData)
+	local bomb = player:FireBomb(swiftData.Parent.Position + spawnPos, Vector.Zero, player)
+	if bomb.Variant == BombVariant.BOMB_ROCKET or bomb.Variant == BombVariant.BOMB_ROCKET_GIGA then
+		bomb.Visible = false
 	end
-	swiftBase:AssignSwiftSounds(bomb)
+	bomb:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_HOMING)
+	bomb.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
+	swiftBase:InitSwiftWeapon(swiftData, bomb, isMult)
 end
 
-function swiftBomb:SpawnSwiftBombs(player, degreeOfBombSpawns, offset)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local anglePos = swiftBase:SpawnPos(player, degreeOfBombSpawns, offset)
-	local bomb = player:FireBomb((player.Position - player.TearsOffset) + (anglePos:Rotated(swiftPlayer.RateOfOrbitRotation)), Vector.Zero, player)
+---@param swiftData SwiftInstance
+---@param swiftWeapon SwiftWeapon
+---@param bomb EntityBomb
+function swiftBomb:SwiftBombUpdate(swiftData, swiftWeapon, bomb)
+	local player = swiftData.Player
+	if not player then return end
 
-	AssignSwiftBombData(player, bomb, anglePos)
-	swiftBase:AddSwiftTrail(bomb, player)
-
-	if swiftPlayer and swiftPlayer.MultiShots > 0 then
-		local multiOffset = EEVEEMOD.RandomNum(360)
-		for i = 1, swiftPlayer.MultiShots + swiftSynergies:BookwormShot(player) do
-			local orbit = swiftBase:MultiSwiftTearDistanceFromTear(player)
-			local anglePosMulti = swiftBase:SpawnPosMulti(player, multiOffset, orbit, i)
-			local bombMulti = player:FireBomb((bomb.Position - player.TearsOffset) + (anglePosMulti:Rotated(swiftPlayer.RateOfOrbitRotation)), Vector.Zero, player)
-			local dataMultiBomb = bombMulti:GetData()
-
-			dataMultiBomb.IsMultiShot = true
-			dataMultiBomb.MultiRotation = (360 / swiftPlayer.MultiShots) * i
-			bombMulti.Parent = bomb
-			dataMultiBomb.MultiSwiftOrbitDistance = orbit
-			AssignSwiftBombData(player, bombMulti, anglePosMulti)
-			bombMulti:SetSize(bomb.Size / 2, Vector(0.5, 0.5), 8)
-		end
+	if bomb.Visible == false then
+		bomb.Visible = true
 	end
-	swiftBase:AssignSwiftSounds(bomb)
-end
-
-function swiftBomb:SwiftBombUpdate(bomb)
-
-	if not VeeHelper.EntitySpawnedByPlayer(bomb, true) then return end
-
-	local player = bomb.SpawnerEntity:ToPlayer()
-	local ptrHashBomb = tostring(GetPtrHash(bomb))
-	local swiftBombWeapon = swiftBase.Weapon[ptrHashBomb]
-	local room = EEVEEMOD.game:GetRoom()
-
-	if not swiftBombWeapon then return end
-
-	if not swiftBombWeapon.HasFired and not swiftBombWeapon.AntiGravTimer then
+	
+	if not swiftWeapon.HasFired then
 		bomb:SetExplosionCountdown(35)
 		bomb.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
-		for i = 1, DoorSlot.NUM_DOOR_SLOTS do
-			if player.Position:DistanceSquared(room:GetDoorSlotPosition(i)) <= 10 ^ 2 then
-				bomb:Remove()
-			end
+		if bomb.Variant == BombVariant.BOMB_ROCKET or bomb.Variant == BombVariant.BOMB_ROCKET_GIGA then
+			local sprite = bomb:GetSprite()
+			sprite.Rotation = swiftWeapon.ShootDirection:GetAngleDegrees()
+		end
+	elseif bomb.Variant == BombVariant.BOMB_ROCKET or bomb.Variant == BombVariant.BOMB_ROCKET_GIGA then
+		bomb.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
+		local room = EEVEEMOD.game:GetRoom()
+		if not room:IsPositionInRoom(bomb.Position, -150) then
+			bomb:Remove()
 		end
 	end
 end

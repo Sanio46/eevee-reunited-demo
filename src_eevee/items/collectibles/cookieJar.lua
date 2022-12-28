@@ -1,5 +1,6 @@
 local cookieJar = {}
 
+---@param player EntityPlayer
 local function IsFat(player)
 	local fatty = false
 
@@ -18,9 +19,9 @@ local function IsFat(player)
 	return fatty
 end
 
+---@param player EntityPlayer
 local function UpdateCookieSpeedData(player)
 	local ID = player:GetData().Identifier
-
 	if EEVEEMOD.PERSISTENT_DATA.PlayerData[ID]
 		and EEVEEMOD.PERSISTENT_DATA.PlayerData[ID].CookieSpeed
 		and player.MoveSpeed >= 0.2
@@ -30,8 +31,30 @@ local function UpdateCookieSpeedData(player)
 	end
 end
 
-function cookieJar:onUse(itemID, _, player, _, _, _)
-	for i = 1, 6 do
+local MAX_COOKIE_USES = 6
+
+---@param player EntityPlayer
+---@return UseItemReturn | boolean
+function cookieJar:onUse(_, _, player, _, _, _)
+	local effects = player:GetEffects()
+	local shouldRemove = false
+
+	player:AddHearts(2)
+
+	if effects:GetCollectibleEffectNum(EEVEEMOD.CollectibleType.COOKIE_JAR) == MAX_COOKIE_USES - 1 then
+		shouldRemove = true
+		player:AddMaxHearts(4, true)
+		player:AddHearts(2)
+	end
+
+	EEVEEMOD.sfx:Play(SoundEffect.SOUND_VAMP_GULP)
+	UpdateCookieSpeedData(player)
+	player:AddCacheFlags(CacheFlag.CACHE_SPEED)
+	player:EvaluateItems()
+
+	return {Discharge = false, Remove = shouldRemove, ShowAnim = true}
+
+	--[[ for i = 1, 6 do
 		local cookieJarIDs = EEVEEMOD.CollectibleType.COOKIE_JAR[i]
 		local cookieJarNextJar = EEVEEMOD.CollectibleType.COOKIE_JAR[i - 1]
 		local cookieJarFinal = EEVEEMOD.CollectibleType.COOKIE_JAR[1]
@@ -64,9 +87,11 @@ function cookieJar:onUse(itemID, _, player, _, _, _)
 			end
 			return true
 		end
-	end
+	end ]]
 end
 
+---@param player EntityPlayer
+---@param itemStats ItemStats
 function cookieJar:Stats(player, itemStats)
 	local ID = player:GetData().Identifier
 
@@ -77,10 +102,15 @@ function cookieJar:Stats(player, itemStats)
 	end
 end
 
+---@param player EntityPlayer
 function cookieJar:SpeedUpdate(player)
 	local data = player:GetData()
 	local cookieSpeedDelay = 30
 	local ID = player:GetData().Identifier
+
+	if player:GetEffects():GetCollectibleEffectNum(EEVEEMOD.CollectibleType.COOKIE_JAR) >= 6 then
+		player:GetEffects():RemoveCollectibleEffect(EEVEEMOD.CollectibleType.COOKIE_JAR, -1)
+	end
 
 	if EEVEEMOD.PERSISTENT_DATA.PlayerData[ID]
 		and EEVEEMOD.PERSISTENT_DATA.PlayerData[ID].CookieSpeed

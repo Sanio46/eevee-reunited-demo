@@ -1,5 +1,6 @@
 local swiftAttack = {}
 
+local attackHelper = require("src_eevee.attacks.attackHelper")
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 local swiftTear = require("src_eevee.attacks.eevee.swiftTear")
 local swiftLaser = require("src_eevee.attacks.eevee.swiftLaser")
@@ -7,251 +8,377 @@ local swiftKnife = require("src_eevee.attacks.eevee.swiftKnife")
 local swiftBomb = require("src_eevee.attacks.eevee.swiftBomb")
 local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
 
------------------------
---  LOCAL FUNCTIONS  --
------------------------
+------------------
+--  INITIATING  --
+------------------
 
-local function CalculateSwiftStats(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local count = 5
-	local degreeOfWeaponSpawns = 360 / count
-	local offset = VeeHelper.GetIsaacShootingDirection(player):Rotated(-1 * degreeOfWeaponSpawns):GetAngleDegrees()
-	local duration = swiftBase:SwiftFireDelay(player) * count
-	local isConstant = false
+---@param swiftData SwiftInstance
+---@param shouldFire boolean
+local function IsSwiftPlayerFiring(swiftData, shouldFire)
+	local player = swiftData.Player
 
-	swiftPlayer.AttackDuration = duration
-	swiftPlayer.AttackDurationSet = duration
-	swiftPlayer.RateOfOrbitRotation = 0
-	swiftPlayer.Instance = { degreeOfWeaponSpawns, offset }
-	swiftPlayer.NumWeaponsSpawned = 1
-	swiftPlayer.TimeTillNextWeapon = swiftBase:SwiftFireDelay(player)
-	swiftPlayer.MultiShots = swiftSynergies:MultiShotCountInit(player)
+	if not player then return end
+	local isFiring = player:GetFireDirection() ~= Direction.NO_DIRECTION
 
-	if swiftBase:SwiftShouldBeConstant(player) then
-		isConstant = true
+	isFiring = shouldFire == true and isFiring or shouldFire == false and not isFiring
+
+	if swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_NEPTUNUS then
+		isFiring = not isFiring
+	elseif swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_SPIRIT_SWORD
+		or swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_LUDOVICO
+	then
+		isFiring = false
 	end
 
-	swiftPlayer.Constant = isConstant
-
-	if isConstant then
-		swiftPlayer.ConstantFiring = true
-	end
+	return isFiring
 end
 
-local function FireKnifeBrim(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
+---@param player EntityPlayer
+function swiftAttack:StartAttack(player)
+	local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
+	if not swiftPlayer then return end
+	local numNeptunusInstances = swiftBase.GetNumNeptunusInstances(swiftPlayer)
 
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE)
-		and player:HasWeaponType(WeaponType.WEAPON_KNIFE) then
-		if swiftPlayer
-			and swiftPlayer.NumWeaponsSpawned
-			and swiftPlayer.NumWeaponsSpawned > 0
+	if swiftPlayer.CanFire then
+		if player:HasCollectible(CollectibleType.COLLECTIBLE_NEPTUNUS)
+			or player:GetFireDirection() ~= Direction.NO_DIRECTION
 		then
-			local knivesSpawned = swiftPlayer.NumWeaponsSpawned
-			for i = 1, knivesSpawned do
-				local degrees = Vector.FromAngle(((360 / knivesSpawned) * i))
-				local direction = VeeHelper.AddTearVelocity(degrees, player.ShotSpeed * 10, player, false)
-				swiftAttack:FireExtraWeapon(player, player, direction)
+			swiftPlayer.Cooldown = swiftBase:GetInstanceCooldown(player)
+			if swiftBase:GetInstanceType(player) == swiftBase.InstanceType.INSTANCE_NEPTUNUS then
+				swiftPlayer.NumNeptunusInstancesUnfired = swiftPlayer.NumNeptunusInstancesUnfired + 1
+				if numNeptunusInstances < 2 then
+					swiftPlayer.Cooldown = swiftPlayer.Cooldown - (swiftBase:GetFireDelay(player, true) * 2)
+				end
+			end
+			swiftAttack:CreateSwiftInstance(player, player)
+			swiftPlayer.CanFire = false
+		end
+	end
+	if swiftPlayer.Cooldown then
+		if swiftPlayer.Cooldown > 0 then
+			swiftPlayer.Cooldown = swiftPlayer.Cooldown - 0.5
+		elseif swiftPlayer.CanFire == false and
+			(
+			not player:HasCollectible(CollectibleType.COLLECTIBLE_NEPTUNUS) or
+				(
+				player:HasCollectible(CollectibleType.COLLECTIBLE_NEPTUNUS) and
+					(
+					swiftPlayer.NumNeptunusInstancesUnfired < 2
+					)
+				)
+			) then
+			local soyBrimActive = swiftSynergies:IsSoyBrim(player)
+			local numNeeded = player:HasCollectible(CollectibleType.COLLECTIBLE_NEPTUNUS) and 2 or 1
+			if not soyBrimActive or (soyBrimActive and #swiftPlayer.OwnedInstances < numNeeded) then
+				swiftPlayer.CanFire = true
 			end
 		end
 	end
 end
 
-local function TriggerSwiftCooldown(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
+---@param player EntityPlayer
+---@param parent Entity
+function swiftAttack:CreateSwiftInstance(player, parent)
+	---@type SwiftInstance
+	local instance = {}
+	local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
+	VeeHelper.copyOverTable(swiftBase.swiftInstanceData, instance)
+	table.insert(swiftBase.Instances, instance)
+	if swiftPlayer then
+		table.insert(swiftPlayer.OwnedInstances, instance)
+	end
+	local swiftData = swiftBase.Instances[#swiftBase.Instances]
+	swiftData.Player = player
+	swiftData.Parent = parent
+	swiftData.InstanceType = swiftBase:GetInstanceType(player)
+	swiftAttack:InitInstanceValues(swiftData)
+	swiftAttack:SpawnSwiftWeapon(swiftData)
+end
 
-	if swiftPlayer.AttackDuration <= 0.5
-		and not swiftPlayer.AttackCooldown then
-		FireKnifeBrim(player)
+---@param swiftData SwiftInstance
+function swiftAttack:InitInstanceValues(swiftData)
+	---@type EntityPlayer
+	local player = swiftData.Player
+	if not player then return end
+	local fireDelay = swiftBase:GetFireDelay(player)
+	local totalDuration = (fireDelay * swiftData.NumWeaponsToSpawn) + 0.5
+	local defaultNumStars = 5
+
+	if swiftSynergies:ShouldUseTinyPlanet(player) then
+		totalDuration = totalDuration * 3
+	elseif swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_SPIRIT_SWORD then
+		totalDuration = 10
 	end
 
-	swiftPlayer.AttackDuration = 0
-	swiftPlayer.NumWeaponsSpawned = 0
+	swiftData.TotalDuration = totalDuration
+	swiftData.DurationTimer = swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_LUDOVICO and totalDuration / 2 or
+		totalDuration
+	swiftData.WeaponSpawnTimer = fireDelay
+	swiftData.ShotMultiplier = swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_SPIRIT_SWORD and 1 or
+		attackHelper:GetMultiShot(player)
+	swiftData.NumWeaponsToSpawn = defaultNumStars * swiftData.ShotMultiplier
+	swiftData.Rotation = attackHelper:GetIsaacShootingDirection(player):Rotated(-1 *
+		(360 / swiftData.NumWeaponsToSpawn) - 45):GetAngleDegrees()
 
-	if not swiftPlayer.AttackCooldown then
-		if player:HasWeaponType(WeaponType.WEAPON_SPIRIT_SWORD) then
-			swiftPlayer.AttackCooldown = 5
-		else
-			swiftPlayer.AttackCooldown = (swiftBase:SwiftFireDelay(player) * 2.5) + 0.5
+	if swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_NEPTUNUS then
+		local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
+		if not swiftPlayer then return end
+
+		local numNeptunusInstances = swiftBase.GetNumNeptunusInstances(swiftPlayer)
+
+		-- dumb bruteforced hack, might break if any other constants change -oat
+		if numNeptunusInstances >= 2 then
+			-- gets a consistent rotation relative to the inner layer at any fire delay
+			local alignedRotation = fireDelay * 20
+			-- aligns it to a star shape
+			swiftData.Rotation = alignedRotation - 5
 		end
-		swiftPlayer.ExistingShots = nil
 	end
 end
 
-local function TriggerSwiftCooldownIfPlayerStopsShooting(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
+---@param swiftData SwiftInstance
+function swiftAttack:SpawnSwiftWeapon(swiftData)
+	local player = swiftData.Player
+	if not player then return end
+	for mult = 1, swiftData.ShotMultiplier do
+		local isMult = mult > 1 and true or false
 
-	if not player:HasWeaponType(WeaponType.WEAPON_LUDOVICO_TECHNIQUE)
-		and player:GetFireDirection() == Direction.NO_DIRECTION
-		and swiftPlayer
-		and ((swiftPlayer.Constant == false and swiftPlayer.AttackDuration > 0)
-			or (swiftPlayer.Constant == true and swiftPlayer.ConstantFiring == true)) then
-		FireKnifeBrim(player)
-		TriggerSwiftCooldown(player)
-		swiftPlayer.ConstantFiring = false
+		swiftData.NumWeaponsSpawned = swiftData.NumWeaponsSpawned + 1
+
+		if player:HasWeaponType(WeaponType.WEAPON_KNIFE) then
+			swiftKnife:SpawnSwiftKnives(swiftData, isMult)
+		elseif player:HasWeaponType(WeaponType.WEAPON_BOMBS) then
+			swiftBomb:SpawnSwiftBomb(swiftData, isMult)
+		elseif (
+			player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
+				or player:HasWeaponType(WeaponType.WEAPON_LASER)
+				or player:HasWeaponType(WeaponType.WEAPON_TECH_X)
+			)
+		then
+			swiftLaser:SpawnSwiftLasers(swiftData, isMult)
+		elseif player:HasWeaponType(WeaponType.WEAPON_TEARS)
+			or player:HasWeaponType(WeaponType.WEAPON_MONSTROS_LUNGS)
+			or player:HasWeaponType(WeaponType.WEAPON_SPIRIT_SWORD)
+			or player:HasWeaponType(WeaponType.WEAPON_LUDOVICO_TECHNIQUE)
+		then
+			swiftTear:SpawnSwiftTears(swiftData, isMult)
+		end
 	end
 end
 
-local function SwiftWeaponUpdateSynergies(weapon, player)
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
 
-	swiftSynergies:ChocolateMilkDamageScaling(weapon, player)
-	swiftSynergies:DelayTearFlags(weapon)
-	swiftSynergies:AntiGravityDuration(player, weapon)
-
-	if swiftSynergies:ShouldAttachTech2Laser(weapon, player)
-		and swiftWeapon.ShotDir
-		and not swiftWeapon.Tech2Attached
-		and weapon.Type ~= EntityType.ENTITY_LASER
+---@param knife EntityKnife
+function swiftAttack:SpiritSwordInit(knife)
+	local sprite = knife:GetSprite()
+	if (knife.Variant ~= VeeHelper.KnifeVariant.SPIRIT_SWORD
+		and knife.Variant ~= VeeHelper.KnifeVariant.TECH_SWORD)
+		or knife:GetEntityFlags() ~= 67108864
 	then
-		swiftWeapon.Tech2Attached = true
-		swiftLaser:FireTechLaser(weapon, player, swiftWeapon.ShotDir, true)
+		return
 	end
-end
-
-local function ShouldWizShot(player)
-	local shouldWiz = false
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_THE_WIZ)
-		or player:HasPlayerForm(PlayerForm.PLAYERFORM_BABY)
-	then
-		shouldWiz = true
-	end
-	return shouldWiz
-end
-
-local function UpdateDurationWithFirerate(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-
-	if swiftPlayer.AttackDuration > 0 then
-		local expectedDuration = swiftBase:SwiftFireDelay(player) * 5
-
-		if swiftPlayer.AttackDurationSet ~= expectedDuration then
-			if expectedDuration < swiftPlayer.AttackDurationSet then
-				local firerateDif = swiftPlayer.AttackDurationSet - expectedDuration
-				swiftPlayer.AttackDuration = swiftPlayer.AttackDuration - firerateDif
-			else
-				local firerateDif = expectedDuration - swiftPlayer.AttackDurationSet
-				swiftPlayer.AttackDuration = swiftPlayer.AttackDuration + firerateDif
+	local player = knife.SpawnerEntity:ToPlayer()
+	if not player then return end
+	local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
+	if not swiftPlayer then return end
+	local data = knife:GetData()
+	local spinAnims = {
+		"SpinRight",
+		"SpinLeft",
+		"SpinUp",
+		"SpinDown",
+	}
+	if VeeHelper.IsSpritePlayingAnims(sprite, spinAnims) then
+		if sprite:IsPlaying(sprite:GetAnimation()) then
+			if (sprite:GetFrame() == 0 or sprite:GetFrame() == 2) and not data.SwiftFiredOnFirstFrame then
+				swiftAttack:CreateSwiftInstance(player, player)
+				data.SwiftFiredOnFirstFrame = true
+			elseif sprite:GetFrame() > 2 and data.SwiftFiredOnFirstFrame then
+				data.SwiftFiredOnFirstFrame = false
 			end
-			swiftPlayer.AttackDurationSet = expectedDuration
-			swiftPlayer.TimeTillNextWeapon = swiftBase:SwiftFireDelay(player)
 		end
 	end
 end
 
-------------------
---  MAIN STUFF  --
-------------------
-
-function swiftAttack:SpawnSwiftWeapon(player, degreeOfWeaponSpawns, offset)
-	if player:HasWeaponType(WeaponType.WEAPON_KNIFE) then
-		swiftKnife:SpawnSwiftKnives(player, degreeOfWeaponSpawns, offset)
-	elseif player:HasWeaponType(WeaponType.WEAPON_BOMBS) then
-		swiftBomb:SpawnSwiftBombs(player, degreeOfWeaponSpawns, offset)
-	elseif (
-		player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
-			or player:HasWeaponType(WeaponType.WEAPON_LASER)
-			or player:HasWeaponType(WeaponType.WEAPON_TECH_X)
-		)
-	then
-		swiftLaser:SpawnSwiftLasers(player, degreeOfWeaponSpawns, offset)
-	elseif player:HasWeaponType(WeaponType.WEAPON_TEARS)
-		or player:HasWeaponType(WeaponType.WEAPON_MONSTROS_LUNGS) then
-		swiftTear:SpawnSwiftTears(player, degreeOfWeaponSpawns, offset)
-	end
-end
-
-function swiftAttack:SwiftMainFireWeapon(weapon, player)
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local fireDirection = VeeHelper.AddTearVelocity(swiftWeapon.ShotDir, player.ShotSpeed * 10, player, true)
-	--[[
-	if player:GetEffects():HasNullEffect(NullItemID.ID_WIZARD) then
-		if not swiftPlayer.WizardShot then
-			swiftPlayer.WizardShot = 45
-		else
-			swiftPlayer.WizardShot = swiftPlayer.WizardShot * -1
-		end
+---@param tearOrKnife EntityTear | EntityKnife
+function swiftAttack:InitLudoTearOrKnifeOnUpdate(tearOrKnife)
+	if not tearOrKnife:HasTearFlags(TearFlags.TEAR_LUDOVICO) then return end
+	local player = tearOrKnife.SpawnerEntity:ToPlayer()
+	local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
+	if not swiftPlayer then return end
+	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(tearOrKnife))]
+	if swiftWeapon or tearOrKnife:GetData().SwiftKnife then return end
+	if tearOrKnife.FrameCount == 1 then
+		tearOrKnife.Visible = false
+		tearOrKnife.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
+		tearOrKnife:ClearTearFlags(tearOrKnife.TearFlags)
+		tearOrKnife:AddTearFlags(TearFlags.TEAR_LUDOVICO)
+		EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
 	else
-		swiftPlayer.WizardShot = 0
-	end]]
+		if not swiftPlayer.SpawnedLudoTear then
+			swiftPlayer.SpawnedLudoTear = true
+			swiftAttack:CreateSwiftInstance(player, tearOrKnife)
+		end
+	end
+end
+
+--------------
+--  FIRING  --
+--------------
+
+--This is just so Rocket Bombs can fire in the right fucking direction
+---@param swiftData SwiftInstance
+---@param swiftWeapon SwiftWeapon
+---@param bomb EntityBomb
+local function RefireRocketBomb(swiftData, swiftWeapon, bomb, direction)
+	local player = swiftData.Player
+	if not player then return end
+	local newBomb = player:FireBomb(bomb.Position, attackHelper:TryFireToEnemy(player, bomb, direction, 30), player)
+	newBomb.Flags = bomb.Flags
+	newBomb:SetExplosionCountdown(35)
+	swiftBase.Weapons[tostring(GetPtrHash(newBomb))] = {}
+	local newSwiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(newBomb))]
+
+	VeeHelper.copyOverTable(swiftWeapon, newSwiftWeapon)
+	newSwiftWeapon.WeaponEntity = newBomb
+	newSwiftWeapon.HasFired = true
+
+	for index, childWeapons in pairs(swiftData.ChildSwiftWeapons) do
+		if tostring(GetPtrHash(bomb)) == tostring(GetPtrHash(childWeapons.WeaponEntity)) then
+			table.remove(swiftData.ChildSwiftWeapons, index)
+			table.insert(swiftData.ChildSwiftWeapons, index, newSwiftWeapon)
+			break
+		end
+	end
+	swiftBase.Weapons[tostring(GetPtrHash(bomb))] = nil
+	bomb:Remove()
+	swiftData.NumWeaponsRemoved = swiftData.NumWeaponsRemoved - 1
+end
+
+---@param swiftData SwiftInstance
+---@param firedEarly? boolean
+function swiftAttack:WeaponAbleToFire(swiftData, firedEarly)
+	---@type EntityEffect
+	local antiGravParent
+	local player = swiftData.Player
+	if not player then return end
+	local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
+	if not swiftPlayer then return end
+
+	for index, swiftWeapon in ipairs(swiftData.ChildSwiftWeapons) do
+		if swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_ANTI_GRAV and not firedEarly then
+			if index == 1 then
+				antiGravParent = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.ANTI_GRAV_PARENT, 0,
+					swiftData.Parent.Position, Vector.Zero, nil):ToEffect()
+				antiGravParent:GetData().ParentInstance = swiftData
+				antiGravParent:Update()
+			end
+			swiftData.Parent = antiGravParent
+			swiftWeapon.FireDelay = swiftWeapon.FireDelay + 90
+			swiftWeapon.AntiGravBlinkToReduceBy = swiftWeapon.FireDelay / 6
+			swiftWeapon.AntiGravBlinkThreshold = swiftWeapon.AntiGravBlinkToReduceBy * 5
+		end
+	end
+
+	swiftData.CanFire = true
+
+	if firedEarly then
+		local baseNumSpawned = swiftData.NumWeaponsSpawned / swiftData.ShotMultiplier
+		local baseNumToSpawn = swiftData.NumWeaponsToSpawn / swiftData.ShotMultiplier
+
+		swiftPlayer.Cooldown = (swiftBase:GetFireDelay(player) * (0.8 + (baseNumSpawned / baseNumToSpawn)))
+	end
+
+	if swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_NEPTUNUS then
+		swiftPlayer.NumNeptunusInstancesUnfired = swiftPlayer.NumNeptunusInstancesUnfired - 1
+	end
+end
+
+---@param swiftData SwiftInstance
+---@param swiftWeapon SwiftWeapon
+---@param weapon Weapon | EntityEffect
+function swiftAttack:SwiftMainFireWeapon(swiftData, swiftWeapon, weapon)
+	local player = swiftData.Player
+	if not player then return end
+	local direction = VeeHelper.AddTearVelocity(swiftWeapon.ShootDirection, player.ShotSpeed * 10, player)
 
 	--Loki's Horns, Mom's Eye, Eye Sore, Monstro's Lung
 	if not swiftWeapon.IsMultiShot then
-		if not swiftPlayer.Constant or (swiftPlayer.Constant and not player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)) then
-			swiftAttack:ShouldFireExtraWeapons(weapon, player, fireDirection)
+		local ExtraShotItems = {
+			CollectibleType.COLLECTIBLE_LOKIS_HORNS,
+			CollectibleType.COLLECTIBLE_MOMS_EYE,
+			CollectibleType.COLLECTIBLE_MONSTROS_LUNG,
+			CollectibleType.COLLECTIBLE_EYE_SORE
+		}
+		for i = 1, #ExtraShotItems do
+			if attackHelper:ShouldFireExtraShot(player, ExtraShotItems[i]) then
+				local directions = attackHelper:GetExtraFireDirections(player, direction)
+				for j = 1, #directions do
+					swiftAttack:FireExtraWeapon(swiftData, swiftWeapon, directions[j])
+				end
+				break
+			end
 		end
 	end
 
 	--Wiz rotation
-	if ShouldWizShot(player)
+	if attackHelper:ShouldWizShot(player)
 		and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then
-		fireDirection = fireDirection:Rotated(45)
+		direction = direction:Rotated(45)
 	end
 
-	if not swiftWeapon.ConstantOrbit then
-		if not swiftBase:IsSwiftLaserEffect(weapon) then
-			if not player:HasCollectible(CollectibleType.COLLECTIBLE_ANTI_GRAVITY) then
-				weapon.Velocity = swiftBase:TryFireToEnemy(player, weapon, fireDirection)
+	if not weapon:ToEffect() or (weapon:ToEffect() and weapon.Variant == EffectVariant.EVIL_EYE) then
+		---@cast weapon Weapon
+		if not player:HasCollectible(CollectibleType.COLLECTIBLE_TINY_PLANET) or swiftSynergies:ShouldUseTinyPlanet(player) then
+			if weapon:ToBomb() and (weapon.Variant == BombVariant.BOMB_ROCKET or weapon.Variant == BombVariant.BOMB_ROCKET_GIGA) then
+				---@cast weapon EntityBomb
+				RefireRocketBomb(swiftData, swiftWeapon, weapon, direction)
 			else
-				weapon.Velocity = Vector.Zero
-				swiftWeapon.AntiGravTimer = 90
-				swiftWeapon.AntiGravDir = fireDirection
-				if weapon.Type == EntityType.ENTITY_TEAR then
-					swiftWeapon.AntiGravHeight = weapon.Height
-				end
+				weapon.Velocity = attackHelper:TryFireToEnemy(player, weapon, direction, 30)
 			end
-		else
-			weapon.Velocity = Vector.Zero
 		end
 	else
-		if not swiftPlayer.Constant then
-			weapon.Velocity = swiftBase:TryFireToEnemy(player, weapon, fireDirection)
-		end
-		swiftAttack:FireExtraWeapon(weapon, player, fireDirection)
+		weapon.Velocity = Vector.Zero
+		swiftAttack:FireExtraWeapon(swiftData, swiftWeapon, direction)
 	end
 
 	--Wiz opposite rotation
-	if ShouldWizShot(player)
+	if attackHelper:ShouldWizShot(player)
 		and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then
-		fireDirection = fireDirection:Rotated(-90)
+		direction = direction:Rotated(-90)
 	end
 
-	--Wiz "normal" shot
-	if ShouldWizShot(player) then
-		swiftAttack:FireExtraWeapon(weapon, player, swiftBase:TryFireToEnemy(player, weapon, fireDirection))
+	--Wiz opposite shot
+	if attackHelper:ShouldWizShot(player) then
+		swiftAttack:FireExtraWeapon(swiftData, swiftWeapon, direction)
+		--Wiz "normal" shot
 		if player:GetCollectibleNum(CollectibleType.COLLECTIBLE_THE_WIZ) >= 2
 			or player:HasPlayerForm(PlayerForm.PLAYERFORM_BABY) then
-			swiftAttack:FireExtraWeapon(weapon, player, swiftBase:TryFireToEnemy(player, weapon, fireDirection:Rotated(45)))
+			swiftAttack:FireExtraWeapon(swiftData, swiftWeapon, direction:Rotated(45))
 		end
-	end
-
-	if swiftPlayer.Constant == true then
-		swiftWeapon.ShotDelay = swiftBase:SwiftShotDelay(weapon, player)
 	end
 end
 
-function swiftAttack:FireExtraWeapon(parent, player, direction, rotationOffset)
+---@param swiftData SwiftInstance
+---@param swiftWeapon SwiftWeapon
+---@param direction Vector
+function swiftAttack:FireExtraWeapon(swiftData, swiftWeapon, direction)
+	local player = swiftData.Player
+	if not player then return end
+	local parent = swiftWeapon.WeaponEntity
+	if not parent then return end
+
 	if (
 		parent.Type ~= EntityType.ENTITY_EFFECT
-			or (parent.Type == EntityType.ENTITY_EFFECT and swiftBase:IsSwiftLaserEffect(parent))--No Evil Eye!
+			or (parent.Type == EntityType.ENTITY_EFFECT and swiftBase:IsSwiftLaserEffect(parent))
 		) then
 		if player:HasWeaponType(WeaponType.WEAPON_KNIFE) then
-			swiftKnife:FireSwiftKnife(parent, player, direction)
+			swiftKnife:FireSwiftKnife(swiftData, swiftWeapon, direction)
 		elseif player:HasWeaponType(WeaponType.WEAPON_BOMBS) then
-			swiftBomb:FireSwiftBomb(parent, player, direction)
+			swiftBomb:FireSwiftBomb(swiftData, swiftWeapon, direction)
 		elseif player:HasWeaponType(WeaponType.WEAPON_LASER)
 			or player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
 			or player:HasWeaponType(WeaponType.WEAPON_TECH_X) then
-			swiftLaser:FireSwiftLaser(parent, player, direction, rotationOffset)
+			swiftLaser:FireSwiftLaser(swiftData, swiftWeapon, direction)
 		elseif player:HasWeaponType(WeaponType.WEAPON_TEARS)
 			or player:HasWeaponType(WeaponType.WEAPON_MONSTROS_LUNGS) then
 			swiftTear:FireSwiftTear(parent, player, direction)
@@ -259,635 +386,291 @@ function swiftAttack:FireExtraWeapon(parent, player, direction, rotationOffset)
 	end
 end
 
-function swiftAttack:ShouldFireExtraWeapons(weapon, player, direction)
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_LOKIS_HORNS)
-		and swiftSynergies:ShouldFireExtraShot(player, CollectibleType.COLLECTIBLE_LOKIS_HORNS) == true
-	then
-		for i = 1, 3 do
-			local rotationOffset = 90 * i
-			local newdirection = direction:Rotated(rotationOffset)
-			swiftAttack:FireExtraWeapon(weapon, player, newdirection, rotationOffset)
-		end
-	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_EYE)
-	and swiftSynergies:ShouldFireExtraShot(player, CollectibleType.COLLECTIBLE_MOMS_EYE) == true
-	then
-		local rotationOffset = 180
-		local newdirection = direction:Rotated(rotationOffset)
-		swiftAttack:FireExtraWeapon(weapon, player, newdirection, rotationOffset)
-	end
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_MONSTROS_LUNG) then
-		local WeaponTypeShotDegrees = {
-			[WeaponType.WEAPON_BRIMSTONE] = 360,
-			[WeaponType.WEAPON_KNIFE] = 360,
-			[WeaponType.WEAPON_TECH_X] = 180,
-			[WeaponType.WEAPON_LASER] = 60,
-			[WeaponType.WEAPON_BOMBS] = 30,
-		}
-		for weaponType, degrees in pairs(WeaponTypeShotDegrees) do
-			if player:HasWeaponType(weaponType) then
-				for i = 1, EEVEEMOD.RandomNum(3, 5) do
-					local rotationOffset = EEVEEMOD.RandomNum((degrees / -2), (degrees / 2))
-					local newdirection = direction:Rotated(rotationOffset)
-					swiftAttack:FireExtraWeapon(weapon, player, newdirection, rotationOffset)
-				end
-			end
-		end
-	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_EYE_SORE)
-		and swiftSynergies:ShouldFireExtraShot(player, CollectibleType.COLLECTIBLE_EYE_SORE) == true
-	then
-		for i = 1, EEVEEMOD.RandomNum(3) do
-			local rotationOffset = EEVEEMOD.RandomNum(360)
-			direction = direction:Rotated(rotationOffset)
-			swiftAttack:FireExtraWeapon(weapon, player, direction, rotationOffset)
-		end
-	end
-end
+---------------------
+--  WEAPON UPDATE  --
+---------------------
 
-function swiftAttack:SwiftAttackWaitingToFire(weapon, player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
+---@param swiftData SwiftInstance
+---@param weapon Weapon | EntityEffect
+function swiftAttack:PreFireUpdate(swiftData, swiftWeapon, weapon)
+	local player = swiftData.Player
+	if not player then return end
+	local parent = swiftData.Parent
+	if not parent then return end
 
-	if player:HasWeaponType(WeaponType.WEAPON_LUDOVICO_TECHNIQUE) then
-		if weapon.Parent
-			and weapon.Parent:ToTear()
-			and weapon.Parent:ToTear():HasTearFlags(TearFlags.TEAR_LUDOVICO)
-		then
-			local ludoTear = weapon.Parent:ToTear()
-			weapon.Velocity = ludoTear.Position - (weapon.Position + swiftWeapon.PosToFollow:Resized(swiftWeapon.DistFromPlayer):Rotated(swiftPlayer.RateOfOrbitRotation))
-		end
-		if weapon.FrameCount > 1 and (not weapon.Parent or weapon.Parent:IsDead() or not weapon.Parent:Exists()) then
-			swiftPlayer.AttackInit = false
-			weapon:Remove()
-		end
-	elseif not player:HasCollectible(CollectibleType.COLLECTIBLE_TRACTOR_BEAM) then
-		if swiftPlayer.RateOfOrbitRotation
-			and swiftWeapon.PosToFollow
-			and not swiftWeapon.IsMultiShot then
-			weapon.Velocity = player.Position - (weapon.Position + swiftWeapon.PosToFollow:Resized(swiftWeapon.DistFromPlayer):Rotated(swiftPlayer.RateOfOrbitRotation))
-		end
+	if player:IsDead() then
+		swiftAttack:WeaponAbleToFire(swiftData, true)
+	end
+
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_TRACTOR_BEAM) then
+		weapon.Velocity = parent.Position -
+			(weapon.Position - swiftWeapon.StartingAngle:Resized(swiftWeapon.OrbitDistance):Rotated(swiftData.Rotation))
 	else
-		weapon.Position = player.Position + swiftWeapon.ShotDir:Resized(swiftWeapon.DistFromPlayer)
+		weapon.Position = parent.Position + swiftWeapon.ShootDirection:Resized(swiftWeapon.OrbitDistance)
 	end
-
-	if not swiftPlayer.StarSword then
-		swiftWeapon.ShotDir = VeeHelper.GetIsaacShootingDirection(player, weapon.Position)
-	else
-		swiftWeapon.ShotDir = swiftPlayer.StarSword.Dir
-	end
-
-	if swiftPlayer.AttackDuration
-		and swiftPlayer.AttackDuration <= 0
-		and not swiftWeapon.CanFire
-	then
-		swiftWeapon.CanFire = true
-	end
-
-	if player:IsDead()
-		or (swiftWeapon.ConstantOrbit and not swiftPlayer.Constant)
-		and not swiftWeapon.HasFired then
-		if weapon.Type ~= EntityType.ENTITY_EFFECT then
-			swiftBase:SwiftTearFlags(weapon, false, true)
-		end
-		swiftAttack:SwiftMainFireWeapon(weapon, player)
-		swiftWeapon.HasFired = true
-	end
-end
-
-function swiftAttack:SwiftAttackUpdate(weapon)
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-
-	if weapon.Type == EntityType.ENTITY_TEAR then
-		swiftTear:SwiftTearUpdate(weapon)
-	elseif weapon.Type == EntityType.ENTITY_LASER then
-		swiftLaser:SwiftLaserUpdate(weapon)
-	elseif (
-		weapon.Type == EntityType.ENTITY_EFFECT
-			and swiftBase:IsSwiftLaserEffect(weapon)
-		) then
-		swiftLaser:SwiftLaserEffectUpdate(weapon)
-	elseif weapon.Type == EntityType.ENTITY_KNIFE then
-		swiftKnife:SwiftKnifeUpdate(weapon)
-	elseif weapon.Type == EntityType.ENTITY_BOMBDROP then
-		swiftBomb:SwiftBombUpdate(weapon)
-	end
-
-	if VeeHelper.EntitySpawnedByPlayer(weapon, false) then
-
-		local player = weapon.SpawnerEntity:ToPlayer()
-		local ptrHashPlayer = tostring(GetPtrHash(player))
-		local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-
-		if swiftPlayer and swiftWeapon then
-			
-			SwiftWeaponUpdateSynergies(weapon, player)
-			swiftAttack:ShouldRestoreSwiftTrail(player, weapon)
-			swiftAttack:SwiftMultiRotation(player, weapon)
-			swiftBase:DelayFallingAcceleration(player, weapon)
-
-			if not swiftWeapon.HasFired then
-				swiftAttack:SwiftAttackWaitingToFire(weapon, player)
-
-				if swiftWeapon.CanFire and not player:HasWeaponType(WeaponType.WEAPON_LUDOVICO_TECHNIQUE) then
-
-					if not swiftPlayer.Constant or not swiftWeapon.ConstantOrbit then
-
-						if swiftWeapon.ShotDelay <= 0 then
-
-							if weapon.Type ~= EntityType.ENTITY_EFFECT then
-								swiftBase:SwiftTearFlags(weapon, false, true)
-							end
-							swiftAttack:SwiftMainFireWeapon(weapon, player)
-							swiftWeapon.HasFired = true
-						end
-					else
-						if swiftWeapon.ShotDelay <= 0 then
-							if swiftBase:IsSwiftLaserEffect(weapon) == "brim" then
-								if not swiftWeapon.LaserHasFired then
-									swiftAttack:SwiftMainFireWeapon(weapon, player)
-								end
-							else
-								swiftAttack:SwiftMainFireWeapon(weapon, player)
-							end
-						end
-
-						if player:GetFireDirection() == Direction.NO_DIRECTION then
-							swiftWeapon.ConstantOrbit = false
-							swiftWeapon.ShotDelay = 0
-						end
-					end
-				end
-			end
-		end
-	end
-end
-
-function swiftAttack:SwiftMultiRotation(player, weapon)
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-
-	if swiftWeapon.IsMultiShot
-		and weapon.Parent
-		and weapon.Parent:Exists() then
-
-		local ptrHashParent = tostring(GetPtrHash(weapon.Parent))
-		local swiftParent = swiftBase.Weapon[ptrHashParent]
-
-		if swiftParent and swiftParent.PosToFollow then
-
-			local rate = swiftWeapon.MultiShotRotation - 15 * player.ShotSpeed
-			if rate < 0 then rate = rate + 360 end
-			swiftWeapon.MultiShotRotation = rate
-
-			weapon.Velocity = weapon.Parent.Position - (weapon.Position + swiftParent.PosToFollow:Resized(swiftWeapon.DistFromStar):Rotated(swiftWeapon.MultiShotRotation))
-		end
-	end
-end
-
-function swiftAttack:ShouldRestoreWeapon(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	if swiftPlayer
-		and swiftPlayer.ExistingShots
-	then
-		for i = 1, #swiftPlayer.ExistingShots do
-			if swiftPlayer.Constant
-				and swiftPlayer.ConstantFiring
-				and not swiftPlayer.AttackCooldown
-				and player:GetFireDirection() ~= Direction.NO_DIRECTION
-				and not swiftPlayer.ExistingShots[i]:Exists()
-			then
-				local originalNumSpawned = swiftPlayer.NumWeaponsSpawned
-				swiftPlayer.NumWeaponsSpawned = i
-				swiftAttack:SpawnSwiftWeapon(player, swiftPlayer.Instance[1], swiftPlayer.Instance[2])
-				swiftPlayer.NumWeaponsSpawned = originalNumSpawned
-			end
-		end
-	end
-end
-
-function swiftAttack:ShouldRestoreSwiftTrail(player, weapon)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-
-	if swiftWeapon.Trail and not swiftWeapon.Trail:Exists() then
-		if (not swiftPlayer.Constant) or (swiftPlayer.Constant and swiftWeapon.ConstantOrbit) then
-			swiftBase:AddSwiftTrail(weapon, player)
-		end
-	end
-end
-
-function swiftAttack:SwiftInit(player)
-	local playerType = player:GetPlayerType()
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-
-	if playerType == EEVEEMOD.PlayerType.EEVEE
-		and not EEVEEMOD.game:IsPaused()
-		and swiftPlayer ~= nil then
-
-		if not swiftSynergies:WeaponShouldOverrideSwift(player) then
-
-			if VeeHelper.PlayerCanControl(player)
-				and VeeHelper.IsSpritePlayingAnims(player:GetSprite(), VeeHelper.WalkAnimations) then --Cannot shoot if any other player animation if playing, which would normally interrupt firing.
-
-				if player:GetFireDirection() ~= Direction.NO_DIRECTION
-					and not swiftPlayer.AttackCooldown
-					and swiftPlayer.AttackInit == false then
-					CalculateSwiftStats(player)
-					swiftAttack:SpawnSwiftWeapon(player, swiftPlayer.Instance[1], swiftPlayer.Instance[2])
-					swiftPlayer.AttackInit = true
-				end
-
-				--Basic updates
-				TriggerSwiftCooldownIfPlayerStopsShooting(player)
-				swiftAttack:ShouldRestoreWeapon(player)
-
-				if swiftBase:SwiftShouldBeConstant(player) == true
-				and swiftPlayer.Constant == false then
-					swiftPlayer.Constant = true
-					TriggerSwiftCooldown(player)
-				elseif swiftBase:SwiftShouldBeConstant(player) == false
-					and swiftPlayer.Constant == true
-					and not swiftPlayer.KidneyTimer then
-					swiftPlayer.Constant = false
-				end
-
-				--For sudden firerate changes
-				UpdateDurationWithFirerate(player)
+	
+	if swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_ANTI_GRAV then
+		if swiftData.CanFire == true then
+			if IsSwiftPlayerFiring(swiftData, false) and swiftWeapon.FireDelay > 0 then
+				swiftWeapon.FireDelay = 0
 			end
 		else
-			if swiftPlayer.AttackDuration
-				and swiftPlayer.AttackDuration > 0
-				and not player:HasWeaponType(WeaponType.WEAPON_SPIRIT_SWORD)
-				and not player:HasWeaponType(WeaponType.WEAPON_LUDOVICO_TECHNIQUE)
-			then
-				TriggerSwiftCooldown(player)
-			end
-			if not player:HasWeaponType(WeaponType.WEAPON_LUDOVICO_TECHNIQUE) and swiftPlayer.Constant == true then
-				swiftPlayer.Constant = false
-			end
+			swiftWeapon.ShootDirection = attackHelper:GetIsaacShootingDirection(player, weapon.Position)
 		end
-	elseif playerType ~= EEVEEMOD.PlayerType.EEVEE then
-		if swiftPlayer then
-			TriggerSwiftCooldown(player)
-			swiftBase.Player[ptrHashPlayer] = nil
-		end
+	else
+		swiftWeapon.ShootDirection = attackHelper:GetIsaacShootingDirection(player, weapon.Position)
 	end
 end
 
-function swiftAttack:SpiritSword(knife)
-	local sprite = knife:GetSprite()
-	local isPlaying = nil
-	local anims = {
-		"SpinRight",
-		"SpinDown",
-		"SpinLeft",
-		"SpinUp"
-	}
-	local AnimToVector = {
-		["SpinDown"] = Vector(0, 1),
-		["SpinRight"] = Vector(1, 0),
-		["SpinUp"] = Vector(0, -1),
-		["SpinLeft"] = Vector(-1, 0)
-	}
-	if not VeeHelper.EntitySpawnedByPlayer(knife, false)
-		or (knife.Variant ~= VeeHelper.KnifeVariant.SPIRIT_SWORD
-			and knife.Variant ~= VeeHelper.KnifeVariant.TECH_SWORD)
-	then
+---@param weapon Weapon | EntityEffect
+function swiftAttack:SwiftAttackUpdate(weapon)
+	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
+	if not swiftWeapon then return end
+	local swiftData = swiftWeapon.ParentInstance
+	if not swiftData then return end
+
+	if not swiftData.Parent or not swiftData.Parent:Exists() then
+		weapon:Remove()
 		return
 	end
-	local player = knife.SpawnerEntity:ToPlayer()
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
 
-	if not swiftPlayer then return end
+	if weapon:ToTear() then
+		---@cast weapon EntityTear
+		swiftTear:SwiftTearUpdate(swiftData, swiftWeapon, weapon)
+		swiftAttack:OnSwiftLudoWeaponUpdate(swiftData, weapon)
+	elseif (
+		weapon:ToEffect()
+			and swiftBase:IsSwiftLaserEffect(weapon)
+		) then
+		---@cast weapon EntityEffect
+		swiftLaser:SwiftLaserEffectUpdate(swiftData, swiftWeapon, weapon)
+	elseif weapon:ToBomb() then
+		---@cast weapon EntityBomb
+		swiftBomb:SwiftBombUpdate(swiftData, swiftWeapon, weapon)
+	end
 
-	if not swiftPlayer.StarSword or not swiftPlayer.StarSword.Entity then
-		for i = 1, #anims do
-			if sprite:IsPlaying(anims[i]) then
-				isPlaying = anims[i]
-			end
-		end
-		if isPlaying ~= nil and knife.SubType == 4 then
-			swiftPlayer.StarSword = {
-				Entity = knife,
-				Dir = AnimToVector[sprite:GetAnimation()]
-			}
-		end
-	elseif swiftPlayer.StarSword.Entity.InitSeed == knife.InitSeed then
-		if not swiftPlayer.AttackInit then
-			local multi = swiftSynergies:MultiShotCountInit(player)
-			if multi > 0 then return end
-			local dur = 14
-			swiftPlayer.AttackInit = true
-			swiftPlayer.MultiShots = multi
-			swiftPlayer.AttackDuration = dur
-			swiftPlayer.AttackDurationSet = dur
-			swiftPlayer.RateOfOrbitRotation = 0
-			swiftPlayer.Constant = false
+	if not VeeHelper.EntitySpawnedByPlayer(weapon) then return end
+	local player = weapon.SpawnerEntity:ToPlayer()
+
+	swiftSynergies:DelayTearFlags(swiftWeapon, weapon)
+	swiftAttack:ShouldRestoreSwiftTrail(swiftWeapon, weapon, player)
+
+	if swiftWeapon.HasFired then return end
+
+	swiftSynergies:AntiGravityBlink(swiftWeapon, player, weapon)
+	swiftSynergies:ChocolateMilkDamageScaling(swiftData, weapon)
+	swiftSynergies:TinyPlanetDistance(swiftData, swiftWeapon)
+
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_TECHNOLOGY_2) then
+		if swiftWeapon.Special.HasTech2 == false then
+			swiftLaser:FireTechLaser(swiftData, swiftWeapon, swiftWeapon.ShootDirection, true)
 		end
 	end
-	if swiftPlayer.StarSword and swiftPlayer.AttackInit and swiftPlayer.AttackDuration > 0 then
-		local degreeOfWeaponSpawns = 72 --(360/5)
-		local offset = swiftPlayer.StarSword.Dir:Rotated(-1 * degreeOfWeaponSpawns):GetAngleDegrees()
-		local spawnAtFrame = {
-			11,
-			8,
-			5,
-			3,
-			1
-		}
-		for i = 1, #spawnAtFrame do
-			if swiftPlayer.AttackDuration == spawnAtFrame[i] then
-				swiftPlayer.NumWeaponsSpawned = i
-				swiftTear:SpawnSwiftTears(player, degreeOfWeaponSpawns, offset)
-				if spawnAtFrame[i] == 1 then
-					swiftPlayer.StarSword.Entity = nil
+	swiftAttack:PreFireUpdate(swiftData, swiftWeapon, weapon)
+
+	if swiftData.CanFire or player:IsDead() then
+		if swiftWeapon.FireDelay > 0 then
+			swiftWeapon.FireDelay = swiftWeapon.FireDelay - 1
+		elseif swiftWeapon.HasFired == false then
+			local soyBrimActive = swiftSynergies:IsSoyBrim(player)
+
+			if not soyBrimActive or (soyBrimActive and not swiftWeapon.Special.SoyBrimEarlyFire) then
+				swiftAttack:SwiftMainFireWeapon(swiftData, swiftWeapon, weapon)
+				if soyBrimActive then
+					swiftWeapon.Special.SoyBrimEarlyFire = true
+				end
+			end
+			if not soyBrimActive or (soyBrimActive and IsSwiftPlayerFiring(swiftData, false)) then
+				swiftWeapon.HasFired = true
+				if soyBrimActive then
+					weapon.Velocity = Vector.Zero
 				end
 			end
 		end
 	end
 end
 
-function swiftAttack:ActivateConstantOnKidneyStone(tear)
-	if tear.SpawnerEntity and tear.SpawnerEntity:ToPlayer() then return end
+---@param swiftData SwiftInstance
+---@param tear EntityTear
+function swiftAttack:OnSwiftLudoWeaponUpdate(swiftData, tear)
+	if swiftData.InstanceType ~= swiftBase.InstanceType.INSTANCE_LUDOVICO then return end
 	local player = tear.SpawnerEntity:ToPlayer()
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	if not swiftPlayer then return end
-
-	if (swiftSynergies:IsKidneyStoneActive(tear, player))
-	and swiftPlayer.Constant == false then
-		swiftPlayer.Constant = true
-		TriggerSwiftCooldown(player)
+	if not tear:HasTearFlags(TearFlags.TEAR_LUDOVICO) then
+		tear:AddTearFlags(TearFlags.TEAR_LUDOVICO)
 	end
-end
-
-function swiftAttack:postFireTear(tear, player)
-	swiftBase:AssignSwiftSprite(tear)
-	swiftBase:AddSwiftTrail(tear, player)
-end
-
-function swiftAttack:postLudoTearReset(tear)
-	local ptrHashWeapon = tostring(GetPtrHash(tear))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-	if swiftWeapon then
-		swiftWeapon.Trail:Remove()
-	else
-		tear:GetData().BasicSwiftTrail:Remove()
-	end
-end
-
-function swiftAttack:OnSwiftLudoUpdate(tear)
-	local ptrHashWeapon = tostring(GetPtrHash(tear))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-	if (not swiftWeapon or not tear:GetData().BasicSwift) or not tear.SpawnerEntity or not tear.SpawnerEntity:ToPlayer() or not tear:HasTearFlags(TearFlags.TEAR_LUDOVICO) then return end
-	local player = tear.SpawnerEntity:ToPlayer()
 
 	if math.floor(tear.FrameCount / player.MaxFireDelay) ~= math.floor((tear.FrameCount - 1) / player.MaxFireDelay) then
-		swiftAttack:postLudoTearReset(tear)
-		swiftAttack:postFireTear(tear, player)
+		swiftTear:AssignSwiftSprite(tear)
 	end
 end
 
-local numCollect = 0
+-----------------------
+--  INSTNACE UPDATE  --
+-----------------------
 
-local function RemoveSwiftTears(swiftPlayer)
-	for i, weapon in pairs(swiftPlayer.ExistingShots) do
-		if weapon.FrameCount > 0 then
-			weapon:Remove()
+---@param swiftData SwiftInstance
+function swiftAttack:RegenerateSwiftWeapons(swiftData)
+	if swiftData.InstanceType ~= swiftBase.InstanceType.INSTANCE_LUDOVICO then return end
+	if swiftData.NumWeaponsRemoved > 0 then
+		for loop = 1, 2 do
+			for index, swiftWeapon in ipairs(swiftData.ChildSwiftWeapons) do
+				if loop == 1 then
+					if not swiftWeapon.WeaponEntity:Exists() then
+						table.remove(swiftData.ChildSwiftWeapons, index)
+						swiftData.NumWeaponsRemoved = swiftData.NumWeaponsRemoved - 1
+					end
+				else
+					swiftData.NumWeaponsSpawned = index
+					swiftWeapon.StartingAngle = swiftBase:GetStartingAngle(swiftData)
+				end
+			end
 		end
 	end
 end
 
-function swiftAttack:SwiftSpecialAttackKillSwitch(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	if not swiftPlayer or not swiftPlayer.ExistingShots then return end
+function swiftAttack:RetainSwiftInstanceOnNewRoom()
+	if EEVEEMOD.game:GetFrameCount() == 0 then return end
+	for _, swiftData in ipairs(swiftBase.Instances) do
+		if (swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_DEFAULT
+			or swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_NEPTUNUS)
+			and #swiftData.ChildSwiftWeapons > 0
+		then
+			local numToSpawn = 0
+			swiftData.NumWeaponsSpawned = 0
+			swiftData.NumWeaponsRemoved = 0
 
-	if player:HasWeaponType(WeaponType.WEAPON_LUDOVICO_TECHNIQUE) and numCollect ~= player:GetCollectibleCount() then
-		numCollect = player:GetCollectibleCount()
-		RemoveSwiftTears(swiftPlayer)
-		TriggerSwiftCooldown(player)
-	elseif not player:HasWeaponType(WeaponType.WEAPON_LUDOVICO_TECHNIQUE) and numCollect ~= 0 then
-		numCollect = 0
-		RemoveSwiftTears(swiftPlayer)
-		TriggerSwiftCooldown(player)
-	end
-	if not player:HasWeaponType(WeaponType.WEAPON_SPIRIT_SWORD) and swiftPlayer.StarSword then
-		swiftPlayer.StarSword = false
+			for _, swiftWeapon in ipairs(swiftData.ChildSwiftWeapons) do
+				if swiftWeapon.HasFired == false and swiftWeapon.IsMultiShot == false then
+					numToSpawn = numToSpawn + 1
+				end
+			end
+			swiftData.ChildSwiftWeapons = {}
+			for _ = 1, numToSpawn do
+				swiftAttack:SpawnSwiftWeapon(swiftData)
+			end
+		end
 	end
 end
 
-function swiftAttack:SwiftLudovicoSpawn(ludoTear)
-	if not ludoTear.SpawnerEntity or not ludoTear.SpawnerEntity:ToPlayer() or not ludoTear:HasTearFlags(TearFlags.TEAR_LUDOVICO) then return end
-	local player = ludoTear.SpawnerEntity:ToPlayer()
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local ptrHashWeapon = tostring(GetPtrHash(ludoTear))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-
-	if swiftPlayer and not swiftWeapon and swiftPlayer.AttackInit and ludoTear.Visible == true then
-		if not ludoTear:GetData().BasicSwift then
-			swiftBase:AssignBasicSwiftStar(ludoTear)
-		end
+---@param swiftData SwiftInstance
+function swiftAttack:FireIfNotShooting(swiftData)
+	if IsSwiftPlayerFiring(swiftData, false)
+		and not swiftData.CanFire
+		and not EEVEEMOD.game:IsPaused()
+	then
+		swiftAttack:WeaponAbleToFire(swiftData, true)
 	end
+end
 
+---@param swiftData SwiftInstance
+function swiftAttack:SpawnNextWeapon(swiftData)
+	if swiftData.NumWeaponsSpawned >= swiftData.NumWeaponsToSpawn then return end
+
+	if swiftData.WeaponSpawnTimer > 0 then
+		swiftData.WeaponSpawnTimer = swiftData.WeaponSpawnTimer - 0.5
+	else
+		swiftAttack:SpawnSwiftWeapon(swiftData)
+		swiftData.WeaponSpawnTimer = swiftBase:GetFireDelay(swiftData.Player)
+	end
+end
+
+---@param swiftData SwiftInstance
+function swiftAttack:CountdownDuration(swiftData)
+	local player = swiftData.Player
+	if not player then return end
+	local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
 	if not swiftPlayer then return end
 
-	if swiftPlayer and ludoTear.FrameCount > 0 then
-		if not swiftPlayer.AttackInit then
-			ludoTear.Visible = false
-			ludoTear.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
-			ludoTear.TearFlags = TearFlags.TEAR_LUDOVICO
-			swiftPlayer.AttackInit = true
-			swiftPlayer.MultiShots = swiftSynergies:MultiShotCountInit(player)
-			swiftPlayer.AttackDuration = 0
-			swiftPlayer.AttackDurationSet = 0
-			swiftPlayer.RateOfOrbitRotation = 0
-			swiftPlayer.Constant = true
-			swiftPlayer.ConstantFiring = true
-			local degreeOfWeaponSpawns = 72 --(360/5)
-			local offset = Vector(0, 1):Rotated(-1 * degreeOfWeaponSpawns):GetAngleDegrees()
-			for i = 1, 5 do
-				swiftPlayer.NumWeaponsSpawned = i
-				swiftTear:SpawnSwiftTears(player, degreeOfWeaponSpawns, offset)
+	if swiftData.DurationTimer >= 0.5 then
+		if swiftData.InstanceType ~= swiftBase.InstanceType.INSTANCE_LUDOVICO then
+			swiftData.DurationTimer = swiftData.DurationTimer - 0.5
+		end
+	elseif not swiftData.CanFire then
+		swiftData.DurationTimer = 0
+		if swiftData.InstanceType ~= swiftBase.InstanceType.INSTANCE_NEPTUNUS then
+			swiftAttack:WeaponAbleToFire(swiftData)
+		end
+	end
+end
+
+---@param swiftData SwiftInstance
+function swiftAttack:RateOfOrbitRotation(swiftData)
+	local player = swiftData.Player
+	if not player then return end
+	--TODO: With faster firerates especially, the rotation looks boring being fired off so fast. Give faster firerates a faster rotation, or maybe a continuous one that each next instance follows?
+	local rateLimit = 2
+	if swiftSynergies:ShouldUseTinyPlanet(player) then
+		rateLimit = 5
+	end
+	local currentRotation = swiftData.Rotation
+	local rateOfRotation = (7 * (player.ShotSpeed * (swiftData.DurationTimer / swiftData.TotalDuration)))
+	if rateOfRotation <= rateLimit then rateOfRotation = rateLimit end
+	currentRotation = currentRotation + rateOfRotation
+	if currentRotation > 360 then currentRotation = currentRotation - 360 end
+	swiftData.Rotation = currentRotation
+end
+
+----------------------
+--  REMOVING SWIFT  --
+----------------------
+
+---@param effect EntityEffect
+function swiftAttack:RemoveAntiGravPlaceholder(effect)
+	local data = effect:GetData()
+	if data.ParentInstance and #data.ParentInstance.ChildSwiftWeapons == 0 then effect:Remove() end
+end
+
+---@param swiftData SwiftInstance
+function swiftAttack:RemoveSwiftBombsBeforeNewRoom(swiftData)
+	local player = swiftData.Player
+	if not player then return end
+	local closestDoorSlot = VeeHelper.GetClosestDoorSlotPos(player.Position)
+
+	if closestDoorSlot and player.Position:DistanceSquared(closestDoorSlot) <= 10 ^ 2 then
+		for _, swiftWeapon in ipairs(swiftData.ChildSwiftWeapons) do
+			if swiftWeapon.WeaponEntity:ToBomb() and swiftWeapon.HasFired == false then
+				swiftWeapon.WeaponEntity:Remove()
 			end
 		end
 	end
 end
 
---------------
---  TIMERS  --
---------------
-
-local function SwiftShotDebug(weapon)
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-
-	local screenpos = EEVEEMOD.game:GetRoom():WorldToScreenPosition(weapon.Position)
-	local shootDir = "nil"
-	local hasTech2 = "false"
-	local inConstantOrbit = "false"
-	local shotdelay = "nil"
-	local hasFired = "false"
-	if swiftWeapon then
-		if swiftWeapon.HasFired then
-			hasFired = "true"
+---@param swiftData SwiftInstance
+---@param index integer
+function swiftAttack:RemoveSwiftInstance(swiftData, index)
+	if EEVEEMOD.game:GetFrameCount() == 0 then return end
+	if (swiftData.CanFire or swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_LUDOVICO) and
+		swiftData.NumWeaponsRemoved == swiftData.NumWeaponsSpawned then
+		local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(swiftData.Player))]
+		if swiftPlayer then
+			if swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_LUDOVICO then
+				swiftPlayer.SpawnedLudoTear = false
+			end
 		end
-		if swiftWeapon.ShotDelay then
-			shotdelay = swiftWeapon.ShotDelay
-		end
-		if swiftWeapon.Tech2Attached then
-			hasTech2 = "true"
-		end
-		if swiftWeapon.ShotDir then
-			shootDir = Vector(math.floor(swiftWeapon.ShotDir.X), math.floor(swiftWeapon.ShotDir.Y))
-		end
-		if swiftWeapon.ConstantOrbit then
-			inConstantOrbit = "true"
-		end
-		local fired = "false"
-		if swiftWeapon.LaserHasFired then
-			fired = "true"
-		end
-		--Isaac.RenderText(weapon:ToTear().Height, screenpos.X, screenpos.Y + 30, 1, 1, 1, 1)
-		--Isaac.RenderText(shotdelay, screenpos.X, screenpos.Y + 30, 1, 1, 1, 1)
-		--Isaac.RenderText(tostring(swiftWeapon.Timer), screenposW.X, screenposW.Y + 70, 1, 1, 1, 1)
-		--Isaac.RenderText("Dir: "..tostring(shootDir.X)..", "..tostring(shootDir.Y), screenpos.X, screenpos.Y + 50, 1, 1, 1, 1)
-		--Isaac.RenderText("Constant: "..inConstantOrbit, screenposW.X, screenposW.Y + 10, 1, 1, 1, 1)
-		--Isaac.RenderText("Has Fired Laser: "..fired, screenposW.X, screenposW.Y + 50, 1, 1, 1, 1)
-		--Isaac.RenderText("Tech 2: "..hasTech2, screenposW.X, screenposW.Y + 50, 1, 1, 1, 1)
-	end
-end
-
-local function SwiftShotDelayTimer(player)
-	local TypeToFind = {
-		{ EntityType.ENTITY_TEAR, -1 },
-		{ EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT },
-		{ EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL },
-		{ EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.EVIL_EYE },
-		{ EntityType.ENTITY_KNIFE, -1 },
-		{ EntityType.ENTITY_LASER, -1 },
-		{ EntityType.ENTITY_BOMBDROP, -1 }
-	}
-	for i = 1, #TypeToFind do
-		for _, weapon in pairs(Isaac.FindByType(TypeToFind[i][1], TypeToFind[i][2], 0)) do
-			local ptrHashWeapon = tostring(GetPtrHash(weapon))
-			local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-
-			local ptrHashPlayer = tostring(GetPtrHash(player))
-			local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-
-			if swiftWeapon then
-				if swiftWeapon.ShotDelay > 0
-					and ((swiftPlayer.Constant == false and swiftWeapon.CanFire)
-						or swiftPlayer.Constant == true) then
-					swiftWeapon.ShotDelay = swiftWeapon.ShotDelay - 0.5
-				end
-				SwiftShotDebug(weapon)
+		table.remove(swiftBase.Instances, index)
+		for index, ownedSwiftData in ipairs(swiftPlayer.OwnedInstances) do
+			if ownedSwiftData == swiftData then
+				table.remove(swiftPlayer.OwnedInstances, index)
+				break
 			end
 		end
 	end
 end
 
-local function SwiftDurationHandle(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
+---@param weapon Weapon
+function swiftAttack:OnWeaponInstanceRemove(weapon)
+	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
+	if swiftWeapon == nil then return end
+	local swiftData = swiftWeapon.ParentInstance
+	if swiftData == nil then return end
 
-	if swiftPlayer
-		and swiftPlayer.AttackDuration
-		and not swiftPlayer.AttackCooldown then
-
-		local attackDuration = swiftPlayer.AttackDuration
-		if attackDuration > 0.5 then
-			attackDuration = attackDuration - 0.5
-		else
-			if swiftPlayer.NumWeaponsSpawned >= 5 then
-				attackDuration = 0
-				if not swiftPlayer.Constant then
-					TriggerSwiftCooldown(player)
-				end
-			elseif player:GetFireDirection() ~= Direction.NO_DIRECTION and swiftPlayer.AttackInit == true then
-				attackDuration = 0.5
+	if swiftWeapon ~= nil then
+		swiftBase.Weapons[tostring(GetPtrHash(weapon))] = nil
+		for _, parentSwiftWeapon in ipairs(swiftData.ChildSwiftWeapons) do
+			if GetPtrHash(weapon) == GetPtrHash(parentSwiftWeapon.WeaponEntity) then
+				swiftData.NumWeaponsRemoved = swiftData.NumWeaponsRemoved + 1
 			end
 		end
-		swiftPlayer.AttackDuration = attackDuration
-	end
-end
-
-local function SwiftRateOfRotation(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local holdStarFrames = swiftBase:SwiftFireDelay(player) * 0.35
-	if swiftPlayer
-		and swiftPlayer.RateOfOrbitRotation
-		and swiftPlayer.AttackDuration
-		and ((not swiftPlayer.Constant and swiftPlayer.AttackDuration <= (swiftPlayer.AttackDurationSet - holdStarFrames))
-			or (swiftPlayer.Constant))
-	then
-		local currentRotation = swiftPlayer.RateOfOrbitRotation
-		local rateOfRotation = (8 * (player.ShotSpeed * (swiftPlayer.AttackDuration / swiftPlayer.AttackDurationSet)))
-		if swiftPlayer.Constant == true then
-			rateOfRotation = (5 * player.ShotSpeed)
-		end
-		if rateOfRotation <= 2 then rateOfRotation = 2 end
-		currentRotation = currentRotation + rateOfRotation
-		if currentRotation > 360 then currentRotation = currentRotation - 360 end
-		swiftPlayer.RateOfOrbitRotation = currentRotation
-	end
-end
-
-local function SwiftCooldownTimer(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-
-	if swiftPlayer.AttackCooldown then
-		if swiftPlayer.AttackCooldown > 0 then
-			swiftPlayer.AttackCooldown = swiftPlayer.AttackCooldown - 0.5
-		else
-			swiftPlayer.AttackCooldown = nil
-			swiftPlayer.AttackInit = false
-		end
-	end
-end
-
-local function SwiftSpawningNextWeapon(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	if swiftPlayer.AttackDuration
-		and swiftPlayer.AttackDuration > 0
-		and player:GetFireDirection() ~= Direction.NO_DIRECTION
-	then
-		if not swiftPlayer.TimeTillNextWeapon then return end
-		if swiftPlayer.TimeTillNextWeapon > 0 then
-			swiftPlayer.TimeTillNextWeapon = swiftPlayer.TimeTillNextWeapon - 0.5
-		else
-			if swiftPlayer.NumWeaponsSpawned < 5 then
-				swiftPlayer.NumWeaponsSpawned = swiftPlayer.NumWeaponsSpawned + 1
-				swiftAttack:SpawnSwiftWeapon(player, swiftPlayer.Instance[1], swiftPlayer.Instance[2])
-				swiftPlayer.TimeTillNextWeapon = swiftBase:SwiftFireDelay(player)
-			end
-		end
-	end
-end
-
-function swiftAttack:SwiftAttackTimers(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-
-	if VeeHelper.PlayerCanControl(player) and swiftPlayer then
-		SwiftShotDelayTimer(player)
-		SwiftDurationHandle(player)
-		SwiftRateOfRotation(player)
-		SwiftCooldownTimer(player)
-		SwiftSpawningNextWeapon(player)
-		swiftSynergies:KidneyStoneDuration(player)
 	end
 end
 
@@ -895,105 +678,71 @@ end
 --  MISC  --
 ------------
 
-function swiftAttack:InitSwiftEvilEye(effect)
-
-	if not effect.Parent or not effect.Parent:ToPlayer() then return end
-	local player = effect.Parent:ToPlayer()
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local ptrHashEffect = tostring(GetPtrHash(effect))
-	local swiftEffectWeapon = swiftBase.Weapon[ptrHashEffect]
-
-	if effect.SpawnerEntity == nil and effect.SpawnerType == EntityType.ENTITY_NULL then
-		effect.SpawnerEntity = effect.Parent
-		effect.SpawnerType = EntityType.ENTITY_PLAYER
+---@param player EntityPlayer
+function swiftAttack:OnPostPlayerUpdate(player)
+	local playerType = player:GetPlayerType()
+	if EEVEEMOD.game:GetFrameCount() < 1 then return end
+	VeeHelper.GetClosestDoorSlotPos(player.Position)
+	if playerType == EEVEEMOD.PlayerType.EEVEE then
+		swiftBase:TryInitSwiftPlayer(player)
 	end
-	if swiftPlayer and not swiftEffectWeapon then
-		swiftBase:AssignSwiftBasicData(effect, player, swiftBase:SpawnPos(player, swiftPlayer.Instance[1], swiftPlayer.Instance[2]))
-		swiftBase:AddSwiftTrail(effect, player)
-		local tC = effect:GetSprite().Color
-		effect:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 15, 1, true, false)
+
+	local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
+
+	if not swiftPlayer then return end
+	if swiftSynergies:ShouldWeaponTypeOverride(player) == false and EEVEEMOD.game:GetRoom():GetFrameCount() > 1 then
+		swiftAttack:StartAttack(player)
 	end
-end
-
-function swiftAttack:RespawnSwiftPerRoom(player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-
-	if swiftPlayer and EEVEEMOD.game:GetFrameCount() > 1 then
-		if player:HasWeaponType(WeaponType.WEAPON_LUDOVICO_TECHNIQUE) then
-			swiftPlayer.AttackInit = false
-		elseif swiftPlayer.NumWeaponsSpawned
-			and swiftPlayer.NumWeaponsSpawned > 0 then
-			local currentCount = swiftPlayer.NumWeaponsSpawned
-			swiftPlayer.RespawnNewRoom = true
-			for i = 1, currentCount do
-				swiftPlayer.NumWeaponsSpawned = i
-				swiftAttack:SpawnSwiftWeapon(player, swiftPlayer.Instance[1], swiftPlayer.Instance[2])
-				EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
-			end
-			swiftPlayer.RespawnNewRoom = nil
+	for index, swiftData in ipairs(swiftBase.Instances) do
+		swiftAttack:RemoveSwiftInstance(swiftData, index)
+		swiftAttack:FireIfNotShooting(swiftData)
+		swiftAttack:RateOfOrbitRotation(swiftData)
+		swiftAttack:RemoveSwiftBombsBeforeNewRoom(swiftData)
+		swiftAttack:RegenerateSwiftWeapons(swiftData)
+		if not swiftData.CanFire then
+			swiftAttack:SpawnNextWeapon(swiftData)
+			swiftAttack:CountdownDuration(swiftData)
 		end
 	end
 end
 
-local function SwiftBasicTrailUpdate(trail)
-	local weapon = trail.Parent
-
-	if trail.Parent then
-		if not weapon:GetData().BasicSwift then return end
-		local room = EEVEEMOD.game:GetRoom()
-		local tC = trail.Color
-		local tearHeightToFollow = (weapon:ToTear().Height * 0.4) - 15
-		local sizeToFollow = weapon.Size * 0.5
-
-		trail.SpriteScale = Vector(weapon.Size * 0.2, 1)
-		trail.Position = Vector(weapon.Position.X, (weapon.Position.Y + tearHeightToFollow) - sizeToFollow) + weapon:ToTear().PosDisplacement
-
-		if not room:IsPositionInRoom(trail.Position, -30) then
-			trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 5, 2, true, false)
-		end
-	else
-		if trail:GetData().SwiftTrail then
-			trail:Remove()
-		end
+---@param swiftWeapon SwiftWeapon
+---@param weapon Weapon
+---@param player EntityPlayer
+function swiftAttack:ShouldRestoreSwiftTrail(swiftWeapon, weapon, player)
+	if swiftWeapon.Trail and not swiftWeapon.Trail:Exists() then
+		swiftBase:AddSwiftTrail(weapon, player)
 	end
 end
 
+---@param trail EntityEffect
 function swiftAttack:SwiftTrailUpdate(trail)
-
-	SwiftBasicTrailUpdate(trail)
-
-	if trail.Parent and swiftBase.Weapon[tostring(GetPtrHash(trail.Parent))] then
+	local data = trail:GetData()
+	
+	if trail.Parent then
 		local weapon = trail.Parent
-		local ptrHashWeapon = tostring(GetPtrHash(trail.Parent))
-		local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
 		local room = EEVEEMOD.game:GetRoom()
 		local tC = trail.Color
 
-		if trail:GetData().EeveeRGB == true then
-			trail:SetColor(EEVEEMOD.GetRBG(tC), -1, -1, true, false)
-		else
+		if not data.EeveeEntHasColorCycle then
 			local wC = weapon:GetSprite().Color
-			if swiftBase:AreColorsDifferent(wC, trail:GetData().TrailColor)
-				and swiftBase:AreColorsDifferent(wC, Color.Default) then
+			if VeeHelper.AreColorsDifferent(wC, trail:GetData().TrailColor)
+				and VeeHelper.AreColorsDifferent(wC, Color.Default) then
 				trail:SetColor(wC, -1, 1, true, false)
 			end
 		end
 
 		if not room:IsPositionInRoom(trail.Position, -30) then
-			trail:SetColor(Color(tC.R, tC.G, tC.B, 0, tC.RO, tC.GO, tC.BO), 5, 2, true, false)
+			trail:SetColor(VeeHelper.SetColorAlpha(tC, 0), 5, 2, true, false)
 		end
 		local heightDif = 0
-		if weapon.Type == EntityType.ENTITY_TEAR then
-			local tearHeightToFollow = (weapon:ToTear().Height * 0.4) - 15
+		if weapon:ToTear() then
+			weapon = weapon:ToTear()
+			local tearHeightToFollow = (weapon.Height * 0.4) - 15
 			local sizeToFollow = weapon.Size * 0.5
 			trail.SpriteScale = Vector(weapon.Size * 0.2, 1)
-
-			if swiftWeapon.IsFakeKnife then
-				heightDif = 10
-			end
-			trail.Position = Vector(weapon.Position.X, (weapon.Position.Y + (tearHeightToFollow + heightDif)) - sizeToFollow) + weapon:ToTear().PosDisplacement
+			trail.Position = Vector(weapon.Position.X, (weapon.Position.Y + (tearHeightToFollow + heightDif)) - sizeToFollow) +
+				weapon.PosDisplacement
 		else
 			if weapon.Type == EntityType.ENTITY_EFFECT and weapon.Variant == EffectVariant.EVIL_EYE then
 				heightDif = 20
@@ -1001,68 +750,39 @@ function swiftAttack:SwiftTrailUpdate(trail)
 			trail.Position = Vector(weapon.Position.X, weapon.Position.Y + weapon.PositionOffset.Y - heightDif)
 		end
 	else
-		if trail:GetData().SwiftTrail then
+		if data.SwiftTrail then
 			trail:Remove()
 		end
 	end
 end
 
--- DEBUG
-
-function swiftAttack:onRender()
-	local player = Isaac.GetPlayer()
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local cooldown = "nil"
-	if swiftPlayer then
-		if swiftPlayer.AttackCooldown then
-			cooldown = swiftPlayer.AttackCooldown
-		end
-		local duration = "nil"
-		if swiftPlayer.AttackDuration then
-			duration = swiftPlayer.AttackDuration
-		end
-		local rotation = "nil"
-		if swiftPlayer.RateOfOrbitRotation then
-			rotation = swiftPlayer.RateOfOrbitRotation
-		end
-		local delaybetweenshots = "nil"
-		if swiftPlayer.TimeTillNextWeapon then
-			delaybetweenshots = swiftPlayer.TimeTillNextWeapon
-		end
-		local numtears = "nil"
-		if swiftPlayer.NumWeaponsSpawned then
-			numtears = swiftPlayer.NumWeaponsSpawned
-		end
-		local kidney = 0
-		if swiftPlayer.KidneyTimer then
-			kidney = swiftPlayer.KidneyTimer
-		end
-		--[[ if swiftPlayer.ExistingShots then
-			for i = 1, #swiftPlayer.ExistingShots do
-				if swiftPlayer.ExistingShots[i] ~= nil then
-					local ptrHashWeapon = tostring(GetPtrHash(swiftPlayer.ExistingShots[i]))
-					local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-					local playerShot = swiftPlayer.ExistingShots[i].SpawnerEntity:ToPlayer()
-					local ptrHashPlayerShot = tostring(GetPtrHash(playerShot))
-					local swiftPlayerShot = swiftBase.Player[ptrHashPlayerShot]
-					local hasPlayer = "false"
-					if swiftPlayerShot then
-						hasPlayer = "true"
-					end
-					if swiftWeapon then
-						Isaac.RenderText(i .. hasPlayer, 50, 25 + (25 * i), 1, 1, 1, 1)
-					end
-				end
-			end
-		end ]]
-		--[[ Isaac.RenderText("Cooldown: " .. cooldown, 50, 50, 1, 1, 1, 1)
-		Isaac.RenderText("Duration: " .. duration, 50, 70, 1, 1, 1, 1)
-		Isaac.RenderText("Rotation: " .. rotation, 50, 90, 1, 1, 1, 1)
-		Isaac.RenderText("Tear Spawn: " .. delaybetweenshots, 50, 110, 1, 1, 1, 1)
-		Isaac.RenderText("Num Tears Spawned: " .. numtears, 50, 130, 1, 1, 1, 1) ]]
-		--Isaac.RenderText("Kidney: " .. kidney, 50, 30, 1, 1, 1, 1)
+function swiftAttack:Debug()
+	--[[ 	local numInstances = 0
+	local weaponTimer = 0
+	local durationTimer = 0
+	local cooldown = 0
+	local swiftData = nil
+	if swiftBase.Instances[1] ~= nil then
+		swiftData = swiftBase.Instances[1]
+		numInstances = #swiftBase.Instances
+		durationTimer = swiftData.DurationTimer
+		weaponTimer = swiftData.WeaponSpawnTimer
 	end
+	if Isaac.GetPlayer():GetData().SwiftInstanceCooldown ~= nil then
+		cooldown = Isaac.GetPlayer():GetData().SwiftInstanceCooldown
+	end
+	Isaac.RenderText("NumInstances: " .. numInstances, 50, 50, 1, 1, 1, 1)
+	Isaac.RenderText("Duration: " .. durationTimer, 50, 70, 1, 1, 1, 1)
+	Isaac.RenderText("Weapon Timer:" .. weaponTimer, 50, 90, 1, 1, 1, 1)
+	Isaac.RenderText("Cooldown:" .. cooldown, 50, 110, 1, 1, 1, 1)
+
+	if swiftBase.Instances[1] == nil then return end
+	for index, weapon in ipairs(swiftBase.Instances[1].ChildSwiftWeapons) do
+		local screenpos = EEVEEMOD.game:GetRoom():WorldToScreenPosition(weapon.Position)
+		local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(weapon))]
+		--Isaac.RenderText(swiftWeapon.FireDelay, screenpos.X, screenpos.Y, 1, 1, 1, 1)
+		--Isaac.RenderText(swiftWeapon.ShootDirection.X .. ", " .. swiftWeapon.ShootDirection.Y, screenpos.X, screenpos.Y + 30, 1, 1, 1, 1)
+	end ]]
 end
 
 return swiftAttack

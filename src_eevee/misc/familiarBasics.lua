@@ -2,6 +2,10 @@
 
 local familiarBasics = {}
 
+---@param player EntityPlayer
+---@param cacheFlag CacheFlag
+---@param familiarItemID CollectibleType
+---@param familiarVariant FamiliarVariant
 function familiarBasics:evaluateCache(player, cacheFlag, familiarItemID, familiarVariant)
 	if cacheFlag == CacheFlag.CACHE_FAMILIARS then
 		local numFamiliars = player:GetCollectibleNum(familiarItemID) + player:GetEffects():GetCollectibleEffectNum(familiarItemID)

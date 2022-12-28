@@ -1,5 +1,7 @@
 local executeCmd = {}
 
+---@param cmd string
+---@param params string
 function executeCmd:main(cmd, params)
 	if cmd == "eeveemod" then
 		local unlockType = ""
@@ -52,10 +54,10 @@ function executeCmd:main(cmd, params)
 				end
 			end
 			if boss ~= nil then
-				local state = string.sub(unlock, string.len(boss) + 2, -1)
-				if string.sub(state, 1, 4) == "true" or string.sub(state, 1, 5) == "false" then
+				local stateString = string.sub(unlock, string.len(boss) + 2, -1)
+				if string.sub(stateString, 1, 4) == "true" or string.sub(stateString, 1, 5) == "false" or string.sub(stateString, 1, 1) == "" then
 					local shouldDisplay = false
-					state = state == "true" and true or state == "false" and false
+					local state = (stateString == "true" or stateString == "") and true or stateString == "false" and false
 
 					if EEVEEMOD.PERSISTENT_DATA.UnlockData[char][boss] ~= nil then
 						if boss == "Tainted" then

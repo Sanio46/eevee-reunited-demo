@@ -3,7 +3,7 @@ local dive = {}
 --Change creep things based on level. Maybe steam emits from creep in Mines/Ashpit and is lighter, blood in Womb,
 
 function dive:OnUse(itemID, itemRNG, player, flags, slot, varData)
-	--[[ if itemID == EEVEEMOD.Birthright.DIVE then
+	--[[ if itemID == EEVEEMOD.CollectibleType.DIVE then
 	   local data = player:GetData()
 	   data.DiveDuration = 60
 	   data.PreDiveEntColl = player.EntityCollisionClass

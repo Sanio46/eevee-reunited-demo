@@ -1,21 +1,26 @@
 local sneakScarf = {}
 
+---@param player EntityPlayer
 function sneakScarf:ConfuseOutOfRangeEnemies(player)
 	if not player:HasCollectible(EEVEEMOD.CollectibleType.SNEAK_SCARF) then return end
 
-	for _, enemies in pairs(Isaac.FindInRadius(player.Position, 1000, EntityPartition.ENEMY)) do
-		local ent = enemies:ToNPC()
+	for _, ent in pairs(Isaac.FindInRadius(player.Position, 1000, EntityPartition.ENEMY)) do
+		local npc = ent:ToNPC()
 
-		if ent.Position:DistanceSquared(player.Position) >= 200 ^ 2 then
-			if not ent:GetData().SneakScarfAvoid then
-				ent:AddConfusion(EntityRef(player), 1, true)
+		if npc.Type ~= EntityType.ENITY_FIREPLACE
+			and npc.Type ~= EntityType.ENTITY_SHOPKEEPER
+			and npc.Position:DistanceSquared(player.Position) >= 200 ^ 2 then
+			if not npc:GetData().SneakScarfAvoid then
+				npc:AddConfusion(EntityRef(player), 1, true)
 			end
 		else
-			ent:GetData().SneakScarfAvoid = true
+			npc:GetData().SneakScarfAvoid = true
 		end
 	end
 end
 
+---@param player EntityPlayer
+---@param itemStats ItemStats
 function sneakScarf:Stats(player, itemStats)
 	if player:HasCollectible(EEVEEMOD.CollectibleType.SNEAK_SCARF) then
 		itemStats.SPEED = itemStats.SPEED + (0.3 * player:GetCollectibleNum(EEVEEMOD.CollectibleType.SNEAK_SCARF))

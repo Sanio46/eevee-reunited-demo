@@ -1,10 +1,16 @@
 local pokeball = {}
+
+local pokeyMans = require("src_eevee.challenges.pokeyMansCrystal")
+local attackHelper = require("src_eevee.attacks.attackHelper")
+
 local pokeballSprite = Sprite()
 
 ---------------------------
 --  THROWING YOUR BALLS  --
 ---------------------------
 
+---@param player EntityPlayer
+---@param id PokeballType | CollectibleType
 local function HidePokeball(player, id)
 	local data = player:GetData()
 	if id and id == EEVEEMOD.CollectibleType.MASTER_BALL then
@@ -21,38 +27,42 @@ local function LoadPokeballSprite()
 	pokeballSprite:Play("Main", true)
 end
 
-function pokeball:OnPokeballUse(ball, player, _)
+---@param ballType PokeballType
+---@param player EntityPlayer
+function pokeball:OnPokeballUse(ballType, player)
 	local data = player:GetData()
 
-	if ball == EEVEEMOD.PokeballType.POKEBALL
-		or ball == EEVEEMOD.PokeballType.GREATBALL
-		or ball == EEVEEMOD.PokeballType.ULTRABALL
+	if ballType == EEVEEMOD.PokeballType.POKEBALL
+		or ballType == EEVEEMOD.PokeballType.GREATBALL
+		or ballType == EEVEEMOD.PokeballType.ULTRABALL
 	then
 		if not data.RemovePokeball then
-			player:AddCard(ball)
-			if not data.CanThrowPokeball or (data.CanThrowPokeball and data.PokeballTypeUsed == EEVEEMOD.CollectibleType.MASTER_BALL) then
+			if not data.CanThrowPokeball or
+				(data.CanThrowPokeball and data.PokeballTypeUsed == EEVEEMOD.CollectibleType.MASTER_BALL) then
 				if not pokeballSprite:IsLoaded() then
 					LoadPokeballSprite()
 				end
 				data.CanThrowPokeball = true
-				data.PokeballTypeUsed = ball
-				pokeballSprite:ReplaceSpritesheet(0, "gfx/items/pickups/render_pokeball_" .. EEVEEMOD.PokeballTypeToString[data.PokeballTypeUsed] .. ".png")
+				data.PokeballTypeUsed = ballType
+				pokeballSprite:ReplaceSpritesheet(0,
+					"gfx/items/pickups/render_pokeball_" .. EEVEEMOD.PokeballTypeToString[data.PokeballTypeUsed] .. ".png")
 				pokeballSprite:LoadGraphics()
 				player:AnimatePickup(pokeballSprite, false, "LiftItem")
-			elseif data.PokeballTypeUsed == ball then
-				HidePokeball(player, ball)
+			elseif data.PokeballTypeUsed == ballType then
+				HidePokeball(player, ballType)
 			end
-		else
-			data.RemovePokeball = false
-			HidePokeball(player, ball)
 		end
 	end
 end
 
+---@param itemID CollectibleType
+---@param player EntityPlayer
+---@return UseItemReturn | boolean
 function pokeball:OnMasterBallUse(itemID, _, player, _, _, _)
 	local data = player:GetData()
 	if itemID == EEVEEMOD.CollectibleType.MASTER_BALL and player:GetActiveItem() == EEVEEMOD.CollectibleType.MASTER_BALL then
-		if not data.CanThrowPokeball or (data.CanThrowPokeball and data.PokeballTypeUsed ~= EEVEEMOD.CollectibleType.MASTER_BALL) then
+		if not data.CanThrowPokeball or
+			(data.CanThrowPokeball and data.PokeballTypeUsed ~= EEVEEMOD.CollectibleType.MASTER_BALL) then
 			data.CanThrowPokeball = true
 			data.PokeballTypeUsed = itemID
 			player:AnimateCollectible(EEVEEMOD.CollectibleType.MASTER_BALL, "LiftItem", "PlayerPickupSparkle")
@@ -66,28 +76,39 @@ function pokeball:OnMasterBallUse(itemID, _, player, _, _, _)
 			data.CanThrowPokeball = false
 		end
 	end
+	return false
 end
 
-local function AddPokeballData(ball, player)
+---@param ball EntityEffect
+---@param player EntityPlayer
+local function AddPokeballData(ball, player, ballType)
 	local bData = ball:GetData()
 	local pData = player:GetData()
 	local sprite = ball:GetSprite()
-	bData.PokeballType = pData.PokeballTypeUsed
-	sprite:ReplaceSpritesheet(0, "gfx/effects/pokeball_" .. EEVEEMOD.PokeballTypeToString[pData.PokeballTypeUsed] .. ".png")
+
+	bData.PokeballType = ballType
+	sprite:ReplaceSpritesheet(0, "gfx/effects/pokeball_" .. EEVEEMOD.PokeballTypeToString[ballType] .. ".png")
 	sprite:LoadGraphics()
 	sprite.Offset = Vector(0, -40)
 	ball.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_GROUND
 	ball.RenderZOffset = -10
-	if pData.PokeballTypeUsed ~= EEVEEMOD.CollectibleType.MASTER_BALL then
-		local pickup = Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_TAROTCARD, pData.PokeballTypeUsed,
-			ball.Position, ball.Velocity, ball):ToPickup()
-		pickup.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
-		pickup.Visible = false
-		bData.Pickup = pickup
+
+	if ballType ~= EEVEEMOD.CollectibleType.MASTER_BALL then
+		if pData.PokeballTypeUsed then
+			local pickup = Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_TAROTCARD, ballType,
+				ball.Position, ball.Velocity, ball):ToPickup()
+			pickup.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
+			pickup.Visible = false
+			bData.Pickup = pickup
+		else
+			bData.DestroyPokeBall = true
+		end
 	end
+
 	bData.PlayerLuck = player.Luck
 end
 
+---@param player EntityPlayer
 local function HideBallOnSwitch(player)
 	local data = player:GetData()
 
@@ -102,23 +123,49 @@ local function HideBallOnSwitch(player)
 	end
 end
 
-function pokeball:PlayerThrowPokeball(player)
+---@param player EntityPlayer
+local function ThrowBall(player, ballType)
+	local Velocity = attackHelper:HeadDirectionToVector(player):Resized(11)
+	local thrownPokeball = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.POKEBALL, 0, player.Position,
+		Velocity, player)
+	AddPokeballData(thrownPokeball, player, ballType)
+end
+
+---@param ballType Card
+---@param player EntityPlayer
+function pokeball:PlayerThrowPokeBall(ballType, player)
+	local data = player:GetData()
+
+	if ballType == EEVEEMOD.PokeballType.POKEBALL
+		or ballType == EEVEEMOD.PokeballType.GREATBALL
+		or ballType == EEVEEMOD.PokeballType.ULTRABALL then
+		ThrowBall(player, ballType)
+		if data.RemovePokeball then
+			data.RemovePokeball = false
+		end
+		HidePokeball(player, ballType)
+	end
+end
+
+---@param player EntityPlayer
+function pokeball:PlayerThrowMasterBall(player)
 	local data = player:GetData()
 
 	if data.CanThrowPokeball and data.PokeballTypeUsed then
 		HideBallOnSwitch(player)
+
 		if player:GetFireDirection() ~= Direction.NO_DIRECTION then
-			local Velocity = VeeHelper.HeadDirectionToVector(player):Resized(11)
-			local thrownPokeball = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.POKEBALL, 0, player.Position, Velocity, player)
-			AddPokeballData(thrownPokeball, player)
-			if player:HasCollectible(EEVEEMOD.CollectibleType.MASTER_BALL) and data.PokeballTypeUsed == EEVEEMOD.CollectibleType.MASTER_BALL then
+			if player:HasCollectible(EEVEEMOD.CollectibleType.MASTER_BALL)
+				and data.PokeballTypeUsed == EEVEEMOD.CollectibleType.MASTER_BALL
+			then
+				ThrowBall(player, data.PokeballTypeUsed)
 				local masterBallSlot = VeeHelper.GetActiveSlots(player, EEVEEMOD.CollectibleType.MASTER_BALL)[1]
 				player:SetActiveCharge(0, masterBallSlot)
+				HidePokeball(player, data.PokeballTypeUsed)
 			end
 			if data.PokeballTypeUsed ~= EEVEEMOD.CollectibleType.MASTER_BALL then
 				data.RemovePokeball = true
 			end
-			HidePokeball(player, data.PokeballTypeUsed)
 		end
 
 		local allWalkAnims = {
@@ -141,21 +188,9 @@ end
 --  CAPTURING  --
 -----------------
 
-local CaptureBlacklist = {
-	[EntityType.ENTITY_MOM] = true,
-	[EntityType.ENTITY_MOMS_HEART] = true, --+It Lives
-	[EntityType.ENTITY_ISAAC] = true, --+Blue Baby
-	[EntityType.ENTITY_SATAN] = true,
-	[EntityType.ENTITY_THE_LAMB] = true,
-	[EntityType.ENTITY_MEGA_SATAN] = true,
-	[EntityType.ENTITY_MEGA_SATAN_2] = true,
-	[EntityType.ENTITY_HUSH] = true,
-	[EntityType.ENTITY_DELIRIUM] = true,
-	[EntityType.ENTITY_DOGMA] = true,
-	[EntityType.ENTITY_BEAST] = true,
-	[EntityType.ENTITY_MOTHERS_SHADOW] = true
-}
-
+---@param npc EntityNPC
+---@param ball EntityEffect
+---@param player EntityPlayer
 local function TryCaptureBoss(npc, ball, player)
 	local data = ball:GetData()
 	local shouldCapture = false
@@ -170,7 +205,6 @@ local function TryCaptureBoss(npc, ball, player)
 		EntityFlag.FLAG_CONFUSION
 	}
 	local strongStatus = {
-		--EntityFlag.FLAG_FREEZE,
 		EntityFlag.FLAG_CHARM,
 		EntityFlag.FLAG_MIDAS_FREEZE,
 		EntityFlag.FLAG_ICE_FROZEN
@@ -193,7 +227,8 @@ local function TryCaptureBoss(npc, ball, player)
 		end
 	end
 	local hpChance = ((2 - (npc.HitPoints / npc.MaxHitPoints)) + 0.1) * 5
-	local luck = math.abs(data.PlayerLuck) < 5 and (data.PlayerLuck * 3) or (data.PlayerLuck / math.abs(data.PlayerLuck)) * 15
+	local luck = math.abs(data.PlayerLuck) < 5 and (data.PlayerLuck * 3) or
+		(data.PlayerLuck / math.abs(data.PlayerLuck)) * 15
 	local randomChance = player:GetCardRNG(data.PokeballType):RandomInt(50) + 1
 	local totalChance = math.ceil(hpChance + ((ballMult * 4) + (statusMult * 5)) + luck)
 	if totalChance >= randomChance then
@@ -203,7 +238,7 @@ local function TryCaptureBoss(npc, ball, player)
 	if shouldCapture then
 		data.NumShouldShake = 3
 	else
-		data.NumShouldShake = EEVEEMOD.RandomNum(0, 3) --troll
+		data.NumShouldShake = VeeHelper.RandomNum(0, 3) --troll
 	end
 	data.ShouldCapture = shouldCapture
 	if data.NumShouldShake > 0 then
@@ -214,6 +249,7 @@ local function TryCaptureBoss(npc, ball, player)
 	end
 end
 
+---@param npc EntityNPC
 local function ShouldCaptureEnemy(npc)
 	local canCapture = false
 
@@ -226,28 +262,26 @@ local function ShouldCaptureEnemy(npc)
 			or npc:HasEntityFlags(EntityFlag.FLAG_HELD)
 			or npc:HasEntityFlags(EntityFlag.FLAG_THROWN)
 		)
-		and not CaptureBlacklist[npc.Type]
+		and not VeeHelper.MajorBosses[npc.Type]
 	then
 		canCapture = true
 	end
 	return canCapture
 end
 
+---@param ball EntityEffect
 local function KeepEnemyFrozenInsideBall(ball)
 	local data = ball:GetData()
 	data.CapturedEnemy.NPC.Position = ball.Position
 	data.CapturedEnemy.NPC:AddEntityFlags(EntityFlag.FLAG_FREEZE)
 	data.CapturedEnemy.NPC.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
-	for _, fly in pairs(data.CapturedEnemy.EternalFlies) do
-		fly:AddEntityFlags(EntityFlag.FLAG_FREEZE)
-		fly.Position = ball.Position
-	end
 end
 
+---@param ball EntityEffect
 local function SpawnPokeballParticles(ball)
 	local data = ball:GetData()
 	for _ = 1, 5 do
-		local randomVec = Vector(2, 0):Rotated(EEVEEMOD.RandomNum(360))
+		local randomVec = Vector(2, 0):Rotated(VeeHelper.RandomNum(360))
 		local gibs = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.TOOTH_PARTICLE, 0, ball.Position, randomVec, ball)
 		local sprite = gibs:GetSprite()
 		sprite:ReplaceSpritesheet(0, "gfx/effects/pokeball_gibs_" .. EEVEEMOD.PokeballTypeToString[data.PokeballType] .. ".png")
@@ -255,16 +289,14 @@ local function SpawnPokeballParticles(ball)
 	end
 end
 
+---@param ball EntityEffect
 local function DestroyPokeball(ball)
-	local data = ball:GetData()
 	EEVEEMOD.sfx:Play(SoundEffect.SOUND_METAL_BLOCKBREAK, 1, 0, false, 1.5)
 	SpawnPokeballParticles(ball)
-	if data.Pickup then
-		data.Pickup:Remove()
-	end
 	ball:Remove()
 end
 
+---@param ball EntityEffect
 function pokeball:TryCaptureNPC(ball)
 	local data = ball:GetData()
 
@@ -274,7 +306,6 @@ function pokeball:TryCaptureNPC(ball)
 			if ShouldCaptureEnemy(npc) then
 				data.CapturedEnemy = {
 					NPC = npc,
-					EternalFlies = {},
 					Collision = npc.EntityCollisionClass,
 					IsBoss = npc:IsBoss(),
 				}
@@ -284,8 +315,7 @@ function pokeball:TryCaptureNPC(ball)
 						and eternalFly.Parent
 						and eternalFly.Parent.InitSeed == npc.InitSeed
 					then
-						table.insert(data.CapturedEnemy.EternalFlies, eternalFly)
-						eternalFly.Visible = false
+						eternalFly:Remove()
 					end
 				end
 
@@ -293,8 +323,12 @@ function pokeball:TryCaptureNPC(ball)
 				npc.Visible = false
 				if not npc:IsBoss() then
 					data.ShouldCapture = true
+					if npc:GetData().StarterPokemon then
+						npc:ClearEntityFlags(EntityFlag.FLAG_CONFUSION)
+					end
 				end
 				ball.Velocity = ball.Velocity:Resized(0.9)
+				return
 			end
 		end
 	elseif data.CapturedEnemy and data.CapturedEnemy.NPC then
@@ -306,26 +340,80 @@ function pokeball:TryCaptureNPC(ball)
 	end
 end
 
+---@param old EntityNPC
+local function CloneNPC(old)
+	local new
+	-- Game:Spawn doesn't work if a SpawnerEntity isn't given, so this function
+	-- is ever-so-slightly inaccurate
+	if old.InitSeed and old.SpawnerEntity then
+		new = Game():Spawn(old.Type, old.Variant, old.SubType, old.Position, old.Velocity, old.SpawnerEntity, old.InitSeed):
+			ToNPC()
+	else
+		new = Isaac.Spawn(old.Type, old.Variant, old.SubType, old.Position, old.Velocity, old.SpawnerEntity):ToNPC()
+	end
+
+	new:AddEntityFlags(old:GetEntityFlags())
+	if old:GetChampionColorIdx() ~= -1 then
+		new:MakeChampion(1, old:GetChampionColorIdx(), false)
+	end
+
+	-- Clone fields
+	-- As far as I'm aware, the following fields are the only fields you can
+	-- modify without a "no member named" error, achieved through
+	-- plain bruteforcing
+	for _, key in ipairs({
+		'Parent', 'Child', 'Color', 'EntityCollisionClass', 'GridCollisionClass', 'HitPoints', 'Parent', 'Child', 'Color',
+		'EntityCollisionClass', 'GridCollisionClass', 'HitPoints', 'MaxHitPoints', 'Visible', 'CanShutDoors', 'CollisionDamage',
+		'DepthOffset', 'FlipX', 'Friction', 'GroupIdx', 'I1', 'I2', 'Mass', 'PositionOffset',
+		'RenderZOffset', 'Scale', 'Size', 'SizeMulti', 'SplatColor', 'SpriteOffset', 'SpriteRotation',
+		'SpriteScale', 'State', 'StateFrame', 'V1', 'V2'
+	}) do
+		old[key] = new[key]
+	end
+
+	-- Clone sprite
+	new:GetSprite():Play(old:GetSprite():GetAnimation())
+	new:GetSprite():SetFrame(old:GetSprite():GetAnimation(), old:GetSprite():GetFrame())
+	if not old:GetSprite():IsPlaying(old:GetSprite():GetAnimation()) then
+		new:GetSprite():Stop()
+	end
+
+	new:GetSprite():SetOverlayFrame(old:GetSprite():GetOverlayAnimation(), old:GetSprite():GetOverlayFrame())
+	-- There isn't a method to set the overlay render priority, so this function
+	-- is ever-so-slightly inaccurate once more
+	-- Isaac modding is great
+
+	return new
+end
+
+---@param ball EntityEffect
 local function ReleaseNPC(ball)
 	local data = ball:GetData()
-	local npc = data.CapturedEnemy.NPC
+	---@type EntityNPC
+	local capturedNPC = data.CapturedEnemy.NPC
+	---@type EntityNPC
+	local npc
+
+	if capturedNPC:IsBoss() then
+		-- Don't recreate NPC; release as-is
+		npc = capturedNPC
+	else
+		-- Re-create NPC to recreate Friendly Ball logic and fix softlocks
+		npc = CloneNPC(capturedNPC)
+		capturedNPC.Visible = false
+		capturedNPC:Remove()
+	end
+
 	npc:SetColor(Color(1, 1, 1, 1, 1, 1, 1), 30, 10, true, false)
 	npc:ClearEntityFlags(EntityFlag.FLAG_FREEZE)
 	npc.EntityCollisionClass = data.CapturedEnemy.Collision
 	npc.Visible = true
-	for _, fly in pairs(data.CapturedEnemy.EternalFlies) do
-		fly:ClearEntityFlags(EntityFlag.FLAG_FREEZE)
-		fly.Visible = true
-	end
+
 	if data.ShouldCapture then
 		EEVEEMOD.sfx:Play(EEVEEMOD.SoundEffect.POKEBALL_OPEN)
 		npc:AddCharmed(EntityRef(ball), -1)
 		npc:AddEntityFlags(EntityFlag.FLAG_PERSISTENT)
 		npc:AddEntityFlags(EntityFlag.FLAG_FRIENDLY_BALL)
-		for _, fly in pairs(data.CapturedEnemy.EternalFlies) do
-			fly:AddCharmed(EntityRef(ball), -1)
-			fly:AddEntityFlags(EntityFlag.FLAG_FRIENDLY_BALL)
-		end
 
 		local healthModifier = {
 			[EEVEEMOD.PokeballType.POKEBALL] = 2,
@@ -333,7 +421,7 @@ local function ReleaseNPC(ball)
 			[EEVEEMOD.PokeballType.ULTRABALL] = 6,
 			[EEVEEMOD.CollectibleType.MASTER_BALL] = 10
 		}
-		        for ball, modifier in pairs(healthModifier) do
+		for ball, modifier in pairs(healthModifier) do
 			local challenge = Isaac.GetChallenge()
 
 			if challenge == EEVEEMOD.Challenge.POKEY_MANS_CRYSTAL then
@@ -343,7 +431,7 @@ local function ReleaseNPC(ball)
 		if npc:IsBoss() then
 			local healthToSet = (npc.MaxHitPoints / 6) * healthModifier[data.PokeballType]
 			if npc.HitPoints < healthToSet then
-				if data.PokeballType == EEVEEMOD.PokeballType.MASTER_BALL then
+				if data.PokeballType == EEVEEMOD.CollectibleType.MASTER_BALL then
 					npc:AddHealth(npc.MaxHitPoints)
 				else
 					npc:AddHealth(healthToSet)
@@ -358,6 +446,8 @@ local function ReleaseNPC(ball)
 	data.CapturedEnemy.NPC = nil
 end
 
+---@param ball EntityEffect
+---@param player EntityPlayer
 local function RemoveMasterBallItem(ball, player)
 	local data = ball:GetData()
 	if data.PokeballType == EEVEEMOD.CollectibleType.MASTER_BALL then
@@ -372,6 +462,8 @@ local function RemoveMasterBallItem(ball, player)
 	end
 end
 
+---@param ball EntityEffect
+---@param player EntityPlayer
 local function ShouldDestroyBall(ball, player)
 	local data = ball:GetData()
 	local shouldDestroy = false
@@ -387,6 +479,7 @@ local function ShouldDestroyBall(ball, player)
 	return shouldDestroy
 end
 
+---@param ball EntityEffect
 function pokeball:OnAnimationFinishOrEvent(ball)
 	local data = ball:GetData()
 	local sprite = ball:GetSprite()
@@ -400,6 +493,14 @@ function pokeball:OnAnimationFinishOrEvent(ball)
 			if data.CapturedEnemy.NPC:IsBoss() and data.PokeballType ~= EEVEEMOD.CollectibleType.MASTER_BALL then
 				TryCaptureBoss(data.CapturedEnemy.NPC, ball, player)
 			else
+				local challenge = Isaac.GetChallenge()
+
+				if challenge == EEVEEMOD.Challenge.POKEY_MANS_CRYSTAL
+					and VeeHelper.IsInStartingRoom()
+					and pokeyMans:ShouldRespawnStarters() then
+					sprite:SetFrame("Idle", 1)
+					return
+				end
 				sprite:Play("Open", true)
 				data.ShouldCapture = true
 			end
@@ -424,8 +525,14 @@ function pokeball:OnAnimationFinishOrEvent(ball)
 	elseif sprite:IsEventTriggered("Release") and data.CapturedEnemy.NPC then
 		ReleaseNPC(ball)
 		RemoveMasterBallItem(ball, player)
-	elseif sprite:IsFinished("Open") then
 		if ShouldDestroyBall(ball, player) then
+			data.DestroyPokeBall = true
+			if data.Pickup then
+				data.Pickup:Remove()
+			end
+		end
+	elseif sprite:IsFinished("Open") then
+		if data.DestroyPokeBall then
 			sprite:Play("Destroy_Open", true)
 		else
 			sprite:Play("Close", true)
@@ -437,6 +544,7 @@ function pokeball:OnAnimationFinishOrEvent(ball)
 	end
 end
 
+---@param ball EntityEffect
 local function RechargeMasterBallOnTouch(ball)
 	local data = ball:GetData()
 	if not data.CapturedEnemy
@@ -459,6 +567,7 @@ local function RechargeMasterBallOnTouch(ball)
 	end
 end
 
+---@param ball EntityEffect
 local function HandleAttachedBallPickup(ball)
 	local data = ball:GetData()
 	if data.Pickup then
@@ -466,12 +575,13 @@ local function HandleAttachedBallPickup(ball)
 		if data.CapturedEnemy and not data.CanCollectBall then
 			data.Pickup:GetSprite():SetFrame(24) --Prevents from being collected.
 		end
-		if data.Pickup:IsDead() then
+		if data.Pickup:IsDead() and not data.DestroyPokeBall then
 			ball:Remove()
 		end
 	end
 end
 
+---@param ball EntityEffect
 function pokeball:PokeballEffectUpdate(ball)
 	local data = ball:GetData()
 	local sprite = ball:GetSprite()
@@ -510,8 +620,24 @@ function pokeball:ResetBallsOnNewRoom(player)
 	end
 end
 
+---@param player EntityPlayer
+---@param inputHook InputHook
+---@param buttonAction ButtonAction
 function pokeball:ForceKeysForPokeball(player, inputHook, buttonAction)
 	local data = player:GetData()
+
+	if buttonAction == ButtonAction.ACTION_PILLCARD
+		and inputHook == InputHook.IS_ACTION_TRIGGERED
+		and Input.IsActionTriggered(ButtonAction.ACTION_PILLCARD, player.ControllerIndex)
+		and (
+		player:GetCard(0) == EEVEEMOD.PokeballType.POKEBALL
+			or player:GetCard(0) == EEVEEMOD.PokeballType.GREATBALL
+			or player:GetCard(0) == EEVEEMOD.PokeballType.ULTRABALL
+		)
+	then
+		pokeball:OnPokeballUse(player:GetCard(0), player)
+		return false
+	end
 
 	--Forces you to remove the Poké Ball
 	if buttonAction == ButtonAction.ACTION_PILLCARD
@@ -531,6 +657,7 @@ local PokeGoEnemies = {
 	EntityType.ENTITY_VIS
 }
 
+---@param familiar EntityFamiliar
 function pokeball:OnMasterBallWispDeath(familiar)
 	if familiar.Variant ~= FamiliarVariant.WISP or familiar.SubType ~= EEVEEMOD.CollectibleType.MASTER_BALL then return end
 	local wispRNG = RNG()

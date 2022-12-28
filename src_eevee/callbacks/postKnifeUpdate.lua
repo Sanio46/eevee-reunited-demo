@@ -1,11 +1,14 @@
 local postKnifeUpdate = {}
 
 local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
+local swiftKnife = require("src_eevee.attacks.eevee.swiftKnife")
 local triggerOnFire = require("src_eevee.items.triggerOnFire")
 
+---@param knife EntityKnife
 function postKnifeUpdate:main(knife)
-	swiftAttack:SwiftAttackUpdate(knife)
-	swiftAttack:SpiritSword(knife)
+	swiftKnife:SwiftKnifeUpdate(knife)
+	swiftAttack:SpiritSwordInit(knife)
+	swiftAttack:InitLudoTearOrKnifeOnUpdate(knife)
 	triggerOnFire:OnKnifeUpdate(knife)
 end
 

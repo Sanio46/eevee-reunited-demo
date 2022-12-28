@@ -1,22 +1,32 @@
 local customSpiritSword = {}
 
-function customSpiritSword:ReplaceSpiritSwordOnInit(sword)
-	local sprite = sword:GetSprite()
-	local swordPath = "gfx/effects/spirit_sword_starrod.png"
+---@param knife EntityKnife
+function customSpiritSword:ReplaceSpiritSwordOnInit(knife)
+	if knife.Variant ~= VeeHelper.KnifeVariant.SPIRIT_SWORD and knife.Variant ~= VeeHelper.KnifeVariant.TECH_SWORD then return end
+	local sprite = knife:GetSprite()
+	local swordPathPng = "gfx/effects/sword_eevee.png"
+	local swordPathAnm2 = "gfx/sword_eevee.anm2"
 
-	if sword.Variant == VeeHelper.KnifeVariant.TECH_SWORD then
-		swordPath = string.gsub(swordPath, "spirit", "tech")
+	if knife.Variant == VeeHelper.KnifeVariant.TECH_SWORD then
+		swordPathAnm2 = string.gsub(swordPathAnm2, ".anm2", "_tech.anm2")
+		swordPathPng = string.gsub(swordPathAnm2, ".png", "_tech.png")
 	end
 
-	if sword.SpawnerEntity
-		and sword.SpawnerEntity:ToPlayer()
-		and sword.SpawnerEntity:ToPlayer():GetPlayerType() == EEVEEMOD.PlayerType.EEVEE
-		and sword.SpawnerEntity:ToPlayer():HasWeaponType(WeaponType.WEAPON_SPIRIT_SWORD)
+	if knife.SpawnerEntity
+		and knife.SpawnerEntity:ToPlayer()
+		and knife.SpawnerEntity:ToPlayer():GetPlayerType() == EEVEEMOD.PlayerType.EEVEE
+		and knife.SpawnerEntity:ToPlayer():HasWeaponType(WeaponType.WEAPON_SPIRIT_SWORD)
 	then
-		for i = 0, 4 do
-			sprite:ReplaceSpritesheet(i, swordPath)
+		if knife.SubType == 4 then --Sword woosh
+			sprite:ReplaceSpritesheet(1, swordPathPng)
+			sprite:ReplaceSpritesheet(2, swordPathPng)
+			sprite:LoadGraphics()
+		elseif knife.SubType == 0 then --Regular sword
+			sprite:Load(swordPathAnm2, true)
+			sprite:ReplaceSpritesheet(1, "gfx/blank.png")
+			sprite:ReplaceSpritesheet(2, "gfx/blank.png")
+			sprite:LoadGraphics()
 		end
-		sprite:LoadGraphics()
 	end
 end
 

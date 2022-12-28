@@ -1,5 +1,6 @@
 local Tracker = {}
 
+---@class Unlocks
 local UnlocksTemplate = {
 	MomsHeart = { Unlock = false, Hard = false },
 	Isaac = { Unlock = false, Hard = false },
@@ -134,9 +135,7 @@ local function UpdateCompletion(name, difficulty)
 				end
 			end
 
-			if (not MissingUnlock)
-				and TargetTab.Haunted
-			then
+			if (not MissingUnlock) then
 				if not TargetTab.FullCompletion.Unlock then
 					TargetTab.FullCompletion.Unlock = true
 					CCO.AchievementDisplayAPI.PlayAchievement("gfx/ui/achieeveements/" .. EEVEEMOD.AchievementGraphics.Eevee_B.FullCompletion .. ".png")

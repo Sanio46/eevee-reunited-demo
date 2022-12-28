@@ -1,8 +1,8 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="10/14/2021 5:25:50 PM" Version="137" Fps="30"/>
+	<Info CreatedBy="robot" CreatedOn="9/8/2022 7:51:36 PM" Version="138" Fps="30"/>
 	<Content>
 		<Spritesheets>
-			<Spritesheet Path="costumes_eevee\costume_019_brimstone_hair.png" Id="0"/>
+			<Spritesheet Path="..\blank.png" Id="0"/>
 			<Spritesheet Path="costumes\costume_eevee_body_black.png" Id="1"/>
 		</Spritesheets>
 		<Layers>

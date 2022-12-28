@@ -2,6 +2,9 @@ local preTearCollision = {}
 
 local lilEevee = require("src_eevee.items.collectibles.lilEevee")
 
+---@param tear EntityTear
+---@param collider Entity
+---@param low boolean
 function preTearCollision:main(tear, collider, low)
 	lilEevee:OnLilLeafeonTearCollision(tear, collider, low)
 end

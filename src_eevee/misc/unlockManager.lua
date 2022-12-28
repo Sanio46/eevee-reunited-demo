@@ -4,7 +4,7 @@ local Manager = {}
 
 local itemToUnlock = {
 	[EEVEEMOD.CollectibleType.SHINY_CHARM] = { Unlock = "Isaac" },
-	[EEVEEMOD.CollectibleType.COOKIE_JAR[6]] = { Unlock = "BlueBaby" },
+	[EEVEEMOD.CollectibleType.COOKIE_JAR] = { Unlock = "BlueBaby" },
 	[EEVEEMOD.CollectibleType.BLACK_GLASSES] = { Unlock = "Satan" },
 	[EEVEEMOD.CollectibleType.SNEAK_SCARF] = { Unlock = "BossRush" },
 	[EEVEEMOD.CollectibleType.STRANGE_EGG] = { Unlock = "MegaSatan" },
@@ -12,36 +12,40 @@ local itemToUnlock = {
 	[EEVEEMOD.CollectibleType.BAG_OF_POKEBALLS] = { Unlock = "Mother" },
 	[EEVEEMOD.CollectibleType.MASTER_BALL] = { Unlock = "Beast" },
 	[EEVEEMOD.CollectibleType.WONDEROUS_LAUNCHER] = { Special = function()
-		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.GreedMode.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.GreedMode.Hard)
+		return (
+			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.GreedMode.Unlock and
+				EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.GreedMode.Hard)
 	end },
-	[EEVEEMOD.Birthright.TAIL_WHIP] = { Special = function()
-		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.FullCompletion.Hard)
+	[EEVEEMOD.CollectibleType.TAIL_WHIP] = { Special = function()
+		return (
+			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.FullCompletion.Unlock and
+				EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.FullCompletion.Hard)
 	end },
 	[EEVEEMOD.CollectibleType.POKE_STOP] = { Special = function()
 		return EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal
 	end },
-	--[[ [EEVEEMOD.Birthright.OVERHEAT] = {Special = function()
+	--[[ [EEVEEMOD.CollectibleType.OVERHEAT] = {Special = function()
 		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
 	end},
-	[EEVEEMOD.Birthright.THUNDER] = {Special = function()
+	[EEVEEMOD.CollectibleType.THUNDER] = {Special = function()
 		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
 	end},
-	[EEVEEMOD.Birthright.DIVE] = {Special = function()
+	[EEVEEMOD.CollectibleType.DIVE] = {Special = function()
 		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
 	end},
-	[EEVEEMOD.Birthright.FUTURE_SIGHT] = {Special = function()
+	[EEVEEMOD.CollectibleType.FUTURE_SIGHT] = {Special = function()
 		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
 	end},
-	[EEVEEMOD.Birthright.BRE] = {Special = function()
+	[EEVEEMOD.CollectibleType.BRE] = {Special = function()
 		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
 	end},
-	[EEVEEMOD.Birthright.GLACE] = {Special = function()
+	[EEVEEMOD.CollectibleType.GLACE] = {Special = function()
 		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
 	end},
-	[EEVEEMOD.Birthright.SWORDS_DANCE] = {Special = function()
+	[EEVEEMOD.CollectibleType.SWORDS_DANCE] = {Special = function()
 		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
 	end},
-	[EEVEEMOD.Birthright.SYLV] = {Special = function()
+	[EEVEEMOD.CollectibleType.SYLV] = {Special = function()
 		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
 	end},
 	[EEVEEMOD.CollectibleType.GIGANTAFLUFF] = {Unlock = "Beast", Tainted = true}
@@ -54,14 +58,16 @@ local trinketToUnlock = {
 	[EEVEEMOD.TrinketType.ALERT_SPECS] = { Unlock = "GreedMode" },
 }
 
-function Manager.postPlayerInit(player)
+function Manager.postPlayerInit(_)
 	local TotPlayers = #Isaac.FindByType(EntityType.ENTITY_PLAYER)
 
 	if TotPlayers == 0 then
 		if EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.MomsHeart == nil then
+			---@type Unlocks
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee = tracker.CreateUnlocksTemplate()
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.Tainted = false
 
+			---@type Unlocks
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B = tracker.CreateUnlocksTemplate()
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.PolNegPath = false
 			EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.SoulPath = false
@@ -100,16 +106,20 @@ function Manager.postPlayerInit(player)
 	end
 end
 
+---@param pickup EntityPickup
 function Manager.postPickupInit(pickup)
 	if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE
 		or pickup.Variant == PickupVariant.PICKUP_TRINKET
 	then
-
+		local isGoldenTrinket = false
 		local tab
 		if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then
 			tab = itemToUnlock[pickup.SubType]
 		else
-			tab = trinketToUnlock[pickup.SubType]
+			if pickup.SubType & TrinketType.TRINKET_GOLDEN_FLAG ~= 0 then
+				isGoldenTrinket = true
+			end
+			tab = trinketToUnlock[pickup.SubType & TrinketType.TRINKET_ID_MASK]
 		end
 
 		if (not tab) then return end
@@ -122,17 +132,22 @@ function Manager.postPickupInit(pickup)
 		else
 			Unlocked = EEVEEMOD.PERSISTENT_DATA.UnlockData["Eevee" .. Suffix][tab.Unlock].Unlock
 		end
-		
+
 		if not Unlocked then
 			if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then
-				local roomPool = EEVEEMOD.game:GetItemPool():GetPoolForRoom(EEVEEMOD.game:GetRoom():GetType(), EEVEEMOD.game:GetLevel():GetCurrentRoomDesc().SpawnSeed)
+				local roomPool = EEVEEMOD.game:GetItemPool():GetPoolForRoom(EEVEEMOD.game:GetRoom():GetType(),
+					EEVEEMOD.game:GetLevel():GetCurrentRoomDesc().SpawnSeed)
 				local targetItem = EEVEEMOD.game:GetItemPool():GetCollectible(roomPool, true, pickup.InitSeed)
 
 				EEVEEMOD.game:GetItemPool():RemoveCollectible(pickup.SubType)
 				pickup:Morph(pickup.Type, pickup.Variant, targetItem, true, true, true)
 			elseif pickup.Variant == PickupVariant.PICKUP_TRINKET then
 				EEVEEMOD.game:GetItemPool():RemoveTrinket(pickup.SubType)
-				pickup:Morph(pickup.Type, pickup.Variant, EEVEEMOD.game:GetItemPool():GetTrinket(), true, true, true)
+				local newTrinket = EEVEEMOD.game:GetItemPool():GetTrinket()
+				if isGoldenTrinket then
+					newTrinket = newTrinket | TrinketType.TRINKET_GOLDEN_FLAG
+				end
+				pickup:Morph(pickup.Type, pickup.Variant, newTrinket, true, true, true)
 			end
 		end
 	elseif pickup.Variant == PickupVariant.PICKUP_TAROTCARD then --Placeholder in case Eeveium Z is a rune
@@ -152,10 +167,15 @@ function Manager.postPickupInit(pickup)
 	end
 end
 
+---@param player EntityPlayer
+---@param itemID CollectibleType
 local function IsPocketBirthright(player, itemID)
-	return player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and player:GetPlayerType() == EEVEEMOD.BirthrightToPlayerType[itemID] and player:GetActiveItem(ActiveSlot.SLOT_POCKET) == itemID
+	return player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and
+		player:GetPlayerType() == EEVEEMOD.BirthrightToPlayerType[itemID] and
+		player:GetActiveItem(ActiveSlot.SLOT_POCKET) == itemID
 end
 
+---@param player EntityPlayer
 function Manager.postPlayerUpdate(player)
 	for item, tab in pairs(itemToUnlock) do
 		local HasIt = player:HasCollectible(item)
@@ -167,7 +187,9 @@ function Manager.postPlayerUpdate(player)
 			if tab.Special then
 				Unlocked = tab.Special()
 			else
-				Unlocked = EEVEEMOD.PERSISTENT_DATA.UnlockData["Eevee" .. Suffix][tab.Unlock].Unlock
+				---@type Unlocks
+				local unlockData = EEVEEMOD.PERSISTENT_DATA.UnlockData["Eevee" .. Suffix]
+				Unlocked = unlockData[tab.Unlock].Unlock
 			end
 
 			if not Unlocked and not IsPocketBirthright(player, item) then

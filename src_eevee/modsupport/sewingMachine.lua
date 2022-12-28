@@ -18,6 +18,7 @@ local EIDDescs = {
 	}
 }
 
+---@param familiar EntityFamiliar
 local function resetStats(familiar)
 	local initSeed = tostring(familiar.InitSeed)
 
@@ -30,6 +31,7 @@ local function resetStats(familiar)
 
 end
 
+---@param familiar EntityFamiliar
 function sewingMachine:OnStateChange(familiar)
 	local initSeed = tostring(familiar.InitSeed)
 
@@ -43,6 +45,7 @@ function sewingMachine:OnStateChange(familiar)
 	end
 end
 
+---@param familiar EntityFamiliar
 function sewingMachine:OnUltraGain(familiar, _)
 	local initSeed = tostring(familiar.InitSeed)
 
@@ -68,16 +71,19 @@ local shouldDisplayLevelUp = false
 local levelUpPos = 0
 local levelUpDur = 7
 
+---@type LilEeveeSaveData
 function sewingMachine:UpdateGainRate(lilEeveeData)
 	gainRate = lilEeveeData.Exp.Stored / 30
 end
 
+---@type LilEeveeSaveData
 function sewingMachine:UpdateXPRequirement(lilEeveeData)
 	lilEeveeData.Exp.ForNextLevel = lilEeveeData.Level + (lilEeveeData.Level ^ 2) * 0.2
 	local previousLevel = lilEeveeData.Level - 1
 	previousRequirement = previousLevel + previousLevel ^ 2
 end
 
+---@param familiar EntityFamiliar
 function sewingMachine:GainXP(familiar, lilEeveeData)
 	if roomCleared == familiar.RoomClearCount or lilEeveeData.Level >= levelCap then return end
 	roomCleared = familiar.RoomClearCount
@@ -89,7 +95,7 @@ function sewingMachine:GainXP(familiar, lilEeveeData)
 	local roomDesc = level:GetCurrentRoomDesc()
 	local stageType = level:GetStage() > 0 and level:GetStage() or LevelStage.STAGE8 --If for some reason you reach a modding-shenanigans negative floor, level gain is that of
 	local isMinibossRoom = roomDesc.SurpriseMiniboss
-	local isBossRoom = roomDesc.Data.RoomType == RoomType.ROOM_BOSS
+	local isBossRoom = roomDesc.Data.Type == RoomType.ROOM_BOSS
 	local xpToGain = 1
 	local xpMultiplier = 1 + (stageType * 0.3)
 
@@ -108,6 +114,7 @@ function sewingMachine:GainXP(familiar, lilEeveeData)
 	EEVEEMOD.sfx:Play(EEVEEMOD.SoundEffect.EXP_GAIN)
 end
 
+---@type LilEeveeSaveData
 function sewingMachine:AddXP(lilEeveeData)
 	if lilEeveeData.Exp.Stored <= 0 then return end
 
@@ -142,7 +149,7 @@ function sewingMachine:LevelBarOnRender()
 			local frameSet = math.ceil(percentage * 100)
 			frameSet = frameSet > 0 and frameSet < 101 and frameSet or 1
 			if not EEVEEMOD.Sprite.LevelBar:IsLoaded() then
-				EEVEEMOD.Sprite.LevelBar:Load("gfx/render_lileevee_xpbar.anm2")
+				EEVEEMOD.Sprite.LevelBar:Load("gfx/render_lileevee_xpbar.anm2", true)
 				EEVEEMOD.Sprite.LevelBar:Play("Main", true)
 				EEVEEMOD.Sprite.LevelBar:SetFrame(frameSet)
 				tempest:Load("font/terminus.fnt")
@@ -164,10 +171,12 @@ function sewingMachine:LevelBarOnRender()
 	end
 end
 
+---@param familiar EntityFamiliar
 function sewingMachine:OnUpgradedFamiliarUpdate(familiar)
 	local initSeed = tostring(familiar.InitSeed)
 
 	if not EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed] or not Sewn_API:IsSuper(familiar:GetData(), true) then return end
+	---@type LilEeveeSaveData
 	local lilEeveeData = EEVEEMOD.PERSISTENT_DATA.LilEeveeData[initSeed]
 	lilEeveeData = Sewn_API:IsUltra(familiar:GetData()) and lilEeveeData.Ultra or lilEeveeData.Super
 	sewingMachine:GainXP(familiar, lilEeveeData)

@@ -2,6 +2,9 @@ local prePlayerCollision = {}
 
 local pokeStop = require("src_eevee.items.collectibles.pokeStop")
 
+---@param player EntityPlayer
+---@param collider Entity
+---@param low boolean
 function prePlayerCollision:main(player, collider, low)
 	pokeStop:IfTouchPokeStop(player, collider, low)
 end

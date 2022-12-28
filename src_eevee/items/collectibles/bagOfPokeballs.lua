@@ -1,18 +1,6 @@
 local bagOfPokeballs = {}
 
-function bagOfPokeballs:CheckBagOfPokeballs(player, cacheFlag)
-	if cacheFlag == CacheFlag.CACHE_FAMILIARS then
-		local effects = player:GetEffects()
-		local boxOfFriendsUses = effects:GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS)
-		local itemNum = player:GetCollectibleNum(EEVEEMOD.CollectibleType.BAG_OF_POKEBALLS)
-		local familiarNum = itemNum > 0 and (boxOfFriendsUses + itemNum) or 0
-		local bagRNG = player:GetCollectibleRNG(EEVEEMOD.CollectibleType.BAG_OF_POKEBALLS)
-
-		bagRNG:Next()
-		player:CheckFamiliar(EEVEEMOD.FamiliarVariant.BAG_OF_POKEBALLS, familiarNum, bagRNG)
-	end
-end
-
+---@param familiar EntityFamiliar
 function bagOfPokeballs:SpawnPokeball(familiar)
 	local sprite = familiar:GetSprite()
 	local seed = EEVEEMOD.game:GetRoom():GetSpawnSeed()

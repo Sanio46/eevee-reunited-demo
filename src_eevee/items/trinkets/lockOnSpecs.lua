@@ -41,7 +41,8 @@ function lockOnSpecs:DropTrinket(player)
 
 	EEVEEMOD.sfx:Play(SoundEffect.SOUND_THUMBS_DOWN)
 	player:TryRemoveTrinket(EEVEEMOD.TrinketType.LOCKON_SPECS)
-	Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.LOCKON_SPECS_DROP, 0, player.Position, Vector(EEVEEMOD.RandomNum(velocityStrength) + 1, EEVEEMOD.RandomNum(velocityStrength) + 1), player)
+	Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.LOCKON_SPECS_DROP, 0, player.Position,
+		Vector(VeeHelper.RandomNum(velocityStrength) + 1, VeeHelper.RandomNum(velocityStrength) + 1), player)
 
 	effects:RemoveCollectibleEffect(EEVEEMOD.TrinketType.LOCKON_SPECS, -1)
 end

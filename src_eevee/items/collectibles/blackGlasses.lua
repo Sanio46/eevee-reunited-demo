@@ -1,5 +1,6 @@
 local blackGlasses = {}
 
+---@param player EntityPlayer
 function blackGlasses:DetectDeals(player)
 	local data = player:GetData()
 
@@ -20,25 +21,31 @@ function blackGlasses:DetectDeals(player)
 	end
 end
 
-function blackGlasses:OnCollectibleCollision(item, player, low)
+---@param item EntityPickup
+---@param player EntityPlayer
+function blackGlasses:OnCollectibleCollision(item, player)
 	local data = player:GetData()
 
 	if item:IsShopItem()
 		and item.SubType ~= 0
 		and (
-		item.Price < 0 or player:HasCollectible(CollectibleType.COLLECTIBLE_POUND_OF_FLESH)
-			and item.Price >= 0
+		(item.Price < 0 and item.Price ~= -1000)
+			or (player:HasCollectible(CollectibleType.COLLECTIBLE_POUND_OF_FLESH) and item.Price >= 0)
 		) then
 		data.PotentialDeal = item
 		data.PotentialDealID = item.SubType
 	end
 end
 
+---@param player EntityPlayer
+---@param itemStats ItemStats
 function blackGlasses:Stats(player, itemStats)
 	if not player:HasCollectible(EEVEEMOD.CollectibleType.BLACK_GLASSES) then return end
 	local effectNum = player:GetEffects():GetCollectibleEffectNum(EEVEEMOD.CollectibleType.BLACK_GLASSES)
 
-	itemStats.DAMAGE_FLAT = itemStats.DAMAGE_FLAT + (0.5 * player:GetCollectibleNum(EEVEEMOD.CollectibleType.BLACK_GLASSES))
+	itemStats.DAMAGE_FLAT = itemStats.DAMAGE_FLAT +
+		(0.5 * player:GetCollectibleNum(EEVEEMOD.CollectibleType.BLACK_GLASSES)
+		)
 	itemStats.DAMAGE_MULT = itemStats.DAMAGE_MULT + (0.1 * effectNum)
 end
 

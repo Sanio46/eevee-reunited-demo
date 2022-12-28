@@ -1,16 +1,9 @@
---Wait for Eeveelution sprites, Sewing Machine support
-
 local lilEevee = {}
 
-local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
+local swiftTear = require("src_eevee.attacks.eevee.swiftTear")
+local attackHelper = require("src_eevee.attacks.attackHelper")
 
-local DirAngles = {
-	[-90] = 1,
-	[0] = 2,
-	[90] = 3,
-	[180] = 0,
-	[270] = 1,
-}
+local VINE_DURATION = 45
 
 local eeveeDirState = {
 	"Side2",
@@ -19,6 +12,7 @@ local eeveeDirState = {
 	"Down"
 }
 
+---@class EvolutionStates
 local EvolutionStates = {
 	EEVEE = 0,
 	FLAREON = 1,
@@ -31,6 +25,14 @@ local EvolutionStates = {
 	SYLVEON = 8
 }
 
+---@class LilEeveeStats
+---@field Damage number
+---@field FireCooldown number
+---@field Flags TearFlags
+---@field TearVariant TearVariant
+---@field Color Color
+
+---@type table<EvolutionStates, LilEeveeStats>
 local EvolutionStats = {
 	[EvolutionStates.EEVEE] = {
 		Damage = 2.5,
@@ -77,7 +79,7 @@ local EvolutionStats = {
 	[EvolutionStates.GLACEON] = {
 		Damage = 3.5,
 		FireCooldown = 22,
-		Flags = TearVariant.TEAR_ICE,
+		Flags = TearFlags.TEAR_ICE,
 		TearVariant = TearVariant.ICE,
 		Color = Color.Default
 	},
@@ -97,6 +99,7 @@ local EvolutionStats = {
 	}
 }
 
+---@type table<EvolutionStates, string>
 local EvoltuionSprites = {
 	[EvolutionStates.EEVEE] = "gfx/familiar/lil_eevee.png",
 	[EvolutionStates.FLAREON] = "gfx/familiar/lil_flareon.png",
@@ -109,6 +112,7 @@ local EvoltuionSprites = {
 	[EvolutionStates.SYLVEON] = "gfx/familiar/lil_sylveon.png"
 }
 
+---@param player EntityPlayer
 local function ShouldAutoAim(player)
 	local shouldAuto = false
 	local playerType = player:GetPlayerType()
@@ -120,8 +124,10 @@ local function ShouldAutoAim(player)
 	return shouldAuto
 end
 
+---@param familiar EntityFamiliar
+---@param player EntityPlayer
 local function CalculateFamiliarShootDirection(familiar, player)
-	local shootDir = VeeHelper.AddTearVelocity(VeeHelper.GetBasicFireDirection(player), 10, player, true)
+	local shootDir = VeeHelper.AddTearVelocity(attackHelper:FireDirectionToVector(player), 10, player)
 
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)
 		or player:HasCollectible(CollectibleType.COLLECTIBLE_EYE_OF_THE_OCCULT)
@@ -132,11 +138,13 @@ local function CalculateFamiliarShootDirection(familiar, player)
 			shootDir = (targetPos - familiar.Position):Normalized():Resized(10)
 		end
 	elseif ShouldAutoAim(player) then
-		shootDir = VeeHelper.TryFireToNearestEnemy(familiar, 500, shootDir):Resized(10)
+		shootDir = attackHelper:TryFireToNearestEnemy(familiar, 500, shootDir):Resized(10)
 	end
 	return shootDir
 end
 
+---@param familiar EntityFamiliar
+---@param player EntityPlayer
 local function LilEeveeFireTear(familiar, player)
 	local fData = familiar:GetData()
 	local stats = EvolutionStats[familiar.State]
@@ -156,7 +164,8 @@ local function LilEeveeFireTear(familiar, player)
 	local damage = stats.Damage
 	local fireDelay = stats.FireCooldown
 	if Sewn_API ~= nil and Sewn_API:IsSuper(fData, true) then
-		local level = Sewn_API:IsUltra(fData) and lilEeveeData.Ultra.Level or Sewn_API:IsSuper(fData, false) and lilEeveeData.Super.Level
+		local level = Sewn_API:IsUltra(fData) and lilEeveeData.Ultra.Level or
+			Sewn_API:IsSuper(fData, false) and lilEeveeData.Super.Level
 		damage = damage + (level * 0.2)
 		fireDelay = fireDelay - math.ceil(level * 0.2)
 		fireDelay = fireDelay > 2 and fireDelay or 2
@@ -167,7 +176,7 @@ local function LilEeveeFireTear(familiar, player)
 	tear:Update()
 
 	if familiar.State == EvolutionStates.EEVEE then
-		swiftBase:AssignBasicSwiftStar(tear)
+		swiftTear:AssignSwiftSprite(tear)
 	end
 
 	--Modifiers
@@ -185,6 +194,7 @@ local function LilEeveeFireTear(familiar, player)
 	tear.CollisionDamage = damage
 end
 
+---@param familiar EntityFamiliar
 local function ChangeLilEeveeState(familiar)
 	local sprite = familiar:GetSprite()
 
@@ -192,6 +202,7 @@ local function ChangeLilEeveeState(familiar)
 	sprite:LoadGraphics()
 end
 
+---@param familiar EntityFamiliar
 function lilEevee:OnFamiliarInit(familiar)
 	local fData = familiar:GetData()
 
@@ -206,6 +217,7 @@ function lilEevee:OnFamiliarInit(familiar)
 	familiar:GetSprite():Play(fData.AnimState .. "" .. fData.DirState, true)
 end
 
+---@param familiar EntityFamiliar
 function lilEevee:OnFamiliarUpdate(familiar)
 	local player = familiar.Player
 	local fData = familiar:GetData()
@@ -227,8 +239,9 @@ function lilEevee:OnFamiliarUpdate(familiar)
 
 		local fireDir = CalculateFamiliarShootDirection(familiar, player)
 		local dirToFace = VeeHelper.RoundHighestVectorPoint(fireDir):GetAngleDegrees()
-		if DirAngles[dirToFace] then
-			familiar.ShootDirection = DirAngles[dirToFace]
+		local angleToDir = VeeHelper.AngleToFireDirection(dirToFace)
+		if angleToDir then
+			familiar.ShootDirection = angleToDir
 		else
 			familiar.ShootDirection = player:GetHeadDirection()
 		end
@@ -261,20 +274,9 @@ function lilEevee:OnFamiliarUpdate(familiar)
 	end
 end
 
-function lilEevee:CheckLilEevee(player, cacheFlag)
-	if cacheFlag == CacheFlag.CACHE_FAMILIARS then
-		local effects = player:GetEffects()
-		local boxOfFriendsUses = effects:GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS)
-		local itemNum = player:GetCollectibleNum(EEVEEMOD.CollectibleType.LIL_EEVEE)
-		local familiarNum = itemNum > 0 and (boxOfFriendsUses + itemNum) or 0
-		local veeRNG = player:GetCollectibleRNG(EEVEEMOD.CollectibleType.LIL_EEVEE)
-
-		veeRNG:Next()
-		player:CheckFamiliar(EEVEEMOD.FamiliarVariant.LIL_EEVEE, familiarNum, veeRNG)
-	end
-end
-
-function lilEevee:OnRune(rune, player, useFlags)
+---@param rune Card
+---@param player EntityPlayer
+function lilEevee:OnRune(rune, player, _)
 	if VeeHelper.IsRune(rune) == false then return end
 
 	for _, e in pairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, EEVEEMOD.FamiliarVariant.LIL_EEVEE, 0)) do
@@ -284,7 +286,8 @@ function lilEevee:OnRune(rune, player, useFlags)
 		if familiar.Player:GetData().Identifier == player:GetData().Identifier then
 			familiar.State = VeeHelper.DifferentRandomNum({ familiar.State }, 9, veeRNG)
 			ChangeLilEeveeState(familiar)
-			local poof = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, familiar.Position, Vector.Zero, familiar):ToEffect()
+			local poof = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, familiar.Position, Vector.Zero, familiar)
+				:ToEffect()
 			poof:GetSprite().PlaybackSpeed = 1.5
 			poof:FollowParent(familiar)
 			EEVEEMOD.sfx:Play(SoundEffect.SOUND_POWERUP_SPEWER)
@@ -292,15 +295,20 @@ function lilEevee:OnRune(rune, player, useFlags)
 	end
 end
 
+---@param tear EntityTear
 function lilEevee:OnLilVaporeonTearRemove(tear)
 	local data = tear:GetData()
 	if not data.LilEeveeTear and data.LilEeveeTear ~= EvolutionStates.VAPOREON then return end
 
-	Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.PLAYER_CREEP_HOLYWATER_TRAIL, 0, tear.Position, Vector.Zero, tear.SpawnerEntity)
+	Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.PLAYER_CREEP_HOLYWATER_TRAIL, 0, tear.Position, Vector.Zero,
+		tear.SpawnerEntity)
 end
 
+---@param tear EntityTear
+---@param collider Entity
 local function SpawnLeafeonVine(tear, collider)
-	local vine = Isaac.Spawn(EntityType.ENTITY_FAMILIAR, EEVEEMOD.FamiliarVariant.VINE, 0, collider.Position, Vector.Zero, tear.SpawnerEntity):ToFamiliar()
+	local vine = Isaac.Spawn(EntityType.ENTITY_FAMILIAR, EEVEEMOD.FamiliarVariant.VINE, 0, collider.Position, Vector.Zero,
+		tear.SpawnerEntity):ToFamiliar()
 	vine:GetData().TrapEnemy = true
 	vine.Parent = collider
 	vine:GetSprite():Play("Grab", true)
@@ -311,6 +319,8 @@ local function SpawnLeafeonVine(tear, collider)
 	end
 end
 
+---@param tear EntityTear
+---@param collider Entity
 function lilEevee:OnLilLeafeonTearCollision(tear, collider, _)
 	local data = tear:GetData()
 	if data.LilEeveeTear
@@ -318,14 +328,13 @@ function lilEevee:OnLilLeafeonTearCollision(tear, collider, _)
 		and collider:ToNPC()
 		and collider:ToNPC():IsActiveEnemy()
 	then
-		if EEVEEMOD.RandomNum(1) == 1 then
+		if VeeHelper.RandomNum(1) == 1 then
 			SpawnLeafeonVine(tear, collider)
 		end
 	end
 end
 
-local vineDuration = 45
-
+---@param familiar EntityFamiliar
 function lilEevee:OnLeafVineUpdate(familiar)
 	local data = familiar:GetData()
 	local sprite = familiar:GetSprite()
@@ -339,7 +348,7 @@ function lilEevee:OnLeafVineUpdate(familiar)
 			familiar.Parent.Velocity = familiar.Position - familiar.Parent.Position
 		end
 		if sprite:IsPlaying("Grab") and sprite:IsEventTriggered("Shoot") then
-			data.VineGrabDuration = vineDuration
+			data.VineGrabDuration = VINE_DURATION
 			familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
 		end
 		if sprite:IsFinished("Grab") then
@@ -363,6 +372,8 @@ end
 
 function lilEevee:RemoveVineOnNewRoom()
 	for _, vine in pairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, EEVEEMOD.FamiliarVariant.VINE)) do
+		---@type EntityFamiliar
+		local vine = vine:ToFamiliar()
 		vine:Remove()
 	end
 end

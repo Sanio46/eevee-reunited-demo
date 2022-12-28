@@ -1,7 +1,5 @@
 local evaluateCache = {}
 
-local bagOfPokeballs = require("src_eevee.items.collectibles.bagOfPokeballs")
-local lilEevee = require("src_eevee.items.collectibles.lilEevee")
 local eeveeStats = require("src_eevee.player.eeveeStats")
 local lockOnSpecs = require("src_eevee.items.trinkets.lockOnSpecs")
 local eviolite = require("src_eevee.items.trinkets.eviolite")
@@ -12,7 +10,10 @@ local addItemStats = require("src_eevee.items.addItemStats")
 local familiarBasics = require("src_eevee.misc.familiarBasics")
 local shinyCharm = require("src_eevee.items.collectibles.shinyCharm")
 
+---@param player EntityPlayer
+---@param cacheFlag CacheFlag
 function evaluateCache:main(player, cacheFlag)
+	---@class ItemStats
 	local itemStats = {
 		SPEED = 0,
 		FIREDELAY = 1,
@@ -36,7 +37,7 @@ function evaluateCache:main(player, cacheFlag)
 	--Put together all item stats
 	addItemStats:OnCache(player, cacheFlag, itemStats)
 
-	for i, familiarTable in pairs(EEVEEMOD.ItemToFamiliarVariant) do
+	for _, familiarTable in pairs(EEVEEMOD.ItemToFamiliarVariant) do
 		local itemID = familiarTable[1]
 		local familiarVariant = familiarTable[2]
 		familiarBasics:evaluateCache(player, cacheFlag, itemID, familiarVariant)

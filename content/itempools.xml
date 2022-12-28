@@ -23,7 +23,7 @@
 	<Pool Name="secret">
 		<Item Name="Shiny Charm" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
 		<Item Name="Poke Stop" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-		<Item Name="Bad Egg" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+		<Item Name="Bad EGG" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
 	</Pool>
 	<Pool Name="library">
 		<Item Name="Poke Stop" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -50,12 +50,12 @@
 		<Item Name="Master Ball" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
 		<Item Name="Sneak Scarf" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
 		<Item Name="Tail Whip" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-		<Item Name="Bad Egg" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+		<Item Name="Bad EGG" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
 	</Pool>
 	<Pool Name="greedShop">
 		<Item Name="Cookie Jar" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
 		<Item Name="Bag of Poke Balls" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-		<Item Name="Bad Egg" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+		<Item Name="Bad EGG" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
 		<Item Name="Sneak Scarf" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
 		<Item Name="Tail Whip" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
 		<Item Name="Black Glasses" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -65,7 +65,7 @@
 	</Pool>
 	<Pool Name="greedSecret">
 		<Item Name="Shiny Charm" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-		<Item Name="Bad Egg" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+		<Item Name="Bad EGG" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
 	</Pool>
 	<Pool Name="craneGame">
 		<Item Name="Master Ball" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
@@ -75,7 +75,7 @@
 	</Pool>
 	<Pool Name="babyShop">
 		<Item Name="Strange Egg" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
-		<Item Name="Bad Egg" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+		<Item Name="Bad EGG" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
 		<Item Name="Lil Eevee" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
 	</Pool>
 </ItemPools>

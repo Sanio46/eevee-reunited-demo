@@ -3,9 +3,7 @@
     <name>Eevee: Reunited - Character Demo</name>
     <directory>eevee_reunited_demo</directory>
     <id>2653691445</id>
-    <description>The current plan for the 'Demo' is to release large updates that feature key features of the full mod one at a time when they're completed, release small updates with feedback and bug fixes, then work on the next big update. The most recent one is the item unlocks. Next are Eeveelutions, and then ending at Tainted Eevee. A release date for the full version is set to November 21st, Eevee Day, where this demo will be marked as [OLD] and will give a message at the start of a run with Eevee saying to download the properly full version.
-
-[img]https://imgur.com/nvTka55.png[/img]
+    <description>[img]https://imgur.com/nvTka55.png[/img]
 
 [h1]PLEASE READ BELOW![/h1]
 
@@ -68,7 +66,7 @@ Kotry - Full Spanish translation for the mod's EID descriptions!
 Seb135, lambchop_is_ok, fly_6, ChemicatGamingYT – Playtesters
 Special thanks to JSG, Agent Cucco, siraxtas, wofsauge, Sentinel, Im_tem, everyone above and many others for their continued support!
 You - Checked out this workshop page! You're cool! Thank you!</description>
-    <version>1.23</version>
+    <version>1.25</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>

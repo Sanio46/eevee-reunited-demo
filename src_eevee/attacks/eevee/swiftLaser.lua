@@ -2,7 +2,9 @@ local swiftLaser = {}
 
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
+local rgbCycle = require("src_eevee.misc.rgbCycle")
 
+---@param player EntityPlayer
 local function SwiftLaserType(player)
 	if player:HasWeaponType(WeaponType.WEAPON_TECH_X) then
 		return "techX"
@@ -13,18 +15,24 @@ local function SwiftLaserType(player)
 	end
 end
 
-local function AssignSwiftLaserEffectData(player, effect, anglePos)
-
-	swiftBase:AssignSwiftBasicData(effect, player, anglePos)
+---@param swiftData SwiftInstance
+---@param effect EntityEffect
+local function AssignSwiftLaserEffectData(swiftData, effect)
+	local player = swiftData.Player
+	if not player then return end
 
 	local eC = effect.Color
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
-		effect:SetColor(EEVEEMOD.GetRBG(eC), -1, 1, false, false)
+
+	if rgbCycle:shouldApplyColorCycle(player) then
+		local colorCycle = player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) and EEVEEMOD.ColorCycle.RGB
+			or player:HasCollectible(CollectibleType.COLLECTIBLE_CONTINUUM) and EEVEEMOD.ColorCycle.CONTINUUM
+		rgbCycle:applyColorCycle(effect, colorCycle)
 	else
-		local tear = player:FireTear(effect.Position, Vector.Zero, Vector.Zero):ToTear()
+		local tear = player:FireTear(effect.Position, Vector.Zero):ToTear()
+		tear.Visible = false
 		tear.CollisionDamage = 0
 		local tC = tear:GetSprite().Color
-		if swiftBase:AreColorsDifferent(eC, tC) == true then
+		if VeeHelper.AreColorsDifferent(eC, tC) == true then
 			effect:SetColor(tC, -1, 1, false, false)
 		else
 			local colorRed = Color(1, 0, 0, 1, 0, 0, 0)
@@ -32,12 +40,9 @@ local function AssignSwiftLaserEffectData(player, effect, anglePos)
 		end
 		tear:Remove()
 	end
-	--As theres a small delay on the manual Chocolate Milk synergy affecting the fired laser's collision damage,
-	--If you fire fast enough you could potentially just fire a normal 3.5 damage attack. This prevents that.
+
 	if SwiftLaserType(player) == "techX" then
-		effect.CollisionDamage = effect.CollisionDamage * 0.25
-	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then
-		effect.CollisionDamage = effect.CollisionDamage * 0.1
+		effect.CollisionDamage = player.Damage * 0.25
 	else
 		effect.CollisionDamage = player.Damage
 		if swiftBase:IsSwiftLaserEffect(effect) == "brim" then
@@ -48,10 +53,12 @@ local function AssignSwiftLaserEffectData(player, effect, anglePos)
 	effect.PositionOffset = Vector(0, -25)
 end
 
-function swiftLaser:SpawnSwiftLasers(player, degreeOfLaserSpawns, offset)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local anglePos = swiftBase:SpawnPos(player, degreeOfLaserSpawns, offset)
+---@param swiftData SwiftInstance
+---@param isMult boolean
+function swiftLaser:SpawnSwiftLasers(swiftData, isMult)
+	local player = swiftData.Player
+	if not player then return end
+
 	local laserVariant = nil
 
 	if SwiftLaserType(player) == "brim"
@@ -62,255 +69,172 @@ function swiftLaser:SpawnSwiftLasers(player, degreeOfLaserSpawns, offset)
 		laserVariant = EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT
 	end
 
-	if laserVariant ~= nil then
-		local effect = Isaac.Spawn(EntityType.ENTITY_EFFECT, laserVariant, 0, player.Position + (anglePos:Rotated(swiftPlayer.RateOfOrbitRotation)), Vector.Zero, player):ToEffect()
-		AssignSwiftLaserEffectData(player, effect, anglePos)
-		effect.Parent = player
-		swiftBase:AddSwiftTrail(effect, player)
+	if laserVariant == nil then return end
 
-		if swiftPlayer.MultiShots > 0 then
-			local multiOffset = EEVEEMOD.RandomNum(360)
-			for i = 1, swiftPlayer.MultiShots + swiftSynergies:BookwormShot(player) do
-				local orbit = swiftBase:MultiSwiftTearDistanceFromTear(player)
-				local anglePosMulti = swiftBase:SpawnPosMulti(player, multiOffset, orbit, i)
-				local effectMulti = Isaac.Spawn(EntityType.ENTITY_EFFECT, laserVariant, 0, effect.Position + (anglePosMulti:Rotated(swiftPlayer.RateOfOrbitRotation)), Vector.Zero, player):ToEffect()
-				local dataMultiEffect = effectMulti:GetData()
+	local parent = swiftData.Parent
+	local spawnPos = swiftBase:GetAdjustedStartingAngle(swiftData)
+	local swiftEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, laserVariant, 0, swiftData.Parent.Position + spawnPos,
+		Vector.Zero, parent):ToEffect()
+	AssignSwiftLaserEffectData(swiftData, swiftEffect)
+	swiftBase:InitSwiftWeapon(swiftData, swiftEffect, isMult)
+end
 
-				dataMultiEffect.IsMultiShot = true
-				dataMultiEffect.MultiRotation = (360 / swiftPlayer.MultiShots) * i
-				effectMulti.Parent = effect
-				dataMultiEffect.MultiSwiftOrbitDistance = orbit
-				AssignSwiftLaserEffectData(player, effectMulti, anglePosMulti)
-				effectMulti:GetSprite().Scale = Vector(0.5, 0.5)
-			end
-		end
-		swiftBase:AssignSwiftSounds(effect)
+---@param swiftData SwiftInstance
+function swiftLaser:TechXRadiusScaling(swiftData)
+	local radius = 15 + (45 * swiftBase:GetDurationPercentage(swiftData))
+	return radius
+end
+
+---@param swiftData SwiftInstance
+---@param weapon Weapon | EntityEffect
+function swiftLaser:TechXDamageScaling(swiftData, weapon)
+	local player = swiftData.Player
+	if not player then return end
+
+	local damageMult = 0.25 + (0.75 * swiftBase:GetDurationPercentage(swiftData))
+	local damageCalc = player.Damage * damageMult
+
+	if damageCalc < 0.1 then
+		weapon.CollisionDamage = 0.1
+	elseif damageCalc > (player.Damage * 2) then
+		weapon.CollisionDamage = (player.Damage * 2)
+	else
+		weapon.CollisionDamage = damageCalc
 	end
 end
 
-function swiftLaser:TechXRadiusScaling(effect, player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local ptrHashEffect = tostring(GetPtrHash(effect))
-	local swiftEffectWeapon = swiftBase.Weapon[ptrHashEffect]
-	local radius = 15
+---@param swiftData SwiftInstance
+---@param swiftWeapon SwiftWeapon
+---@param direction Vector
+function swiftLaser:FireTechXLaser(swiftData, swiftWeapon, direction)
+	local player = swiftData.Player
+	if not player then return end
+	local parent = swiftData.Parent
+	if not parent then return end
+	local knifeOverride = (
+		swiftData.Player:HasWeaponType(WeaponType.WEAPON_KNIFE) or swiftData.Player:HasWeaponType(WeaponType.WEAPON_BONE))
+	local damageMult = knifeOverride and player.Damage * 0.25 or swiftWeapon.WeaponEntity.CollisionDamage / player.Damage
+	local radius = knifeOverride and 25 or swiftLaser:TechXRadiusScaling(swiftData) or 15
 
-	if swiftPlayer
-		and swiftPlayer.AttackDuration > 0
-		and swiftPlayer.AttackDurationSet then
-		radius = 15 + (45 * (swiftPlayer.AttackDurationSet - swiftPlayer.AttackDuration) / swiftPlayer.AttackDurationSet)
-		if swiftEffectWeapon then
-			swiftEffectWeapon.TechXRadius = radius
-		end
-	end
-end
-
-function swiftLaser:TechXDamageScaling(weapon, player)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local ptrHashWeapon = tostring(GetPtrHash(weapon))
-	local swiftWeapon = swiftBase.Weapon[ptrHashWeapon]
-
-	if swiftWeapon then
-		if swiftPlayer.AttackDuration > 0
-			and swiftPlayer.AttackDurationSet
-			and not swiftWeapon.HasFired then
-			local damageMult = 0.25 + (3 * (swiftPlayer.AttackDurationSet - swiftPlayer.AttackDuration) / swiftPlayer.AttackDurationSet)
-			local damageCalc = player.Damage * damageMult
-			if damageCalc < 0.1 then
-				weapon.CollisionDamage = 0.1
-			elseif damageCalc > player.Damage then
-				weapon.CollisionDamage = player.Damage
-			else
-				weapon.CollisionDamage = damageCalc
-			end
-		end
-	end
-end
-
-function swiftLaser:FireTechXLaser(parent, player, direction, knifeOverride)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local ptrHashParent = tostring(GetPtrHash(parent))
-	local swiftParent = swiftBase.Weapon[ptrHashParent]
-	local damageMult = knifeOverride and player.Damage * 0.25 or parent.CollisionDamage / player.Damage
-	local radius = knifeOverride and 25 or swiftPlayer.Constant and 15 or swiftParent.TechXRadius or 15
-
-	if damageMult == 0 then
+	if damageMult < 0.25 then
 		damageMult = 0.25
 	end
 
-	local techX = player:FireTechXLaser(parent.Position, VeeHelper.AddTearVelocity(direction, player.ShotSpeed * 10, player, true), radius, player, damageMult):ToLaser()
-	swiftBase:InitSwiftWeapon(techX)
-	local ptrHashLaser = tostring(GetPtrHash(techX))
-	local swiftLaser = swiftBase.Weapon[ptrHashLaser]
-	
-	swiftLaser.HasFired = true
-	
+	local laser = player:FireTechXLaser(swiftWeapon.WeaponEntity.Position,
+		VeeHelper.AddTearVelocity(direction, player.ShotSpeed * 10, player), radius, player, damageMult)
+		:ToLaser()
+
 	if knifeOverride then
-		techX.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
+		laser.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
 	end
 
-	swiftLaser.Player = player
-	techX.Parent = parent
+	laser.Parent = swiftWeapon.WeaponEntity
+	swiftWeapon.AttachedLaser = laser
 end
 
-function swiftLaser:FireBrimLaser(parent, player, direction, rotationOffset)
-	local ptrHashPlayer = tostring(GetPtrHash(player))
-	local swiftPlayer = swiftBase.Player[ptrHashPlayer]
-	local ptrHashParent = tostring(GetPtrHash(parent))
-	local swiftParent = swiftBase.Weapon[ptrHashParent]
-	local damageMult = player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) and (parent.CollisionDamage / player.Damage) or 1
+---@param swiftData SwiftInstance
+---@param swiftWeapon SwiftWeapon
+---@param direction Vector
+function swiftLaser:FireBrimLaser(swiftData, swiftWeapon, direction)
+	local player = swiftData.Player
+	if not player then return end
+	local parent = swiftWeapon.WeaponEntity
+	if not parent then return end
+	local damageMult = player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) and
+		(swiftWeapon.WeaponEntity.CollisionDamage / player.Damage) or 1
+	local laser = player:FireBrimstone(direction, player, damageMult):ToLaser()
 
-	local brim = player:FireBrimstone(direction, parent, damageMult):ToLaser()
-	swiftBase:InitSwiftWeapon(brim)
-	local ptrHashLaser = tostring(GetPtrHash(brim))
-	local swiftLaser = swiftBase.Weapon[ptrHashLaser]
-	
-	swiftLaser.HasFired = true
-	brim.Parent = parent
-	brim.PositionOffset = Vector(0, -23)
-	swiftLaser.Player = player
-
-	if swiftPlayer.Constant == true then
-		swiftLaser.IsConstantLaser = true
-		swiftParent.LaserHasFired = true
-		if rotationOffset then
-			swiftLaser.ConstantRotationOffset = rotationOffset
-		else
-			swiftLaser.ConstantRotationOffset = 0
-		end
-	end
-end
-
-function swiftLaser:FireTechLaser(parent, player, direction, isTech2)
-	local damageMult = player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) and (parent.CollisionDamage / player.Damage) or 1
-
-	if isTech2 then
-		damageMult = 0.8
-	end
-
-	local laser = player:FireTechLaser(parent.Position, LaserOffset.LASER_TRACTOR_BEAM_OFFSET, direction, false, false, parent, damageMult):ToLaser()
-	swiftBase:InitSwiftWeapon(laser)
-	local ptrHashLaser = tostring(GetPtrHash(laser))
-	local swiftLaser = swiftBase.Weapon[ptrHashLaser]
-	
-	swiftLaser.HasFired = true
-	swiftLaser.Player = player
-	laser.Parent = parent
+	laser.Parent = swiftWeapon.WeaponEntity
 	laser.PositionOffset = Vector(0, -23)
+	laser.Timeout = swiftWeapon.Special.HoldTimeout(laser)
+	swiftWeapon.AttachedLaser = laser
+end
 
+---@param swiftData SwiftInstance
+---@param swiftWeapon SwiftWeapon
+---@param direction Vector
+---@param isTech2 boolean
+function swiftLaser:FireTechLaser(swiftData, swiftWeapon, direction, isTech2)
+	local player = swiftData.Player
+	if not player then return end
+	local parent = swiftData.Parent
+	if not parent then return end
+	local damageMult = isTech2 and 0.2 or
+		player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) and (swiftWeapon.WeaponEntity.CollisionDamage / player.Damage) or 1
+	local laser = player:FireTechLaser(swiftWeapon.WeaponEntity.Position, LaserOffset.LASER_TRACTOR_BEAM_OFFSET, direction,
+		false, false,
+		player, damageMult):ToLaser()
+
+	laser.Parent = swiftWeapon.WeaponEntity
+	laser.PositionOffset = Vector(0, -23)
+	swiftWeapon.Special.HasTech2 = isTech2 or false
+	laser.Timeout = swiftWeapon.Special.HoldTimeout(laser)
 	if isTech2 then
-		swiftLaser.IsTech2 = true
-		laser.Timeout = 3
-		if not swiftLaser.ConstantRotationOffset then
-			swiftLaser.ConstantRotationOffset = 0
-		end
+		laser.Timeout = laser.Timeout + 1
 	end
+	swiftWeapon.AttachedLaser = laser
 end
 
-function swiftLaser:FireSwiftLaser(parent, player, direction, rotationOffset)
+---@param swiftData SwiftInstance
+---@param swiftWeapon SwiftWeapon
+---@param direction Vector
+function swiftLaser:FireSwiftLaser(swiftData, swiftWeapon, direction)
+	local player = swiftData.Player
+	if not player then return end
+
 	if SwiftLaserType(player) == "techX" then
-		swiftLaser:FireTechXLaser(parent, player, direction)
+		swiftLaser:FireTechXLaser(swiftData, swiftWeapon, direction)
 	elseif SwiftLaserType(player) == "brim" then
-		swiftLaser:FireBrimLaser(parent, player, direction, rotationOffset)
+		swiftLaser:FireBrimLaser(swiftData, swiftWeapon, direction)
 	elseif SwiftLaserType(player) == "laser" then
-		swiftLaser:FireTechLaser(parent, player, direction)
+		swiftLaser:FireTechLaser(swiftData, swiftWeapon, direction, false)
 	end
 end
 
-local LaserEffectSize = {
-	[EEVEEMOD.EffectVariant.CUSTOM_TECH_DOT] = 20,
-	[EEVEEMOD.EffectVariant.CUSTOM_BRIMSTONE_SWIRL] = 35,
-}
-
-function swiftLaser:SwiftLaserEffectUpdate(effect)
-	if not VeeHelper.EntitySpawnedByPlayer(effect, true) then return end
-
-	local player = effect.SpawnerEntity:ToPlayer()
-	local ptrHashEffect = tostring(GetPtrHash(effect))
-	local swiftEffectWeapon = swiftBase.Weapon[ptrHashEffect]
-
-	if not swiftEffectWeapon then return end
+---@param swiftData SwiftInstance
+---@param swiftWeapon SwiftWeapon
+---@param effect EntityEffect
+function swiftLaser:SwiftLaserEffectUpdate(swiftData, swiftWeapon, effect)
+	local player = swiftData.Player
+	local data = effect:GetData()
+	if not player then return end
 
 	if SwiftLaserType(player) == "techX" then
-		swiftLaser:TechXDamageScaling(effect, player)
-		swiftLaser:TechXRadiusScaling(effect, player)
-	elseif not player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then
-		effect.CollisionDamage = player.Damage
+		swiftLaser:TechXDamageScaling(swiftData, swiftWeapon.WeaponEntity)
 	end
 
-	local scale = effect:GetSprite().Scale.X
-
-	for _, ent in pairs(Isaac.FindInRadius(effect.Position, scale * LaserEffectSize[effect.Variant], EntityPartition.ENEMY)) do
-		if ent:IsActiveEnemy(false) and ent:IsVulnerableEnemy() and effect.FrameCount % 3 == 0 then
-			ent:TakeDamage(effect.CollisionDamage, DamageFlag.DAMAGE_LASER, EntityRef(player), 50)
-		end
+	if rgbCycle:shouldApplyColorCycle(player) and not data.EeveeEntHasColorCycle then
+		local colorCycle = player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) and EEVEEMOD.ColorCycle.RGB
+			or player:HasCollectible(CollectibleType.COLLECTIBLE_CONTINUUM) and EEVEEMOD.ColorCycle.CONTINUUM
+		rgbCycle:applyColorCycle(effect, colorCycle)
 	end
 
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
-		effect:SetColor(EEVEEMOD.GetRBG(effect.Color), -1, 1, false, false)
-	end
-	
-	
-	if not swiftEffectWeapon.HasFired then
+	if not swiftWeapon.HasFired then
 		effect.Timeout = 2
-	else
-		local fireDirection = swiftEffectWeapon.ShotDir
-
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_THE_WIZ)
-			and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then
-			fireDirection = fireDirection:Rotated(45)
-		end
-
-		if not swiftEffectWeapon.LaserHasFired then
-			if swiftBase:IsSwiftLaserEffect(effect) == "tech" then
-				swiftLaser:FireSwiftLaser(effect, player, fireDirection)
-			elseif swiftBase:IsSwiftLaserEffect(effect) == "brim" then
-				swiftLaser:FireSwiftLaser(effect, player, fireDirection)
-			end
-			swiftEffectWeapon.LaserHasFired = true
-		end
-		
-		if swiftEffectWeapon.ConstantOrbit then
-			if player:GetFireDirection() ~= Direction.NO_DIRECTION then
-				effect.Timeout = 2
-			end
-		end
 	end
-
 end
 
+---@param laser EntityLaser
 function swiftLaser:SwiftLaserUpdate(laser)
-
-	if not laser.Parent or not swiftBase.Weapon[tostring(GetPtrHash(laser.Parent))] then return end
-
-	local ptrHashLaser = tostring(GetPtrHash(laser))
-	local swiftLaserWeapon = swiftBase.Weapon[ptrHashLaser]
-	local player = swiftLaserWeapon.Player
 	local parent = laser.Parent
-	local ptrHashParent = tostring(GetPtrHash(parent))
-	local swiftParent = swiftBase.Weapon[ptrHashParent]
+	---@cast parent EntityEffect | EntityTear
+	if not parent then return end
+	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(parent))]
+	if not swiftWeapon then return end
+	local swiftData = swiftWeapon.ParentInstance
+	if not swiftData then return end
+	local player = swiftData.Player
+	if not player then return end
 
-	if not swiftLaserWeapon then return end
+	swiftSynergies:TechXKnifeUpdate(swiftWeapon, laser, parent)
 
 	if laser.SubType == LaserSubType.LASER_SUBTYPE_LINEAR then
+
+		laser.Angle = swiftWeapon.ShootDirection:Rotated(swiftWeapon.Special.RotationOffset):GetAngleDegrees()
 		laser.Position = parent.Position
-	end
 
-	swiftSynergies:TechXKnifeUpdate(laser, parent)
-
-	if (swiftLaserWeapon.IsTech2 and not swiftParent.HasFired)
-		or (swiftLaserWeapon.IsConstantLaser and player:GetFireDirection() ~= Direction.NO_DIRECTION
-			and swiftParent.ConstantOrbit)
-	then
-		if laser.Variant == VeeHelper.LaserVariant.BRIMSTONE then
-			laser.Timeout = 7
-		else
-			laser.Timeout = 3
-		end
-		if swiftLaserWeapon.ConstantRotationOffset then
-			laser.Angle = swiftParent.ShotDir:Rotated(swiftLaserWeapon.ConstantRotationOffset):GetAngleDegrees()
+		if not swiftWeapon.HasFired then
+			laser.Timeout = swiftWeapon.Special.HoldTimeout(laser)
 		end
 	end
 end

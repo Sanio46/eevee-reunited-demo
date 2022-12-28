@@ -1,32 +1,28 @@
 local eeveeBasics = {}
 
+local attackHelper = require("src_eevee.attacks.attackHelper")
 local costumeProtector = require("src_eevee.player.characterCostumeProtector")
 local miscMods = require("src_eevee.modsupport.miscModsOnPlayerInit")
---local uniqueCharacterItems = require("src_eevee.modsupport.uniqueCharacterItems")
+local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 
+---@param player EntityPlayer
 function eeveeBasics:TryInitEevee(player)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
 
 	if not data.IsEevee and EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] and not player:IsCoopGhost() then
-
 		data.IsEevee = true
-		miscMods:addPogCompatibility()
-		miscMods:addCoopGhostCompatibility()
-		miscMods:addNoCostumesCompatibility()
-		--[[ if UniqueCharacterItemsAPI then
-			uniqueCharacterItems:OnPlayerInit(player)
-		end ]]
+		miscMods:OnPlayerInit(player)
 		VeeHelper.SetCanShoot(player, false)
 		player:AddCacheFlags(CacheFlag.CACHE_ALL)
 		player:EvaluateItems()
-
 	end
 end
 
 local EeveeToEsauJr = {}
 
-function eeveeBasics:OnEsauJr(itemID, itemRNG, player, flags, slot, vardata)
+---@param player EntityPlayer
+function eeveeBasics:OnEsauJr(_, _, player, _, _, _)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
 
@@ -35,6 +31,7 @@ function eeveeBasics:OnEsauJr(itemID, itemRNG, player, flags, slot, vardata)
 	end
 end
 
+---@param player EntityPlayer
 function eeveeBasics:GiveEsauJrEeveeData(player)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
@@ -43,8 +40,8 @@ function eeveeBasics:GiveEsauJrEeveeData(player)
 		if EeveeToEsauJr == data.Identifier
 			and not data.IsEevee
 			and EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] then
-			VeeHelper.SetCanShoot(player, false)
 			data.IsEevee = true
+			VeeHelper.SetCanShoot(player, false)
 			player:AddCacheFlags(CacheFlag.CACHE_ALL)
 			player:EvaluateItems()
 			costumeProtector:InitPlayerCostume(player)
@@ -53,6 +50,7 @@ function eeveeBasics:GiveEsauJrEeveeData(player)
 	end
 end
 
+---@param player EntityPlayer
 function eeveeBasics:NoTainted(player)
 	local playerType = player:GetPlayerType()
 
@@ -62,6 +60,7 @@ function eeveeBasics:NoTainted(player)
 	end
 end
 
+---@param player EntityPlayer
 function eeveeBasics:TryDeinitEevee(player)
 	local data = player:GetData()
 	local playerType = player:GetPlayerType()
@@ -70,12 +69,13 @@ function eeveeBasics:TryDeinitEevee(player)
 		data.IsEevee = false
 		player:AddCacheFlags(CacheFlag.CACHE_ALL)
 		player:EvaluateItems()
+		swiftBase.Players[tostring(GetPtrHash(player))] = nil
 	end
 end
 
+---@param player EntityPlayer
 function eeveeBasics:TrackFireDirection(player)
-	local playerType = player:GetPlayerType()
-	VeeHelper.GetIsaacShootingDirection(player, player.Position)
+	attackHelper:GetIsaacShootingDirection(player, player.Position)
 end
 
 return eeveeBasics

@@ -26,7 +26,8 @@ local uniqueRoomReward = {
 	[RoomType.ROOM_SUPERSECRET] = { PickupVariant.PICKUP_LOCKEDCHEST, 0 },
 	[RoomType.ROOM_ARCADE] = { PickupVariant.PICKUP_COIN, CoinSubType.COIN_DIME },
 	[RoomType.ROOM_CURSE] = { PickupVariant.PICKUP_HEART, HeartSubType.HEART_BLACK },
-	[RoomType.ROOM_CHALLENGE] = { PickupVariant.PICKUP_TRINKET, function() return EEVEEMOD.game:GetItemPool():GetTrinket(true) end },
+	[RoomType.ROOM_CHALLENGE] = { PickupVariant.PICKUP_TRINKET,
+		function() return EEVEEMOD.game:GetItemPool():GetTrinket(true) end },
 	[RoomType.ROOM_LIBRARY] = { PickupVariant.PICKUP_WOODENCHEST, 0 },
 	[RoomType.ROOM_SACRIFICE] = { PickupVariant.PICKUP_HEART, HeartSubType.HEART_DOUBLEPACK },
 	[RoomType.ROOM_ISAACS] = { PickupVariant.PICKUP_CHEST, 0 },
@@ -34,8 +35,9 @@ local uniqueRoomReward = {
 	[RoomType.ROOM_CHEST] = { PickupVariant.PICKUP_ETERNALCHEST, 0 },
 	[RoomType.ROOM_DICE] = { PickupVariant.PICKUP_TAROTCARD, Card.CARD_DICE_SHARD },
 	[RoomType.ROOM_PLANETARIUM] = { PickupVariant.PICKUP_TRINKET, TrinketType.TELESCOPE_LENS },
-	[RoomType.ROOM_ULTRASECRET] = { PickupVariant.PICKUP_REDCHEST, 0 }
+	[RoomType.ROOM_ULTRASECRET] = { PickupVariant.PICKUP_REDCHEST, 0 } --TODO: Remove maybe because Ultra Secrets aren't come by often and the reward is a troll
 }
+---@type table<PickupVariant, CoinSubType | BombSubType | KeySubType>
 local pickupSpawnWeights = {
 	{ PickupVariant.PICKUP_COIN, CoinSubType.COIN_PENNY },
 	{ PickupVariant.PICKUP_COIN, CoinSubType.COIN_PENNY },
@@ -53,9 +55,11 @@ local pickupSpawnWeights = {
 	{ PickupVariant.PICKUP_KEY, KeySubType.KEY_NORMAL },
 	{ PickupVariant.PICKUP_KEY, KeySubType.KEY_NORMAL },
 }
-local maxSpins = 6
+
+local MAX_SPINS = 6
 
 --Thank you budj for providing this old-ass hack I used in AB+ Eevee
+---@param pos Vector
 local function RemoveRecentRewards(pos)
 	for _, pickup in ipairs(Isaac.FindByType(5, -1, -1)) do
 		if pickup.FrameCount <= 1 and pickup.SpawnerType == 0
@@ -73,6 +77,7 @@ local function RemoveRecentRewards(pos)
 	end
 end
 
+---@param slot Entity
 local function OverrideExplosionHack(slot)
 	local bombed = slot.GridCollisionClass == EntityGridCollisionClass.GRIDCOLL_GROUND
 	if not bombed then return end
@@ -86,6 +91,7 @@ function pokeStop:ResetSpecialRooms()
 	specialRooms = {}
 end
 
+---@param player EntityPlayer
 function pokeStop:GetAllSpecialRooms(player)
 	if player:HasCollectible(EEVEEMOD.CollectibleType.POKE_STOP) then
 		local level = EEVEEMOD.game:GetLevel()
@@ -102,7 +108,7 @@ function pokeStop:GetAllSpecialRooms(player)
 			end
 		end
 
-		for i = 1, player:GetCollectibleNum(EEVEEMOD.CollectibleType.POKE_STOP) do
+		for _ = 1, player:GetCollectibleNum(EEVEEMOD.CollectibleType.POKE_STOP) do
 			local pokeStopRng = player:GetCollectibleRNG(EEVEEMOD.CollectibleType.POKE_STOP)
 			local randomNum = VeeHelper.DifferentRandomNum(roomToSpawnIn, #specialRooms, pokeStopRng) + 1
 			local randomRoomIndex = specialRooms[randomNum]
@@ -114,7 +120,8 @@ end
 local function SpawnPokeStop()
 	local room = EEVEEMOD.game:GetRoom()
 	local centerPos = room:GetCenterPos()
-	local stop = Isaac.Spawn(EntityType.ENTITY_SLOT, EEVEEMOD.SlotVariant.POKE_STOP, 0, Vector(centerPos.X, centerPos.Y - 70), Vector.Zero, nil)
+	local stop = Isaac.Spawn(EntityType.ENTITY_SLOT, EEVEEMOD.SlotVariant.POKE_STOP, 0,
+		Vector(centerPos.X, centerPos.Y - 70), Vector.Zero, nil)
 	local data = stop:GetData()
 	data.PosToStayIn = stop.Position
 	local pokeStopRNG = RNG()
@@ -133,6 +140,7 @@ function pokeStop:SpawnPokeStopInSpecialRoom()
 	end
 end
 
+---@param stop Entity
 function pokeStop:IfTouchPokeStop(_, stop, _)
 	if stop.Type == EntityType.ENTITY_SLOT
 		and stop.Variant == EEVEEMOD.SlotVariant.POKE_STOP then
@@ -165,28 +173,32 @@ function pokeStop:SlotUpdate()
 				data.PokeStopRNG = pokeStopRNG
 			end
 
-			if data.TimesSpun ~= maxSpins then
-				local velocity = Vector(3, 0):Rotated(EEVEEMOD.RandomNum(360))
-				local randomNum = data.PokeStopRNG:RandomInt(#pickupSpawnWeights) + 1
+			if data.TimesSpun <= MAX_SPINS then
+				local velocity = Vector(3, 0):Rotated(VeeHelper.RandomNum(360))
+				local randomNum = data.PokeStopRNG:RandomInt(#pickupSpawnWeights - 1) + 1
 				data.PokeStopRNG:Next()
 				local pickupSpawn = pickupSpawnWeights[randomNum]
-				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop, pickupSpawn[2], stop.InitSeed)
-			else
+				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop, pickupSpawn[2],
+					stop.InitSeed)
+			elseif data.TimesSpin == MAX_SPINS then
 				local roomDesc = EEVEEMOD.game:GetLevel():GetCurrentRoomDesc()
 				local roomType = roomDesc.Data.Type
 				local pickupSpawn = uniqueRoomReward[roomType]
 				if pickupSpawn == nil then pickupSpawn = { PickupVariant.PICKUP_COIN, CoinSubType.COIN_NICKEL } end
-				local velocity = Vector(3, 0):Rotated(EEVEEMOD.RandomNum(360))
+				local velocity = Vector(3, 0):Rotated(VeeHelper.RandomNum(360))
 
 				if roomType == RoomType.ROOM_TREASURE and roomDesc.Flags == (roomDesc.Flags | RoomDescriptor.FLAG_DEVIL_TREASURE) then
 					pickupSpawn[1] = PickupVariant.PICKUP_TAROTCARD
 					pickupSpawn[2] = Card.CARD_CRACKED_KEY
 				end
-				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop, pickupSpawn[2], stop.InitSeed)
+				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop, pickupSpawn[2],
+					stop.InitSeed)
+			elseif data.TimesSpun >= MAX_SPINS then
+				sprite:Play("Spin_Winddown", false)
 			end
 		end
 
-		if data.TimesSpun >= maxSpins and sprite:GetFrame() == 8 then
+		if sprite:IsFinished("Spin_Winddown") then
 			sprite:Play("Disappear", false)
 		end
 
@@ -196,22 +208,24 @@ function pokeStop:SlotUpdate()
 	end
 end
 
+---@param player EntityPlayer
 function pokeStop:DropPokeStopOnFirstPickup(player)
 	local data = player:GetData()
-	
+
 	if player.QueuedItem.Item ~= nil then
 		if player.QueuedItem.Item.ID == EEVEEMOD.CollectibleType.POKE_STOP
-		and not data.ShouldDropPokeStop
+			and not data.ShouldDropPokeStop
 		then
 			data.ShouldDropPokeStop = true
 		end
-		
+
 	elseif player:IsItemQueueEmpty() and data.ShouldDropPokeStop then
 		SpawnPokeStop()
 		data.ShouldDropPokeStop = nil
 	end
 end
 
+---@param player EntityPlayer
 function pokeStop:SpawnOnGameExit(player)
 	local data = player:GetData()
 
