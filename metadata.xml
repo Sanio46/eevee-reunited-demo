@@ -22,8 +22,8 @@ Everything you can expect from downloading the mod.
 [*]40+ item synergies! Most of your favorite attack-changing items and unique effects for certain items.
 [*]Unique costume support! Eevee has 700+ unique costume sprites, and any costumes that would otherwise harm Eevee are automatically removed on the spot!
 [*]Birthright: Tail Whip! With this secondary move, keep your distance by knocking back any harm that comes your way, and lowering the defense of enemies.
-[*][b][NEW][/b] A full set of character unlocks and a new pickup type: Poke Ball!
-[*][b][NEW][/b] A new challenge: 'Pokey Mans: Crystal'. Fight using only your Pokemon and defeat Mom!
+[*]A full set of character unlocks and a new pickup type: Poke Ball!
+[*]A new challenge: 'Pokey Mans: Crystal'. Fight using only your Pokemon and defeat Mom!
 [/list]
 
 [img]https://imgur.com/7WtTfi8.png[/img]
@@ -36,37 +36,49 @@ Eevee is compatible with a handful of mods. If you want to see Eevee compatible 
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2615720951]Mega Mush CostumeSuffix Compat[/url] -Required for custom Mega Mush costume
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2681875787]Mod Config Menu[/url] -Allows you to toggle a variety of options for your Eevee experience!
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2490515687]POG for Good Items[/url]
+[url=https://steamcommunity.com/sharedfiles/filedetails/?id=2493551842]Ugh for Bad Items[/url]
+[url=https://steamcommunity.com/sharedfiles/filedetails/?id=2612456876]Not Mad, Just Disappointed for Quality 0 Items[/url]
 [/list]
 
 [img]https://imgur.com/h0807Zb.png[/img]
-When the mod is done, it’ll be made into a separate upload. The demo will slowly update over time with major content updates for the purpose of gaining feedback, with the full release being the final push for quality and polish. The full release will feature:
+When the mod is done, it’ll be made into a separate upload. The demo has reached the point where it's satisfactory of the quality you can expect in the full release, and will no longer receive major updates. The full release will include:
 [list]
 [*]All 8 Eeveelutions, only able to be obtained in a run through Eevee, each with their own unique attacks, costumes, and birthrights.
 [*]Tainted Eevee, who’s gimmick surrounds mix-matching Eeveelution abilities
-[*]Collectibles, pickups, and trinkets tied to character unlocks for Eevee and Tainted Eevee, all based on various Pokémon items.
+[*]Collectibles, pickups, and trinkets tied to character unlocks for Tainted Eevee as well as random unlock, all based on various Pokémon items.
 [*]Secrets???
 [/list]
 
-[img]https://imgur.com/fgaODN0.png[/img]
-[u]The Team[/u]
-Everything in the mod was done by us unless stated otherwise below
-[img]https://imgur.com/d6eihY6.png[/img]
 
+[h1]Credits[/h1]
 
-[u]Artists[/u]
-CheapBones – Eevee: Reunited logo
-TikaraTheMew – Workshop Thumbnail Art
-SGTX – Doodles in Workshop description titles.
-Candle - Lil Eeveelution sprites
-Jam - Boss/Stage portrait for Eevee
+[h3]Sprites[/h3]
+Majority of all sprites: StrAkio
+Tail Whip costumes: Neb
+C-Section tear, Eevee’s custom birthright, Mom’s Ring, Black Glasses, Pices, Eye of Belial, Piggy Bank, Lil Leafeon’s vine: stewartisme
+Eevee’s boss/stage portrait: Sanio, sketch, Zer0
+Majority of achievement papers: AllOfLucky
+Poke Stop Achievement Paper: Takano, Sanio
+Temporary Tail Whip Achievement Paper: StrAkio
+Lil Eevee & Eeveelution sprites: Candle
 
-[u]Other[/u]
-Ilias – Assisted in Eevee’s v1 sprite redesign (Before the unlocks update)
-Kotry - Full Spanish translation for the mod's EID descriptions!
-Seb135, lambchop_is_ok, fly_6, ChemicatGamingYT – Playtesters
-Special thanks to JSG, Agent Cucco, siraxtas, wofsauge, Sentinel, Im_tem, everyone above and many others for their continued support!
-You - Checked out this workshop page! You're cool! Thank you!</description>
-    <version>1.25</version>
+[h3]Code[/h3]
+Majority of code: Sanio
+Contributor to code: oatmealine
+Function SetCanShoot: tem
+Function GetPlayerIdentifier: tem
+Function GetAngleDifference: DeadInfinity
+Function TearScaleToSizeAnim: Whichever modders decompiled the Switch port
+
+[h3]Artwork[/h3]
+Portraits of Eevee and Sylveon in the headers in the Workshop Demo: SGTX
+Eevee: Reunited Logo: CheapBones
+Workshop thumbnail for demo: TikaraTheMew
+
+[h3]Special Thanks[/h3]
+JSG, AgentCucco, wofsauge, siraxtas, Sentinel, im_tem, DeadInfinity, 4Grabs, pedroff_1, fly_6, Mr.SeemsGood
+</description>
+    <version>1.26</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>
