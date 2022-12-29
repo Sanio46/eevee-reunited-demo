@@ -35,7 +35,7 @@ local uniqueRoomReward = {
 	[RoomType.ROOM_CHEST] = { PickupVariant.PICKUP_ETERNALCHEST, 0 },
 	[RoomType.ROOM_DICE] = { PickupVariant.PICKUP_TAROTCARD, Card.CARD_DICE_SHARD },
 	[RoomType.ROOM_PLANETARIUM] = { PickupVariant.PICKUP_TRINKET, TrinketType.TELESCOPE_LENS },
-	[RoomType.ROOM_ULTRASECRET] = { PickupVariant.PICKUP_REDCHEST, 0 } --TODO: Remove maybe because Ultra Secrets aren't come by often and the reward is a troll
+	[RoomType.ROOM_ULTRASECRET] = { PickupVariant.PICKUP_REDCHEST, 0 }
 }
 ---@type table<PickupVariant, CoinSubType | BombSubType | KeySubType>
 local pickupSpawnWeights = {

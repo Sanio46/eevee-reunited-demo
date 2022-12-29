@@ -34,7 +34,6 @@ end
 local MAX_COOKIE_USES = 6
 
 ---@param player EntityPlayer
----@return UseItemReturn | boolean
 function cookieJar:onUse(_, _, player, _, _, _)
 	local effects = player:GetEffects()
 	local shouldRemove = false
@@ -53,41 +52,6 @@ function cookieJar:onUse(_, _, player, _, _, _)
 	player:EvaluateItems()
 
 	return {Discharge = false, Remove = shouldRemove, ShowAnim = true}
-
-	--[[ for i = 1, 6 do
-		local cookieJarIDs = EEVEEMOD.CollectibleType.COOKIE_JAR[i]
-		local cookieJarNextJar = EEVEEMOD.CollectibleType.COOKIE_JAR[i - 1]
-		local cookieJarFinal = EEVEEMOD.CollectibleType.COOKIE_JAR[1]
-
-		if itemID == cookieJarIDs and player:GetActiveItem() == cookieJarIDs then
-
-			player:RemoveCollectible(cookieJarIDs)
-
-			if itemID ~= cookieJarFinal then
-				player:AddCollectible(cookieJarNextJar)
-			else
-				player:AddMaxHearts(4)
-				player:AddHearts(2)
-			end
-
-			player:AddHearts(2)
-			EEVEEMOD.sfx:Play(SoundEffect.SOUND_VAMP_GULP)
-
-			UpdateCookieSpeedData(player)
-
-			player:AddCacheFlags(CacheFlag.CACHE_SPEED)
-			player:EvaluateItems()
-
-			if player:HasCollectible(CollectibleType.COLLECTIBLE_BOOK_OF_VIRTUES)
-			and itemID ~= EEVEEMOD.CollectibleType.COOKIE_JAR[2] --Literally have no clue why but #2 specifically doesn't even spawn a wisp
-			then
-				player:AddWisp(EEVEEMOD.CollectibleType.COOKIE_JAR[1], player.Position, true)
-				local data = player:GetData()
-				data.CookieJarRemoveWisp = true
-			end
-			return true
-		end
-	end ]]
 end
 
 ---@param player EntityPlayer

@@ -3,11 +3,6 @@ VeeHelper = {}
 local game = Game()
 VeeHelper.RoomCleared = false
 
----@class UseItemReturn
----@field Discharge boolean
----@field ShowAnim boolean
----@field Remove boolean
-
 ---@alias Weapon EntityTear | EntityLaser | EntityKnife | EntityBomb
 
 VeeHelper.RandomRNG = RNG()

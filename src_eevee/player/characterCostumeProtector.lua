@@ -12,38 +12,14 @@ local curOutfit = Outfit.CHRISTMAS
 ---@type table<PlayerType, boolean>
 local playerToProtect = {
 	[EEVEEMOD.PlayerType.EEVEE] = true,
-	--[[ [EEVEEMOD.PlayerType.FLAREON] = true,
-	[EEVEEMOD.PlayerType.JOLTEON] = true,
-	[EEVEEMOD.PlayerType.VAPOREON] = true,
-	[EEVEEMOD.PlayerType.ESPEON] = true,
-	[EEVEEMOD.PlayerType.UMBREON] = true,
-	[EEVEEMOD.PlayerType.GLACEON] = true,
-	[EEVEEMOD.PlayerType.LEAFEON] = true,
-	[EEVEEMOD.PlayerType.SYLVEON] = true, ]]
 }
 ---@type table<PlayerType, string>
 local playerCostume = {
 	[EEVEEMOD.PlayerType.EEVEE] = "gfx/characters/costume_eevee",
-	--[[ [EEVEEMOD.PlayerType.FLAREON] = "gfx/characters/costume_flareon",
-	[EEVEEMOD.PlayerType.JOLTEON] = "gfx/characters/costume_jolteon",
-	[EEVEEMOD.PlayerType.VAPOREON] = "gfx/characters/costume_vaporeon",
-	[EEVEEMOD.PlayerType.ESPEON] = "gfx/characters/costume_espeon",
-	[EEVEEMOD.PlayerType.UMBREON] = "gfx/characters/costume_umbreon",
-	[EEVEEMOD.PlayerType.GLACEON] = "gfx/characters/costume_glaceon",
-	[EEVEEMOD.PlayerType.LEAFEON] = "gfx/characters/costume_leafeon",
-	[EEVEEMOD.PlayerType.SYLVEON] = "gfx/characters/costume_sylveon", ]]
 }
 ---@type table<PlayerType, string>
 local playerSpritesheet = {
 	[EEVEEMOD.PlayerType.EEVEE] = baseCharacterPath .. "character_eevee",
-	--[[ [EEVEEMOD.PlayerType.FLAREON] = baseCharacterPath .. "character_flareon",
-	[EEVEEMOD.PlayerType.JOLTEON] = baseCharacterPath .. "character_jolteon",
-	[EEVEEMOD.PlayerType.VAPOREON] = baseCharacterPath .. "character_vaporeon",
-	[EEVEEMOD.PlayerType.ESPEON] = baseCharacterPath .. "character_espeon",
-	[EEVEEMOD.PlayerType.UMBREON] = baseCharacterPath .. "character_umbreon",
-	[EEVEEMOD.PlayerType.GLACEON] = baseCharacterPath .. "character_glaceon",
-	[EEVEEMOD.PlayerType.LEAFEON] = baseCharacterPath .. "character_leafeon",
-	[EEVEEMOD.PlayerType.SYLVEON] = baseCharacterPath .. "character_sylveon", ]]
 }
 ---@type table<CollectibleType, boolean>
 local costumeList = {

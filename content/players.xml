@@ -9,36 +9,4 @@
 		nameimage="PlayerName_Eevee.png" 
 		portrait="PlayerPortrait_Eevee.png" skinColor="-1" costumeSuffix="eevee"
 		birthright="Eevee learned Tail Whip!" />
-	<!-- <player name="Flareon" skin="character_flareon.png" hp="4" bombs="0" 
-         nameimage="PlayerName_Flareon.png" 
-         portrait="PlayerPortrait_EeveeFlareonpng" skinColor="-1" costumeSuffix="flareon" hidden="true"
-		 birthright="Flareon learned ???" />
-	<player name="Jolteon" skin="character_jolteon.png" hp="4" bombs="0" 
-         nameimage="PlayerName_Jolteon.png" 
-         portrait="PlayerPortrait_Jolteon.png" skinColor="-1" costumeSuffix="jolteon" hidden="true"
-		 birthright="Jolteon learned ???" />
-	<player name="Vaporeon" skin="character_vaporeon.png" hp="4" bombs="0" 
-         nameimage="PlayerName_Vaporeon.png" 
-         portrait="PlayerPortrait_Vaporeon.png" skinColor="-1" costumeSuffix="vaporeon" hidden="true"
-		 birthright="Vaporeon learned ???" />
-	<player name="Espeon" skin="character_espeon.png" hp="4" bombs="0" 
-         nameimage="PlayerName_Espeon.png" 
-         portrait="PlayerPortrait_Espeon.png" skinColor="-1" costumeSuffix="espeon" hidden="true"
-		 birthright="Espeon learned Future Sight!" />
-	<player name="Umbreon" skin="character_umbreon.png" hp="4" bombs="0" 
-         nameimage="PlayerName_Umbreon.png" 
-         portrait="PlayerPortrait_Umbreon.png" skinColor="-1" costumeSuffix="umbreon" hidden="true"
-		 birthright="Umbreon learned ???" />
-	<player name="Glaceon" skin="character_glaceon.png" hp="4" bombs="0" 
-         nameimage="PlayerName_Glaceon.png" 
-         portrait="PlayerPortrait_Glaceon.png" skinColor="-1" costumeSuffix="glaceon" hidden="true"
-		 birthright="Glaceon learned ???" />
-	<player name="Leafeon" skin="character_leafeon.png" hp="4" bombs="0" 
-         nameimage="PlayerName_Leafeon.png" 
-         portrait="PlayerPortrait_Leafeon.png" skinColor="-1" costumeSuffix="leafeon" hidden="true"
-		 birthright="Leafeon learned ???" />
-	<player name="Sylveon" skin="character_sylveon.png" hp="4" bombs="0"
-         nameimage="PlayerName_Sylveon.png" 
-         portrait="PlayerPortrait_Sylveon.png" skinColor="-1" costumeSuffix="sylveon" hidden="true"
-		 birthright="Sylveon learned ???" /> -->
 </players>

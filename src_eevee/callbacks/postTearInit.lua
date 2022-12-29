@@ -1,14 +1,9 @@
 local postTearInit = {}
-
-local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
 local swiftTear = require("src_eevee.attacks.eevee.swiftTear")
-local ember = require("src_eevee.attacks.flareon.ember")
-local customTearVariants = require("src_eevee.misc.customTearVariants")
 
 ---@param tear EntityTear
 function postTearInit:main(tear)	
 	swiftTear:MakeStarOnTearInit(tear)
-	--ember:EmberTearInit(tear)
 end
 
 function postTearInit:init(EeveeReunited)

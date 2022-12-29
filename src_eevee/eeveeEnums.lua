@@ -63,14 +63,6 @@ EEVEEMOD.CollectibleType = {
 	SNEAK_SCARF = Isaac.GetItemIdByName("Sneak Scarf"),
 	SHINY_CHARM = Isaac.GetItemIdByName("Shiny Charm"),
 	BLACK_GLASSES = Isaac.GetItemIdByName("Black Glasses"),
-	--[[ COOKIE_JAR = {
-		Isaac.GetItemIdByName("Cookie Jar"),
-		Isaac.GetItemIdByName(" Cookie Jar "),
-		Isaac.GetItemIdByName("  Cookie Jar  "),
-		Isaac.GetItemIdByName("   Cookie Jar   "),
-		Isaac.GetItemIdByName("    Cookie Jar    "),
-		Isaac.GetItemIdByName("     Cookie Jar     ")
-	}, ]]
 	COOKIE_JAR = Isaac.GetItemIdByName("Cookie Jar"),
 	STRANGE_EGG = Isaac.GetItemIdByName("Strange Egg"),
 	LIL_EEVEE = Isaac.GetItemIdByName("Lil Eevee"),
@@ -79,11 +71,8 @@ EEVEEMOD.CollectibleType = {
 	WONDEROUS_LAUNCHER = Isaac.GetItemIdByName("Wonderous Launcher"),
 	BAG_OF_POKEBALLS = Isaac.GetItemIdByName("Bag of Poke Balls"),
 	MASTER_BALL = Isaac.GetItemIdByName("Master Ball"),
-	--GIGANTAFLUFF = Isaac.GetItemIdByName("Gigantafluff"),
-	--LEAF_BLADE = Isaac.GetItemIdByName("Leaf Blade"),
 	POKE_STOP = Isaac.GetItemIdByName("Poke Stop"),
 	TAIL_WHIP = Isaac.GetItemIdByName("Tail Whip"),
-	--HI_TECH_EARBUDS = Isaac.GetItemIdByName("Hi-tech Earbuds"),
 }
 
 EEVEEMOD.CollectiblesWithCostumes = {
@@ -123,7 +112,6 @@ EEVEEMOD.FamiliarVariant = {
 	BAD_EGG_DUPE = Isaac.GetEntityVariantByName("Bad EGG Dupe"),
 }
 
---TODO: Kidnap someone and tell me how to see if an item is unlocked or not
 EEVEEMOD.ItemPool = {
 	POOL_GLITCH = {
 		CollectibleType.COLLECTIBLE_GB_BUG,
@@ -158,27 +146,11 @@ EEVEEMOD.NullCostume = {
 EEVEEMOD.PlayerType = {
 	EEVEE = Isaac.GetPlayerTypeByName("Eevee", false),
 	EEVEE_B = Isaac.GetPlayerTypeByName("Eevee", true),
-	--[[ FLAREON = Isaac.GetPlayerTypeByName("Flareon"),
-	JOLTEON = Isaac.GetPlayerTypeByName("Jolteon"),
-	VAPOREON = Isaac.GetPlayerTypeByName("Vaporeon"),
-	ESPEON = Isaac.GetPlayerTypeByName("Espeon"),
-	UMBREON = Isaac.GetPlayerTypeByName("Umbreon"),
-	GLACEON = Isaac.GetPlayerTypeByName("Glaceon"),
-	LEAFEON = Isaac.GetPlayerTypeByName("Leafeon"),
-	SYLVEON = Isaac.GetPlayerTypeByName("Sylveon") ]]
 }
 
 ---@type table<PlayerType, string>
 EEVEEMOD.PlayerTypeToString = {
 	[EEVEEMOD.PlayerType.EEVEE] = "eevee",
-	--[[ [EEVEEMOD.PlayerType.FLAREON] = "flareon",
-	[EEVEEMOD.PlayerType.JOLTEON] = "jolteon",
-	[EEVEEMOD.PlayerType.VAPOREON] = "vaporeon",
-	[EEVEEMOD.PlayerType.ESPEON] = "espeon",
-	[EEVEEMOD.PlayerType.UMBREON] = "umbreon",
-	[EEVEEMOD.PlayerType.GLACEON] = "glaceon",
-	[EEVEEMOD.PlayerType.LEAFEON] = "leafeon",
-	[EEVEEMOD.PlayerType.SYLVEON] = "sylveon", ]]
 }
 
 ---@type table<CollectibleType, PlayerType>
@@ -201,14 +173,6 @@ EEVEEMOD.PlayerSounds = {
 ---@type table<PlayerType, boolean>
 EEVEEMOD.IsPlayerEeveeOrEvolved = {
 	[EEVEEMOD.PlayerType.EEVEE] = true,
-	--[[ [EEVEEMOD.PlayerType.FLAREON] = true,
-	[EEVEEMOD.PlayerType.JOLTEON] = true,
-	[EEVEEMOD.PlayerType.VAPOREON] = true,
-	[EEVEEMOD.PlayerType.ESPEON] = true,
-	[EEVEEMOD.PlayerType.UMBREON] = true,
-	[EEVEEMOD.PlayerType.GLACEON] = true,
-	[EEVEEMOD.PlayerType.LEAFEON] = true,
-	[EEVEEMOD.PlayerType.SYLVEON] = true ]]
 }
 
 ---@class PokeballType

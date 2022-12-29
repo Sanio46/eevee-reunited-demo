@@ -3,7 +3,7 @@ local eeveeStats = {}
 local statsEevee = {
 	[CacheFlag.CACHE_SPEED] = 0,
 	[CacheFlag.CACHE_FIREDELAY] = 1,
-	[CacheFlag.CACHE_DAMAGE] = 0.9,
+	[CacheFlag.CACHE_DAMAGE] = 0.858,
 	[CacheFlag.CACHE_RANGE] = 3,
 	[CacheFlag.CACHE_SHOTSPEED] = 0.2,
 	[CacheFlag.CACHE_LUCK] = 0,
@@ -11,14 +11,6 @@ local statsEevee = {
 
 local statsEeveelutions = {
 	[EEVEEMOD.PlayerType.EEVEE] = statsEevee,
-	--[[ [EEVEEMOD.PlayerType.FLAREON] = statsDefault,
-	[EEVEEMOD.PlayerType.JOLTEON] = statsDefault,
-	[EEVEEMOD.PlayerType.VAPOREON] = statsDefault,
-	[EEVEEMOD.PlayerType.ESPEON] = statsDefault,
-	[EEVEEMOD.PlayerType.UMBREON] = statsDefault,
-	[EEVEEMOD.PlayerType.GLACEON] = statsDefault,
-	[EEVEEMOD.PlayerType.LEAFEON] = statsDefault,
-	[EEVEEMOD.PlayerType.SYLVEON] = statsDefault, ]]
 }
 
 ---@param player EntityPlayer

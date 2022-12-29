@@ -10,7 +10,7 @@
 ---@type ModReference
 local EeveeReunited = RegisterMod("Eevee: Reunited - Demo", 1)
 
---VERSION: 2.1.1
+--VERSION: 2.1.2
 
 local json = nil
 
@@ -115,6 +115,7 @@ function EeveeReunited:init(j)
 		"postKnifeUpdate",
 		"postEffectInit",
 		"postEffectUpdate",
+		"postEffectRender",
 		"postBombInit",
 		"postBombUpdate",
 		"postFireTear",

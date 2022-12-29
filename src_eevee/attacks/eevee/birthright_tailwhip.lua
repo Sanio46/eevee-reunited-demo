@@ -69,7 +69,7 @@ local tailWhipHitCooldown = 10
 local tailWhipWeaknessTimer = 120
 
 ---@param effect EntityEffect
-function tailWhip:OnEffectUpdate(effect)
+function tailWhip:onEffectRender(effect)
 	local data = effect:GetData()
 	local sprite = effect:GetSprite()
 
@@ -161,6 +161,9 @@ end
 function tailWhip:CostumePlayerUpdate(player)
 	local data = player:GetData()
 	local effects = player:GetEffects()
+	local playerType = player:GetPlayerType()
+
+	if playerType == EEVEEMOD.PlayerType.EEVEE then return end
 	if player:HasCollectible(EEVEEMOD.CollectibleType.TAIL_WHIP)
 		and not effects:HasCollectibleEffect(EEVEEMOD.CollectibleType.TAIL_WHIP)
 		and not data.HasTailWhipCostume then

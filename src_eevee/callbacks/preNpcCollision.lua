@@ -1,7 +1,6 @@
 local preNpcCollision = {}
 
 local alertSpecs = require("src_eevee.items.trinkets.alertSpecs")
-local leafBlade = require("src_eevee.attacks.leafeon.leafBlade")
 
 ---@param npc EntityNPC
 ---@param collider Entity
@@ -12,7 +11,6 @@ function preNpcCollision:main(npc, collider, low)
 		local player = collider:ToPlayer()
 		local useItemFunctions = {
 			alertSpecs:OnCollisionGreedEnemy(npc, player),
-			leafBlade:SlashCollidedEnemy(npc, player),
 		}
 		for i = 1, #useItemFunctions do
 			if useItemFunctions[i] ~= nil then return useItemFunctions[i] end

@@ -128,10 +128,18 @@ function swiftAttack:InitInstanceValues(swiftData)
 
 		-- dumb bruteforced hack, might break if any other constants change -oat
 		if numNeptunusInstances >= 2 then
-			-- gets a consistent rotation relative to the inner layer at any fire delay
-			local alignedRotation = fireDelay * 20
-			-- aligns it to a star shape
-			swiftData.Rotation = alignedRotation - 5
+			-- gets a consistent rotation relative to the inner layer at any fire delay to make a star shape
+			local alignedRotation = fireDelay * 20 - 5
+			swiftData.Rotation = alignedRotation
+		end
+	else
+		--If firerates go too fast, the 
+		local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
+		if swiftPlayer then
+			local lastInstance = swiftPlayer.OwnedInstances[#swiftPlayer.OwnedInstances - 1]
+			if #swiftPlayer.OwnedInstances > 1 and fireDelay <= 2 then
+				swiftData.Rotation = lastInstance.Rotation
+			end
 		end
 	end
 end
@@ -604,6 +612,9 @@ function swiftAttack:RateOfOrbitRotation(swiftData)
 	end
 	local currentRotation = swiftData.Rotation
 	local rateOfRotation = (7 * (player.ShotSpeed * (swiftData.DurationTimer / swiftData.TotalDuration)))
+	if swiftBase:GetFireDelay(player, false) <= 1 then
+		rateOfRotation = 3 * player.ShotSpeed
+	end
 	if rateOfRotation <= rateLimit then rateOfRotation = rateLimit end
 	currentRotation = currentRotation + rateOfRotation
 	if currentRotation > 360 then currentRotation = currentRotation - 360 end
@@ -718,7 +729,7 @@ end
 ---@param trail EntityEffect
 function swiftAttack:SwiftTrailUpdate(trail)
 	local data = trail:GetData()
-	
+
 	if trail.Parent then
 		local weapon = trail.Parent
 		local room = EEVEEMOD.game:GetRoom()

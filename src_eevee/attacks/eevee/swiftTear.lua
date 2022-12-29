@@ -204,7 +204,16 @@ function swiftTear:OnSwiftStarDestroy(tear, splashType)
 	sprite.Offset = Vector(0, splashPos)
 	sprite.Scale = Vector(tear.Scale, tear.Scale)
 	local color = Color.Default
-	if not VeeHelper.AreColorsDifferent(tear.Color, Color.Default) then
+	local swiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(tear))]
+
+	if swiftWeapon
+		and swiftWeapon.Trail and swiftWeapon.Trail:Exists()
+		and (
+		swiftWeapon.Trail:GetData().EeveeEntHasColorCycle
+			or tear.SpawnerEntity:ToPlayer():HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE)
+		) then
+		color = swiftWeapon.Trail.Color
+	elseif not VeeHelper.AreColorsDifferent(tear.Color, Color.Default) then
 		color = EEVEEMOD.TrailColor[tear.Variant]
 	else
 		color = tear.Color

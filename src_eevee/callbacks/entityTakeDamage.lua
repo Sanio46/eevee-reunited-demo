@@ -2,7 +2,6 @@ local entityTakeDamage = {}
 
 local eeveeSFX = require("src_eevee.player.eeveeSFX")
 local ccp = require("src_eevee.player.characterCostumeProtector")
-local leafBlade = require("src_eevee.attacks.leafeon.leafBlade")
 local lockOnSpecs = require("src_eevee.items.trinkets.lockOnSpecs")
 
 ---@param player EntityPlayer
@@ -13,7 +12,6 @@ local lockOnSpecs = require("src_eevee.items.trinkets.lockOnSpecs")
 function entityTakeDamage:main(player, amount, flags, source, countdown)
 	player = player:ToPlayer()
 	local entTakeDamageFunctions = {
-		leafBlade:PreventDamageOnDash(player, amount, flags, source, countdown),
 		eeveeSFX:EeveeOnHit(player, amount, flags, source, countdown),
 		ccp:AstralProjectionOnHit(player, amount, flags, source, countdown),
 		lockOnSpecs:DropChanceOnHit(player, amount, flags, source, countdown),

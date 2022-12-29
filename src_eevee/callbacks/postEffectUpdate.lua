@@ -1,12 +1,9 @@
 local postEffectUpdate = {}
 
-local eeveeBirthright = require("src_eevee.attacks.eevee.birthright_tailwhip")
-local eeveeGhost = require("src_eevee.player.eeveeGhost")
 local eeveeSFX = require("src_eevee.player.eeveeSFX")
 local pokeball = require("src_eevee.items.pickups.pokeball")
 local swiftAttack = require("src_eevee.attacks.eevee.swiftAttack")
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
-local swiftKnife = require("src_eevee.attacks.eevee.swiftKnife")
 local wonderousLauncher = require("src_eevee.items.collectibles.wonderousLauncher")
 local triggerOnFire = require("src_eevee.items.triggerOnFire")
 local lockOnSpecs = require("src_eevee.items.trinkets.lockOnSpecs")
@@ -15,12 +12,7 @@ local shinyCharm = require("src_eevee.items.collectibles.shinyCharm")
 
 function postEffectUpdate:main(effect)
 
-	if swiftBase:IsSwiftLaserEffect(effect)
-		or effect.Variant == EffectVariant.EVIL_EYE then
-		if effect.Variant == EffectVariant.EVIL_EYE then
-			--swiftAttack:InitSwiftEvilEye(effect)
-		end
-
+	if swiftBase:IsSwiftLaserEffect(effect) then
 		swiftAttack:SwiftAttackUpdate(effect)
 	end
 end
@@ -53,10 +45,6 @@ function postEffectUpdate:init(EeveeReunited)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, swiftAttack.SwiftTrailUpdate, EffectVariant.SPRITE_TRAIL)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, pokeball.PokeballEffectUpdate,
 		EEVEEMOD.EffectVariant.POKEBALL)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeGhost.EeveeGhostUpdate,
-		EEVEEMOD.EffectVariant.EEVEE_GHOST)
-	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeBirthright.OnEffectUpdate,
-		EEVEEMOD.EffectVariant.TAIL_WHIP)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, eeveeSFX.FindDeadPlayerEffect, EffectVariant.DEVIL)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, wonderousLauncher.FireHandling,
 		EEVEEMOD.EffectVariant.WONDEROUS_LAUNCHER)
@@ -73,7 +61,6 @@ function postEffectUpdate:init(EeveeReunited)
 		EEVEEMOD.EffectVariant.SHINY_SPARKLE)
 	EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, swiftAttack.RemoveAntiGravPlaceholder,
 		EEVEEMOD.EffectVariant.ANTI_GRAV_PARENT)
-		EeveeReunited:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, swiftKnife.KillGodheadAura, EEVEEMOD.EffectVariant.CUSTOM_TEAR_HALO)
 end
 
 return postEffectUpdate

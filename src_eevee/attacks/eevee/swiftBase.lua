@@ -57,7 +57,6 @@ swiftBase.swiftInstanceData = {
 	NumWeaponsToSpawn = 5,
 	NumWeaponsRemoved = 0,
 	ShotMultiplier = 1,
-	IsSecondNeptunusInstance = false,
 }
 
 ---@class SwiftTear
@@ -142,7 +141,7 @@ end
 
 ---@param swiftPlayer SwiftPlayer
 ---@param swiftData SwiftInstance
-function swiftBase.GetNumOfNeptunusInstance(swiftPlayer, swiftData)
+function swiftBase.getOrderNumberOfNeptunusInstance(swiftPlayer, swiftData)
 	local instanceNum = 0
 	for _, ownedSwiftData in ipairs(swiftPlayer.OwnedInstances) do
 		if ownedSwiftData.InstanceType == swiftBase.InstanceType.INSTANCE_NEPTUNUS
@@ -324,7 +323,7 @@ function swiftBase:SwiftOrbitDistance(swiftData)
 	if swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_NEPTUNUS then
 		local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
 
-		if swiftPlayer and swiftBase.GetNumOfNeptunusInstance(swiftPlayer, swiftData) >= 2 then
+		if swiftPlayer and swiftBase.getOrderNumberOfNeptunusInstance(swiftPlayer, swiftData) >= 2 then
 			distFromPlayer = distFromPlayer * 1.5
 		end
 	end

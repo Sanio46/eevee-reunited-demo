@@ -11,7 +11,10 @@ local colorsToCycle = {
 	[EEVEEMOD.ColorCycle.RGB] = { { 0, 0, 0 }, { 255, 255, 255 } },
 	[EEVEEMOD.ColorCycle.CONTINUUM] = { { 170, 0, 255 }, { 255, 255, 255 }, { 0, 0, 0 } }
 }
-local rgbSpeed = 10
+local colorSpeed = {
+	[EEVEEMOD.ColorCycle.RGB] = 10,
+	[EEVEEMOD.ColorCycle.CONTINUUM] = 23
+}
 
 ---@type table<Entity, ColorCycle>[]
 local entsToColorCycle = {}
@@ -39,7 +42,7 @@ local function ConvertToFloat(num)
 end
 
 function rgbCycle:cycleRGB()
-	for _ = 1, rgbSpeed do
+	for _ = 1, colorSpeed[EEVEEMOD.ColorCycle.RGB] do
 		if rGlobal > 0 and bGlobal == 0 then
 			rGlobal = rGlobal - 1
 			gGlobal = gGlobal + 1
@@ -91,7 +94,7 @@ function rgbCycle:cycleCustomColor()
 					curColor = 1
 				}
 			end
-			for i = 1, 10 do
+			for _ = 1, colorSpeed[colorCycle] do
 				if data.EeveeCCC.r > curColorCycle[data.EeveeCCC.curColor][1] then
 					data.EeveeCCC.r = data.EeveeCCC.r - data.EeveeCCC.rChangeNum
 				end

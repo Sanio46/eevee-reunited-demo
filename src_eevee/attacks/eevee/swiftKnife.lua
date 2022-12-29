@@ -42,11 +42,10 @@ local function BasicSwiftKnifeData(tearKnife, knife, player)
 	--Invisible tear means invisible halo, but because of how this funcitons by making the tear do all the work and slapping a knife on it...
 	--Removing the halo isn't an option, but there's still a halo, so this is to just create one that's visible
 	if tearKnife:HasTearFlags(TearFlags.TEAR_GLOW) then
-		local godheadEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.CUSTOM_TEAR_HALO, 0, knife.Position, Vector.Zero, knife):ToEffect()
-		godheadEffect.Parent = knife
-		godheadEffect:FollowParent(godheadEffect.Parent)
+		local godheadEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.CUSTOM_TEAR_HALO, 0, knife.Position
+			, Vector.Zero, tearKnife):ToEffect()
 		godheadEffect.SpriteScale = Vector(0.5, 0.5)
-		--TODO: Halo follows knife so it doesn't fall with the tear but it isn't correctly positioned. Probably an anm2 change.
+		godheadEffect.SpriteOffset = Vector(0, -15)
 	end
 end
 
@@ -84,14 +83,14 @@ function swiftKnife:FireSwiftKnife(swiftData, swiftWeapon, direction)
 	if not parent then return end
 	local tearKnife = player:FireTear(swiftWeapon.WeaponEntity.Position, direction, false, false, false, player)
 	local knife = player:FireKnife(player, direction:GetAngleDegrees())
-	
+
 	tearKnife:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_HOMING)
 	tearKnife:ClearTearFlags(TearFlags.TEAR_ORBIT)
 	swiftBase:AddSwiftTrail(tearKnife, player)
 	swiftBase:PlaySwiftFireSFX(tearKnife)
 	BasicSwiftKnifeData(tearKnife, knife, player)
 	tearKnife:SetColor(VeeHelper.SetColorAlpha(tearKnife.Color, 0), -1, 1, false, false)
-	
+
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
 		knife.Color = swiftBase:PlaydoughRandomColor()
 	else
@@ -150,7 +149,7 @@ function swiftKnife:SwiftKnifeUpdate(knife)
 		local fKC = tearKnife:GetSprite().Color
 		tearKnife:SetColor(VeeHelper.SetColorAlpha(fKC, 0), -1, 1, false, false)
 	end
-	
+
 	if swiftWeapon.HasFired and data.SwiftKnifeBrim_Delay then
 		if not data.SwiftKnifeBrim_OriginalColor then
 			local fKC = tearKnife:GetSprite().Color
@@ -181,9 +180,11 @@ function swiftKnife:SwiftKnifeUpdate(knife)
 end
 
 ---@param effect EntityEffect
-function swiftKnife:KillGodheadAura(effect)
-	if not effect.Parent then
+function swiftKnife:godheadAuraRenderUpdate(effect)
+	if not effect.SpawnerEntity then
 		effect:Remove()
+	else
+		effect.Position = effect.SpawnerEntity.Position
 	end
 end
 

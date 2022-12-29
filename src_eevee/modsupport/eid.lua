@@ -6,27 +6,8 @@ local eeveeIcons = Sprite()
 eeveeIcons:Load("gfx/ui/eid_eevee_icons.anm2", true)
 local Player = {
 	Eevee = "Player" .. EEVEEMOD.PlayerType.EEVEE,
-	--[[ Flareon = "Player"..EEVEEMOD.PlayerType.FLAREON,
-	Jolteon = "Player"..EEVEEMOD.PlayerType.JOLTEON,
-	Vaporeon = "Player"..EEVEEMOD.PlayerType.VAPOREON,
-	Espeon = "Player"..EEVEEMOD.PlayerType.EEVEE,
-	Umbreon = "Player"..EEVEEMOD.PlayerType.EEVEE,
-	Glaceon = "Player"..EEVEEMOD.PlayerType.EEVEE,
-	Leafeon = "Player"..EEVEEMOD.PlayerType.EEVEE,
-	Sylveon = "Player"..EEVEEMOD.PlayerType.EEVEE ]]
 }
 EID:addIcon(Player.Eevee, "Players", 0, 12, 12, -1, 1, eeveeIcons)
---[[
-EID:addIcon(Player.Flareon, "Players", 1, 12, 12, -1, 1, eeveeIcons)
-EID:addIcon(Player.Jolteon, "Players", 2, 12, 12, -1, 1, eeveeIcons)
-EID:addIcon(Player.Vaporeon, "Players", 3, 12, 12, -1, 1, eeveeIcons)
-EID:addIcon(Player.Espeon, "Players", 4, 12, 12, -1, 1, eeveeIcons)
-EID:addIcon(Player.Umbreon, "Players", 5, 12, 12, -1, 1, eeveeIcons)
-EID:addIcon(Player.Glaceon, "Players", 6, 12, 12, -1, 1, eeveeIcons)
-EID:addIcon(Player.Leafeon, "Players", 7, 12, 12, -1, 1, eeveeIcons)
-EID:addIcon(Player.Sylveon, "Players", 8, 12, 12, -1, 1, eeveeIcons)
-EID:addIcon(Player.EeveeB, "Players", 9, 12, 12, -1, 1, eeveeIcons)
-]]
 
 EID:addIcon("Card" .. EEVEEMOD.PokeballType.POKEBALL, "Poke Balls", 0, 9, 9, -1, 0, eeveeIcons)
 EID:addIcon("Card" .. EEVEEMOD.PokeballType.GREATBALL, "Poke Balls", 1, 9, 9, -1, 0, eeveeIcons)
@@ -384,14 +365,6 @@ local Descriptions = {
 		Collectibles_Modified = CollectiblesDescs_Modified_EN,
 		Trinkets_Modified = TrinketDescs_Modified_EN,
 		Eevee = "Eevee",
-		Flareon = "Flareon",
-		Jolteon = "Jolteon",
-		Vaporeon = "Vaporeon",
-		Espeon = "Espeon",
-		Glaceon = "Glaceon",
-		Leafeon = "Leafeon",
-		Sylveon = "Sylveon",
-		Eevee_B = "Tainted Eevee"
 	},
 	["spa"] = {
 		Collectibles = CollectibleDescs_SPA,
@@ -402,14 +375,6 @@ local Descriptions = {
 		Collectibles_Modified = CollectiblesDescs_Modified_SPA,
 		Trinkets_Modified = TrinketDescs_Modified_SPA,
 		Eevee = "Eevee",
-		Flareon = "Flareon",
-		Jolteon = "Jolteon",
-		Vaporeon = "Vaporeon",
-		Espeon = "Espeon",
-		Glaceon = "Glaceon",
-		Leafeon = "Leafeon",
-		Sylveon = "Sylveon",
-		Eevee_B = "Tainted Eevee"
 	},
 	["ko_kr"] = {
 		Collectibles = CollectibleDescs_KR,
@@ -420,14 +385,6 @@ local Descriptions = {
 		Collectibles_Modified = CollectiblesDescs_Modified_KR,
 		Trinkets_Modified = TrinketDescs_Modified_KR,
 		Eevee = "이브이",
-		Flareon = "Flareon",
-		Jolteon = "Jolteon",
-		Vaporeon = "Vaporeon",
-		Espeon = "Espeon",
-		Glaceon = "Glaceon",
-		Leafeon = "Leafeon",
-		Sylveon = "Sylveon",
-		Eevee_B = "Tainted 이브이"
 	}
 }
 

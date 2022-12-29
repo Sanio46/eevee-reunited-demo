@@ -57,7 +57,6 @@ end
 
 ---@param itemID CollectibleType
 ---@param player EntityPlayer
----@return UseItemReturn | boolean
 function pokeball:OnMasterBallUse(itemID, _, player, _, _, _)
 	local data = player:GetData()
 	if itemID == EEVEEMOD.CollectibleType.MASTER_BALL and player:GetActiveItem() == EEVEEMOD.CollectibleType.MASTER_BALL then
@@ -74,9 +73,9 @@ function pokeball:OnMasterBallUse(itemID, _, player, _, _, _)
 	else
 		if data.CanThrowPokeball then
 			data.CanThrowPokeball = false
+			return false
 		end
 	end
-	return false
 end
 
 ---@param ball EntityEffect

@@ -3,11 +3,6 @@
 	<passive id="0" cache="speed" name="Sneak Scarf" description="Be careful not to make a sound!" gfx="collectibles_sneak_scarf.png" quality="3" />
 	<passive id="1" cache="luck" name="Shiny Charm" description="Luck up" gfx="collectibles_shiny_charm.png" quality="2" tags="offensive" />
 	<passive id="2" cache="damage" name="Black Glasses" description="Be a part of the cool kids" gfx="collectibles_black_glasses.png" persistent="true" quality="2" tags="offensive " />
-	<!-- <active id="3" cache="speed" name="     Cookie Jar     " description="One at a time please" gfx="collectibles_cookie_jar6.png" maxcharges="0" quality="1" tags="nolostbr" />
-	<active id="3" cache="speed" name="    Cookie Jar    " description="One at a time please" gfx="collectibles_cookie_jar5.png" hidden="true" maxcharges="0" quality="1" tags="nolostbr" />
-	<active id="3" cache="speed" name="   Cookie Jar   " description="One at a time please" gfx="collectibles_cookie_jar4.png" hidden="true" maxcharges="0" quality="1" tags="nolostbr" />
-	<active id="3" cache="speed" name="  Cookie Jar  " description="One at a time please" gfx="collectibles_cookie_jar3.png" hidden="true" maxcharges="0" quality="1" tags="nolostbr" />
-	<active id="3" cache="speed" name=" Cookie Jar " description="One at a time please" gfx="collectibles_cookie_jar2.png" hidden="true" maxcharges="0" quality="1" tags="nolostbr" /> -->
 	<active id="3" cache="speed" name="Cookie Jar" description="One at a time please" gfx="collectibles_cookie_jar.png" persistent="true" maxcharges="0" quality="1" tags="nolostbr" />
 	<active id="4" cache="" name="Strange Egg" description="Should I take care of it?" gfx="collectibles_strange_egg.png" maxcharges="3" chargetype="special" initcharge="0" quality="1" tags="nolostbr" />
 	<familiar id="5" cache="familiars" name="Lil Eevee" description="Protect the child" gfx="familiar_lileevee.png" quality="2" tags="summonable monstermanual offensive" />
@@ -17,27 +12,10 @@
 	<familiar id="8" cache="familiars" name="Bag of Poke Balls" description="Gives balls" gfx="collectibles_bag_of_pokeballs.png" quality="3" tags="offensive nocantrip" />
 	<active id="9" cache="" name="Master Ball" description="Guarenteed capture" gfx="collectibles_master_ball.png" maxcharges="1" chargetype="special" initcharge="1" quality="4" tags="offensive nocantrip" />
 	<passive id="10" cache="" name="Poke Stop" description="Gotta find em..." gfx="collectibles_poke_stop.png" quality="1" tags="lazarussharedglobal offensive nogreed nocantrip" />
-	<!-- <passive id="21" cache="" name="Gigantafluff" description="It radiates irressistible cuteness" gfx="collectibles_gigantafluff.png" quality="0" tags="nolostbr" /> -->
-	<!-- Birthrights -->
+	<!-- Birthright -->
 	<active id="11" cache="" name="Tail Whip" description="Aggressive tail wagging" gfx="birthright_tailwhip.png" maxcharges="300" chargetype="timed" quality="1" />
-	<!-- <active cache="12" name="Overheat" description="Build up and release" gfx="birthright_overheat.png" maxcharges="8" />
-	<active cache="13" name="Thunder" description="Strike thy foe" gfx="birthright_thunder.png" maxcharges="3" />
-	<active cache="14" name="Dive" description="This'll go swimmingly!" gfx="birthright_dive.png" maxcharges="0" />
-	<active cache="15" name="Future Sight" description="Die a violent death" gfx="birthright_future_sight.png" maxcharges="0" />
-	<active cache="16" name="Umbreon's Birthright" description="i got no clue man" gfx="birthright_bre.png" maxcharges="0" />
-	<active cache="17" name="Leaf Blade" description="Dash and slash" gfx="collectibles_leaf_blade.png" maxcharges="180" chargetype="timed" cooldown="30" />
-	<active cache="18" name="Glaceon's Birthright" description="Snowgrave" gfx="birthright_glace.png" maxcharges="0" />
-	<passive cache="19" name="Swords Dance" description="bazinga swords" gfx="birthright_swords_dance.png" maxcharges="0" />
-	<active cache="20" name="Sylveon's Birthright" description="haha wow this'll be a tough one" gfx="birthright_sylv.png" maxcharges="0" /> -->
 	<!-- Trinkets -->
 	<trinket cache="damage range shotspeed" name="Lock-On Specs" description="Keep your focus!" gfx="trinket_lockon_specs.png" />
 	<trinket cache="all" name="Eviolite" description="Stay true to your origin" gfx="trinket_eviolite.png" />
 	<trinket cache="" name="Alert Specs" description="Paws off!" gfx="trinket_alert_specs.png" persistent="true"/>
-	<!-- <trinket cache="" name="Small Mossy Rock" description="Finding two more should give it the strength it needs" gfx="trinket_mossyrock_stage1.png" />
-	<trinket cache="" name="Sizeable Mossy Rock" description="Finding one more should give it the strength it needs" gfx="trinket_mossyrock_stage2.png" />
-	<trinket cache="" name="Mossy Rock" description="You feel ready to evolve with its natural aura" gfx="trinket_mossyrock_stage3.png" />
-	<trinket cache="" name="Small Icy Rock" description="Finding two more should give it the strength it needs" gfx="trinket_icyrock_stage1.png" />
-	<trinket cache="" name="Sizeable Icy Rock" description="Finding one more should give it the strength it needs" gfx="trinket_icyrock_stage2.png" />
-	<trinket cache="" name="Icy Rock" description="You feel ready to evolve with its chilling aura" gfx="trinket_icyrock_stage3.png" /> -->
-	<!-- <passive cache="" name="Hi-tech Earbuds" description="Truly the technology of the future." gfx="collectibles_hi_tech_earbuds" /> -->
 </items>

@@ -24,32 +24,6 @@ local itemToUnlock = {
 	[EEVEEMOD.CollectibleType.POKE_STOP] = { Special = function()
 		return EEVEEMOD.PERSISTENT_DATA.UnlockData.PokeyMansCrystal
 	end },
-	--[[ [EEVEEMOD.CollectibleType.OVERHEAT] = {Special = function()
-		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
-	end},
-	[EEVEEMOD.CollectibleType.THUNDER] = {Special = function()
-		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
-	end},
-	[EEVEEMOD.CollectibleType.DIVE] = {Special = function()
-		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
-	end},
-	[EEVEEMOD.CollectibleType.FUTURE_SIGHT] = {Special = function()
-		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
-	end},
-	[EEVEEMOD.CollectibleType.BRE] = {Special = function()
-		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
-	end},
-	[EEVEEMOD.CollectibleType.GLACE] = {Special = function()
-		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
-	end},
-	[EEVEEMOD.CollectibleType.SWORDS_DANCE] = {Special = function()
-		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
-	end},
-	[EEVEEMOD.CollectibleType.SYLV] = {Special = function()
-		return (EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Unlock and EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee_B.FullCompletion.Hard)
-	end},
-	[EEVEEMOD.CollectibleType.GIGANTAFLUFF] = {Unlock = "Beast", Tainted = true}
-	]]
 }
 
 local trinketToUnlock = {

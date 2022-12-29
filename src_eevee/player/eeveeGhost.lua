@@ -30,7 +30,7 @@ function eeveeGhost:SpawnGhostEffect(player)
 end
 
 ---@param effect EntityEffect
-function eeveeGhost:EeveeGhostUpdate(effect)
+function eeveeGhost:eeveeGhostRenderUpdate(effect)
 	if VeeHelper.EntitySpawnedByPlayer(effect) then
 		local player = effect.SpawnerEntity:ToPlayer()
 		local sprite = effect:GetSprite()
@@ -38,7 +38,7 @@ function eeveeGhost:EeveeGhostUpdate(effect)
 		local playerType = player:GetPlayerType()
 
 		sprite:SetAnimation(pSprite:GetAnimation(), false) --For like a really specific instance if the death animation changes mid-animation that i saw thanks to a twitter video
-		
+
 		if sprite:IsFinished(sprite:GetAnimation()) then
 			effect:Remove()
 		end
