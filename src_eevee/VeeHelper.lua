@@ -82,6 +82,7 @@ VeeHelper.TearVariantBlacklist = {
 	[TearVariant.CHAOS_CARD] = true,
 	[TearVariant.KEY] = true,
 	[TearVariant.KEY_BLOOD] = true,
+	[TearVariant.ERASER] = true,
 	[TearVariant.FIRE] = true,
 	[TearVariant.SWORD_BEAM] = true,
 	[TearVariant.TECH_SWORD_BEAM] = true,

@@ -60,7 +60,8 @@ local function AssignSwiftKnifeData(swiftData, tearKnife, knife)
 	BasicSwiftKnifeData(tearKnife, knife, player)
 
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
-		knife:SetColor(VeeHelper.SetColorAlpha(swiftBase:PlaydoughRandomColor(), 0), 15, 1, true, false)
+		knife.Color  = VeeHelper.PlaydoughRandomColor()
+		knife:SetColor(VeeHelper.SetColorAlpha(knife.Color, 0), 15, 1, true, false)
 	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_CONTINUUM) then
 		rgbCycle:applyColorCycle(knife, EEVEEMOD.ColorCycle.CONTINUUM)
 	else
@@ -92,7 +93,7 @@ function swiftKnife:FireSwiftKnife(swiftData, swiftWeapon, direction)
 	tearKnife:SetColor(VeeHelper.SetColorAlpha(tearKnife.Color, 0), -1, 1, false, false)
 
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
-		knife.Color = swiftBase:PlaydoughRandomColor()
+		knife.Color = VeeHelper.PlaydoughRandomColor()
 	else
 		local fKC = tearKnife:GetSprite().Color
 		knife:SetColor(VeeHelper.SetColorAlpha(fKC, 1), -1, 1, false, false)
