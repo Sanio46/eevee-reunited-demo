@@ -60,7 +60,7 @@ Eevee’s boss/stage portrait: Sanio, sketch, Zer0
 Majority of achievement papers: AllOfLucky
 Poke Stop Achievement Paper: Takano, Sanio
 Temporary Tail Whip Achievement Paper: StrAkio
-Lil Eevee & Eeveelution sprites: Candle
+Lil Eevee and Eeveelution sprites: Candle
 
 [h3]Code[/h3]
 Majority of code: Sanio
@@ -76,9 +76,8 @@ Eevee: Reunited Logo: CheapBones
 Workshop thumbnail for demo: TikaraTheMew
 
 [h3]Special Thanks[/h3]
-JSG, AgentCucco, wofsauge, siraxtas, Sentinel, im_tem, DeadInfinity, 4Grabs, pedroff_1, fly_6, Mr.SeemsGood
-</description>
-    <version>1.26</version>
+JSG, AgentCucco, wofsauge, siraxtas, Sentinel, im_tem, DeadInfinity, 4Grabs, pedroff_1, fly_6, Mr.SeemsGood </description>
+    <version>1.27</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>
