@@ -80,6 +80,7 @@ VeeHelper.SlotVariant = {
 VeeHelper.TearVariantBlacklist = {
 	[TearVariant.BOBS_HEAD] = true,
 	[TearVariant.CHAOS_CARD] = true,
+	[TearVariant.GRIDENT] = true,
 	[TearVariant.KEY] = true,
 	[TearVariant.KEY_BLOOD] = true,
 	[TearVariant.ERASER] = true,
