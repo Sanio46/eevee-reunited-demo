@@ -7,7 +7,7 @@ local Outfit = {
 	NONE = "",
 	CHRISTMAS = "christmas"
 }
-local curOutfit = Outfit.CHRISTMAS
+local curOutfit = Outfit.NONE
 
 ---@type table<PlayerType, boolean>
 local playerToProtect = {

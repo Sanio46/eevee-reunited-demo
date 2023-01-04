@@ -132,7 +132,7 @@ local function BreakEgg(familiar)
 		end
 	end
 	local rng = player:GetCollectibleRNG(EEVEEMOD.CollectibleType.BAD_EGG)
-	local pos = Game():GetRoom():FindFreePickupSpawnPosition(familiar.Position)
+	local pos = EEVEEMOD.game:GetRoom():FindFreePickupSpawnPosition(familiar.Position)
 	local shouldItem = player:HasCollectible(CollectibleType.COLLECTIBLE_BFFS) and rng:RandomInt(2) == 1 or false
 	local alreadyReset = false
 

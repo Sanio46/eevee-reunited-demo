@@ -345,8 +345,7 @@ local function CloneNPC(old)
 	-- Game:Spawn doesn't work if a SpawnerEntity isn't given, so this function
 	-- is ever-so-slightly inaccurate
 	if old.InitSeed and old.SpawnerEntity then
-		new = Game():Spawn(old.Type, old.Variant, old.SubType, old.Position, old.Velocity, old.SpawnerEntity, old.InitSeed):
-			ToNPC()
+		new = EEVEEMOD.game:Spawn(old.Type, old.Variant, old.Position, old.Velocity, old.SpawnerEntity, old.SubType, old.InitSeed):ToNPC()
 	else
 		new = Isaac.Spawn(old.Type, old.Variant, old.SubType, old.Position, old.Velocity, old.SpawnerEntity):ToNPC()
 	end
