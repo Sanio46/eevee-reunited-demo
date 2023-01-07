@@ -409,19 +409,20 @@ end
 ---@param range number
 ---@return EntityNPC | nil
 function VeeHelper.DetectNearestEnemy(ent, range)
-	local closestEnemy = nil --placeholder variable we'll put the closest enemy in
-	local closestDistance = nil --placeholder variable we'll put the distance in
+	---@type EntityNPC | nil
+	local closestEnemy
+	local closestDistance
 
-	for _, npc in pairs(Isaac.FindInRadius(ent.Position, range, EntityPartition.ENEMY)) do --if there are enemies, dumbass.
-		npc = npc:ToNPC()
-		if not npc then return end
-		if npc:IsActiveEnemy() and npc:IsVulnerableEnemy() then --if its an active enemy
+	for _, ent in pairs(Isaac.FindInRadius(ent.Position, range, EntityPartition.ENEMY)) do
+		if not ent or not ent:ToNPC() then return end
+		local npc = ent:ToNPC()
+		if npc:IsActiveEnemy() and npc:IsVulnerableEnemy() then
 
-			local npcDistance = npc.Position:DistanceSquared(ent.Position) --calculate the distance of this npc from the starting position of the ent
+			local npcDistance = npc.Position:DistanceSquared(ent.Position)
 
-			if not closestEnemy or npcDistance < closestDistance then --if we never stored any variables OR if this npc is closer than the closest one we stored last
-				closestEnemy = npc --store this npc in the variable
-				closestDistance = npcDistance --store this distance in the variable
+			if not closestEnemy or npcDistance < closestDistance then
+				closestEnemy = npc
+				closestDistance = npcDistance
 			end
 		end
 	end

@@ -701,10 +701,13 @@ function swiftAttack:OnPostPlayerUpdate(player)
 	local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
 
 	if not swiftPlayer then return end
-	if swiftSynergies:ShouldWeaponTypeOverride(player) == false and EEVEEMOD.game:GetRoom():GetFrameCount() > 1 then
+	if swiftSynergies:ShouldWeaponTypeOverride(player) == false
+	and EEVEEMOD.game:GetRoom():GetFrameCount() > 1
+	and VeeHelper.IsSpritePlayingAnims(player:GetSprite(), VeeHelper.WalkAnimations)
+	then
 		swiftAttack:StartAttack(player)
 	end
-	for index, swiftData in ipairs(swiftBase.Instances) do
+	for index, swiftData in ipairs(swiftPlayer.OwnedInstances) do
 		swiftAttack:RemoveSwiftInstance(swiftData, index)
 		swiftAttack:FireIfNotShooting(swiftData)
 		swiftAttack:RateOfOrbitRotation(swiftData)
