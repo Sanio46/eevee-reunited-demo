@@ -188,7 +188,8 @@ function swiftBase:InitSwiftWeapon(swiftData, weapon, isMult)
 		swiftBase:AddSwiftTrail(weapon, swiftData.Player)
 		swiftBase:PlaySwiftFireSFX(weapon)
 		swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
-		table.insert(swiftData.ChildSwiftWeapons, swiftData.NumWeaponsSpawned, swiftWeapon)
+		local insertPoint = swiftData.NumWeaponsSpawned > #swiftData.ChildSwiftWeapons + 1 and #swiftData.ChildSwiftWeapons or swiftData.NumWeaponsSpawned
+		table.insert(swiftData.ChildSwiftWeapons, insertPoint, swiftWeapon)
 		weapon:SetColor(VeeHelper.SetColorAlpha(weapon:GetColor(), 0), 15, 1, true, false)
 	end
 end
