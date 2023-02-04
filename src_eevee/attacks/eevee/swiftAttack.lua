@@ -133,7 +133,7 @@ function swiftAttack:InitInstanceValues(swiftData)
 			swiftData.Rotation = alignedRotation
 		end
 	else
-		--If firerates go too fast, the 
+		--If firerates go too fast, the
 		local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
 		if swiftPlayer then
 			local lastInstance = swiftPlayer.OwnedInstances[#swiftPlayer.OwnedInstances - 1]
@@ -173,7 +173,6 @@ function swiftAttack:SpawnSwiftWeapon(swiftData)
 		end
 	end
 end
-
 
 ---@param knife EntityKnife
 function swiftAttack:SpiritSwordInit(knife)
@@ -416,7 +415,7 @@ function swiftAttack:PreFireUpdate(swiftData, swiftWeapon, weapon)
 	else
 		weapon.Position = parent.Position + swiftWeapon.ShootDirection:Resized(swiftWeapon.OrbitDistance)
 	end
-	
+
 	if swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_ANTI_GRAV then
 		if swiftData.CanFire == true then
 			if IsSwiftPlayerFiring(swiftData, false) and swiftWeapon.FireDelay > 0 then
@@ -700,10 +699,13 @@ function swiftAttack:OnPostPlayerUpdate(player)
 
 	local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
 
-	if not swiftPlayer then return end
-	if swiftSynergies:ShouldWeaponTypeOverride(player) == false
-	and EEVEEMOD.game:GetRoom():GetFrameCount() > 1
-	and VeeHelper.IsSpritePlayingAnims(player:GetSprite(), VeeHelper.WalkAnimations)
+	if not swiftPlayer then
+		return
+	end
+	if EEVEEMOD.game:GetRoom():GetFrameCount() > 1
+		and (swiftSynergies:ShouldWeaponTypeOverride(player) == false
+			and VeeHelper.IsSpritePlayingAnims(player:GetSprite(), VeeHelper.WalkAnimations)
+			or player:IsCoopGhost())
 	then
 		swiftAttack:StartAttack(player)
 	end
@@ -733,7 +735,7 @@ end
 function swiftAttack:SwiftTrailUpdate(trail)
 	local data = trail:GetData()
 
-	if trail.Parent then
+	if trail.Parent and data.SwiftTrail then
 		local weapon = trail.Parent
 		local room = EEVEEMOD.game:GetRoom()
 		local tC = trail.Color

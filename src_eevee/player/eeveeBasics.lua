@@ -70,6 +70,7 @@ function eeveeBasics:TryDeinitEevee(player)
 		player:AddCacheFlags(CacheFlag.CACHE_ALL)
 		player:EvaluateItems()
 		swiftBase.Players[tostring(GetPtrHash(player))] = nil
+		VeeHelper.SetCanShoot(player, true)
 	end
 end
 
