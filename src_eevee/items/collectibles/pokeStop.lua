@@ -58,34 +58,6 @@ local pickupSpawnWeights = {
 
 local MAX_SPINS = 6
 
---Thank you budj for providing this old-ass hack I used in AB+ Eevee
----@param pos Vector
-local function RemoveRecentRewards(pos)
-	for _, pickup in ipairs(Isaac.FindByType(5, -1, -1)) do
-		if pickup.FrameCount <= 1 and pickup.SpawnerType == 0
-			and pickup.Position:DistanceSquared(pos) <= 400 then
-			pickup:Remove()
-		end
-	end
-
-	for _, trollbomb in ipairs(Isaac.FindByType(4, -1, -1)) do
-		if (trollbomb.Variant == 3 or trollbomb.Variant == 4)
-			and trollbomb.FrameCount <= 1 and trollbomb.SpawnerType == 0
-			and trollbomb.Position:DistanceSquared(pos) <= 400 then
-			trollbomb:Remove()
-		end
-	end
-end
-
----@param slot Entity
-local function OverrideExplosionHack(slot)
-	local bombed = slot.GridCollisionClass == EntityGridCollisionClass.GRIDCOLL_GROUND
-	if not bombed then return end
-
-	RemoveRecentRewards(slot.Position)
-	slot.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
-end
-
 function pokeStop:ResetSpecialRooms()
 	roomToSpawnIn = {}
 	specialRooms = {}
@@ -120,10 +92,11 @@ end
 local function SpawnPokeStop()
 	local room = EEVEEMOD.game:GetRoom()
 	local centerPos = room:GetCenterPos()
-	local stop = Isaac.Spawn(EntityType.ENTITY_SLOT, EEVEEMOD.SlotVariant.POKE_STOP, 0,
+	local stop = Isaac.Spawn(EntityType.ENTITY_PICKUP, EEVEEMOD.SlotVariant.POKE_STOP, 0,
 		Vector(centerPos.X, centerPos.Y - 70), Vector.Zero, nil)
 	local data = stop:GetData()
-	data.PosToStayIn = stop.Position
+	stop.EntityCollisionClass = EntityCollisionClass.ENTCOLL_PLAYERONLY
+	stop.Mass = 100
 	local pokeStopRNG = RNG()
 	pokeStopRNG:SetSeed(stop.InitSeed, 35)
 	data.PokeStopRNG = pokeStopRNG
@@ -138,25 +111,33 @@ function pokeStop:SpawnPokeStopInSpecialRoom()
 	if roomToSpawnIn[currentIndex] and room:IsFirstVisit() == true then
 		SpawnPokeStop()
 	end
+	for _, stop in pairs(Isaac.FindByType(EntityType.ENTITY_PICKUP, EEVEEMOD.SlotVariant.POKE_STOP)) do		
+		--Check if is a pokestop, then apply player only collision type and some mass.
+		if stop:ToPickup().Touched then
+			stop:Remove()
+		else
+		stop.EntityCollisionClass = EntityCollisionClass.ENTCOLL_PLAYERONLY
+		stop.Mass = 100
+		end
+	end
 end
 
 ---@param stop Entity
 function pokeStop:IfTouchPokeStop(_, stop, _)
-	if stop.Type == EntityType.ENTITY_SLOT
+	if stop.Type == EntityType.ENTITY_PICKUP
 		and stop.Variant == EEVEEMOD.SlotVariant.POKE_STOP then
+		stop:ToPickup().Touched = true
+		print(stop:ToPickup().Touched)
 		local sprite = stop:GetSprite()
-
 		sprite:Play("Spin", false)
 		stop.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
 	end
 end
 
-function pokeStop:SlotUpdate()
-	for _, stop in pairs(Isaac.FindByType(EntityType.ENTITY_SLOT, EEVEEMOD.SlotVariant.POKE_STOP)) do
+function pokeStop:SlotUpdate()			--Changed the Spawn methods to normal ones to use random seed and dont break on D20
+	for _, stop in pairs(Isaac.FindByType(EntityType.ENTITY_PICKUP, EEVEEMOD.SlotVariant.POKE_STOP)) do
 		local data = stop:GetData()
 		local sprite = stop:GetSprite()
-
-		OverrideExplosionHack(stop)
 
 		if data.PosToStayIn and stop.Position:DistanceSquared(data.PosToStayIn) >= 2 then
 			stop.Position = data.PosToStayIn
@@ -178,8 +159,7 @@ function pokeStop:SlotUpdate()
 				local randomNum = data.PokeStopRNG:RandomInt(#pickupSpawnWeights - 1) + 1
 				data.PokeStopRNG:Next()
 				local pickupSpawn = pickupSpawnWeights[randomNum]
-				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop, pickupSpawn[2],
-					stop.InitSeed)
+				Isaac.Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], pickupSpawn[2], stop.Position, velocity, stop)
 			elseif data.TimesSpin == MAX_SPINS then
 				local roomDesc = EEVEEMOD.game:GetLevel():GetCurrentRoomDesc()
 				local roomType = roomDesc.Data.Type
@@ -191,8 +171,7 @@ function pokeStop:SlotUpdate()
 					pickupSpawn[1] = PickupVariant.PICKUP_TAROTCARD
 					pickupSpawn[2] = Card.CARD_CRACKED_KEY
 				end
-				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop, pickupSpawn[2],
-					stop.InitSeed)
+				Isaac.Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], pickupSpawn[2], stop.Position, velocity, stop)
 			elseif data.TimesSpun >= MAX_SPINS then
 				sprite:Play("Spin_Winddown", false)
 			end
