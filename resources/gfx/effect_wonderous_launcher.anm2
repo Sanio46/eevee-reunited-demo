@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="trtv" CreatedOn="5/3/2022 3:35:49 PM" Version="21" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="5/3/2022 3:35:49 PM" Version="21" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="effects\wonderouslauncher.png" Id="0"/>

@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="10/30/2021 10:11:01 PM" Version="154" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="10/30/2021 10:11:01 PM" Version="154" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="effects\ghost_eevee.png" Id="0"/>

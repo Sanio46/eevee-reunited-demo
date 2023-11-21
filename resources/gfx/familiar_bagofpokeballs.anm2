@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="2/13/2022 1:45:29 PM" Version="108" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="2/13/2022 1:45:29 PM" Version="108" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="familiar\familiar_spawners_bagofpokeballs.png" Id="0"/>

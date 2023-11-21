@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local swiftLaser = {}
 
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
@@ -24,7 +25,8 @@ local function AssignSwiftLaserEffectData(swiftData, effect)
 	local eC = effect.Color
 
 	if rgbCycle:shouldApplyColorCycle(player) then
-		local colorCycle = player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) and EEVEEMOD.ColorCycle.RGB
+		local colorCycle = player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) and
+			EEVEEMOD.ColorCycle.RGB
 			or player:HasCollectible(CollectibleType.COLLECTIBLE_CONTINUUM) and EEVEEMOD.ColorCycle.CONTINUUM
 		rgbCycle:applyColorCycle(effect, colorCycle)
 	else
@@ -32,7 +34,7 @@ local function AssignSwiftLaserEffectData(swiftData, effect)
 		tear.Visible = false
 		tear.CollisionDamage = 0
 		local tC = tear:GetSprite().Color
-		if VeeHelper.AreColorsDifferent(eC, tC) == true then
+		if vee.AreColorsDifferent(eC, tC) == true then
 			effect:SetColor(tC, -1, 1, false, false)
 		else
 			local colorRed = Color(1, 0, 0, 1, 0, 0, 0)
@@ -113,7 +115,8 @@ function swiftLaser:FireTechXLaser(swiftData, swiftWeapon, direction)
 	if not parent then return end
 	local knifeOverride = (
 		swiftData.Player:HasWeaponType(WeaponType.WEAPON_KNIFE) or swiftData.Player:HasWeaponType(WeaponType.WEAPON_BONE))
-	local damageMult = knifeOverride and player.Damage * 0.25 or swiftWeapon.WeaponEntity.CollisionDamage / player.Damage
+	local damageMult = knifeOverride and player.Damage * 0.25 or swiftWeapon.WeaponEntity.CollisionDamage / player
+	.Damage
 	local radius = knifeOverride and 25 or swiftLaser:TechXRadiusScaling(swiftData) or 15
 
 	if damageMult < 0.25 then
@@ -121,7 +124,7 @@ function swiftLaser:FireTechXLaser(swiftData, swiftWeapon, direction)
 	end
 
 	local laser = player:FireTechXLaser(swiftWeapon.WeaponEntity.Position,
-		VeeHelper.AddTearVelocity(direction, player.ShotSpeed * 10, player), radius, player, damageMult)
+			vee.AddTearVelocity(direction, player.ShotSpeed * 10, player), radius, player, damageMult)
 		:ToLaser()
 
 	if knifeOverride then
@@ -160,8 +163,10 @@ function swiftLaser:FireTechLaser(swiftData, swiftWeapon, direction, isTech2)
 	local parent = swiftData.Parent
 	if not parent then return end
 	local damageMult = isTech2 and 0.2 or
-		player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) and (swiftWeapon.WeaponEntity.CollisionDamage / player.Damage) or 1
-	local laser = player:FireTechLaser(swiftWeapon.WeaponEntity.Position, LaserOffset.LASER_TRACTOR_BEAM_OFFSET, direction,
+		player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) and
+		(swiftWeapon.WeaponEntity.CollisionDamage / player.Damage) or 1
+	local laser = player:FireTechLaser(swiftWeapon.WeaponEntity.Position, LaserOffset.LASER_TRACTOR_BEAM_OFFSET,
+		direction,
 		false, false,
 		player, damageMult):ToLaser()
 
@@ -204,7 +209,8 @@ function swiftLaser:SwiftLaserEffectUpdate(swiftData, swiftWeapon, effect)
 	end
 
 	if rgbCycle:shouldApplyColorCycle(player) and not data.EeveeEntHasColorCycle then
-		local colorCycle = player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) and EEVEEMOD.ColorCycle.RGB
+		local colorCycle = player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) and
+			EEVEEMOD.ColorCycle.RGB
 			or player:HasCollectible(CollectibleType.COLLECTIBLE_CONTINUUM) and EEVEEMOD.ColorCycle.CONTINUUM
 		rgbCycle:applyColorCycle(effect, colorCycle)
 	end
@@ -229,7 +235,6 @@ function swiftLaser:SwiftLaserUpdate(laser)
 	swiftSynergies:TechXKnifeUpdate(swiftWeapon, laser, parent)
 
 	if laser.SubType == LaserSubType.LASER_SUBTYPE_LINEAR then
-
 		laser.Angle = swiftWeapon.ShootDirection:Rotated(swiftWeapon.Special.RotationOffset):GetAngleDegrees()
 		laser.Position = parent.Position
 

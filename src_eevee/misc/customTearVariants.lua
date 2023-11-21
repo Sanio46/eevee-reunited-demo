@@ -23,7 +23,7 @@ function customTearVariants:OnCustomTearUpdate(tear)
 	local spritePath = tearSpritePath[tear.Variant]
 	if not tear:GetData().CustomEeveeTearVariant then
 		--[[ if tear.Variant == TearVariant.FETUS then
-			spritePath = spritePath .. EEVEEMOD.PlayerTypeToString[playerType] .. VeeHelper.SkinColor(player, false) .. ".png"
+			spritePath = spritePath .. EEVEEMOD.PlayerTypeToString[playerType] .. vee.SkinColor(player, false) .. ".png"
 			local animToPlay = sprite:GetAnimation()
 			sprite:Load("tears_fetus_eevee.anm2", true)
 			sprite:ReplaceSpritesheet(0, spritePath)

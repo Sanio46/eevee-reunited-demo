@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="2/12/2022 9:01:59 AM" Version="104" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="2/12/2022 9:01:59 AM" Version="104" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="items\trinkets\trinket_lockon_specs.png" Id="0"/>

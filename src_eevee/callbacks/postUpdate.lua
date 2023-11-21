@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local postUpdate = {}
 
 local tracker = require("src_eevee.misc.achievementTracker")
@@ -6,8 +7,8 @@ local pokeyMans = require("src_eevee.challenges.pokeyMansCrystal")
 
 function postUpdate:main()
 	if not EEVEEMOD.game:IsPaused() then
-		VeeHelper.RoomClearTriggered()
-		--[[ local players = VeeHelper.GetAllPlayers()
+		vee.RoomClearTriggered()
+		--[[ local players = vee.GetAllPlayers()
 		for i = 1, #players do
 			local player = players[i]
 			

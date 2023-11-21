@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local wonderousLauncher = {}
 
 local attackHelper = require("src_eevee.attacks.attackHelper")
@@ -42,13 +43,13 @@ local throwableSpells = {
 
 ---@type table<PoopSpellType, integer>
 local spellToPoopVariant = {
-	[PoopSpellType.SPELL_POOP] = VeeHelper.PoopVariant.POOP_BB,
-	[PoopSpellType.SPELL_STONE] = VeeHelper.PoopVariant.STONE,
-	[PoopSpellType.SPELL_CORNY] = VeeHelper.PoopVariant.CORNY,
-	[PoopSpellType.SPELL_BURNING] = VeeHelper.PoopVariant.BURNING,
-	[PoopSpellType.SPELL_STINKY] = VeeHelper.PoopVariant.STINKY,
-	[PoopSpellType.SPELL_BLACK] = VeeHelper.PoopVariant.BLACK,
-	[PoopSpellType.SPELL_HOLY] = VeeHelper.PoopVariant.HOLY,
+	[PoopSpellType.SPELL_POOP] = vee.PoopVariant.POOP_BB,
+	[PoopSpellType.SPELL_STONE] = vee.PoopVariant.STONE,
+	[PoopSpellType.SPELL_CORNY] = vee.PoopVariant.CORNY,
+	[PoopSpellType.SPELL_BURNING] = vee.PoopVariant.BURNING,
+	[PoopSpellType.SPELL_STINKY] = vee.PoopVariant.STINKY,
+	[PoopSpellType.SPELL_BLACK] = vee.PoopVariant.BLACK,
+	[PoopSpellType.SPELL_HOLY] = vee.PoopVariant.HOLY,
 }
 
 ---@param player EntityPlayer
@@ -141,7 +142,7 @@ local function GetLauncherDirection(sprite)
 		[270] = "Up",
 	}
 	local vecRotation = Vector.FromAngle(sprite.Rotation)
-	local spriteDir = VeeHelper.RoundHighestVectorPoint(vecRotation):GetAngleDegrees()
+	local spriteDir = vee.RoundHighestVectorPoint(vecRotation):GetAngleDegrees()
 	local dir = "Down"
 	if DirAngles[spriteDir] then
 		dir = DirAngles[spriteDir]
@@ -181,7 +182,7 @@ local function RemoveWonderLauncher(player)
 	data.WonderLauncher:Remove()
 	data.WonderLauncher = nil
 	if not player:CanShoot() and player:GetPlayerType() ~= EEVEEMOD.PlayerType.EEVEE then
-		VeeHelper.SetCanShoot(player, true)
+		vee.SetCanShoot(player, true)
 	end
 end
 
@@ -194,7 +195,7 @@ function wonderousLauncher:OnUse(itemID, _, player, _, _, _)
 		if not data.WonderLauncher or not data.WonderLauncher:Exists() then
 			SpawnWonderLauncher(player)
 			if player:CanShoot() then
-				VeeHelper.SetCanShoot(player, false)
+				vee.SetCanShoot(player, false)
 			end
 		elseif data.WonderLauncher and data.WonderLauncher:Exists() then
 			RemoveWonderLauncher(player)
@@ -213,7 +214,7 @@ function wonderousLauncher:OrbitPlayer(player)
 	local fireDir = player:GetFireDirection() ~= Direction.NO_DIRECTION and player:GetShootingInput() or
 		attackHelper:HeadDirectionToVector(player)
 	local vecRotation = Vector.FromAngle(sprite.Rotation)
-	sprite.Rotation = VeeHelper.LerpAngleDegrees(sprite.Rotation, fireDir:GetAngleDegrees(), 0.3)
+	sprite.Rotation = vee.LerpAngleDegrees(sprite.Rotation, fireDir:GetAngleDegrees(), 0.3)
 	data.WonderLauncher:FollowParent(player)
 	data.WonderLauncher.ParentOffset = vecRotation + Vector(0, -1)
 	sprite.Offset = Vector(0, -10)
@@ -269,7 +270,7 @@ end
 ---@param player EntityPlayer
 function wonderousLauncher:StopPoopAnimation(player)
 	local data = player:GetData()
-	if data.WonderDestroyPoopAnimation and VeeHelper.IsSpritePlayingAnims(player:GetSprite(), VeeHelper.PickupAnimations) then
+	if data.WonderDestroyPoopAnimation and vee.IsSpritePlayingAnims(player:GetSprite(), vee.PickupAnimations) then
 		player:StopExtraAnimation()
 		data.WonderDestroyPoopAnimation = nil
 	end
@@ -339,7 +340,7 @@ function wonderousLauncher:OnCoinDiscDestroy(tear)
 	EEVEEMOD.sfx:Play(SoundEffect.SOUND_POT_BREAK)
 
 	for _ = 1, 6 do
-		local vel = Vector(3, 0):Rotated(VeeHelper.RandomNum(360))
+		local vel = Vector(3, 0):Rotated(vee.RandomNum(360))
 		local gibs = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.COIN_PARTICLE, 0, tear.Position, vel, tear)
 		local sprite = gibs:GetSprite()
 		sprite:ReplaceSpritesheet(0, "gfx/effects/wondercoin_gibs_" .. data.WonderCoinVariant .. ".png")
@@ -399,7 +400,6 @@ function wonderousLauncher:FireDisc(launcher, player)
 	local disc = nil
 
 	if dataPlayer.WonderDiscType == DiscType.COIN then
-
 		disc = Isaac.Spawn(EntityType.ENTITY_TEAR, EEVEEMOD.TearVariant.WONDERCOIN, 0, pos, vel, player):ToTear()
 		local sprite = disc:GetSprite()
 		local data = disc:GetData()
@@ -426,33 +426,28 @@ function wonderousLauncher:FireDisc(launcher, player)
 		player:AddCoins(coinReduction)
 		disc.CollisionDamage = damage * mult
 	elseif dataPlayer.WonderDiscType == DiscType.BOMB then
-
 		disc = player:FireBomb(player.Position, vel, player)
 		disc:AddTearFlags(player:GetBombFlags())
 		player:AddBombs(-1)
 		EEVEEMOD.sfx:Play(SoundEffect.SOUND_BULLET_SHOT, 1, 0, false, 0.5, 0)
-
 	elseif dataPlayer.WonderDiscType == DiscType.KEY then
-
 		disc = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.KEY, 0, pos, vel, player):ToTear()
 		disc:AddTearFlags(TearFlags.TEAR_PIERCING)
 		disc.CollisionDamage = (player.Damage * 5) + 30
 		player:AddKeys(-1)
 		EEVEEMOD.sfx:Play(SoundEffect.SOUND_SHELLGAME)
-
 	elseif dataPlayer.WonderDiscType == DiscType.POOP then
 		if throwableSpells[player:GetPoopSpell(0)] == true then
 			dataPlayer.WonderDestroyPoopQueue = player:GetPoopSpell(0)
 			if player:GetPoopSpell(0) == PoopSpellType.SPELL_BOMB then
-
 				local bomb = Isaac.Spawn(EntityType.ENTITY_BOMB, BombVariant.BOMB_BUTT, 0, pos, vel, player):ToBomb()
 				bomb:AddTearFlags(TearFlags.TEAR_BUTT_BOMB)
 				EEVEEMOD.sfx:Play(SoundEffect.SOUND_BULLET_SHOT, 1, 0, false, 0.5, 0)
-
 			else
-
-				local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, EEVEEMOD.TearVariant.WONDERPOOP, 0, pos, vel, player):ToTear()
-				local poop = Isaac.Spawn(EntityType.ENTITY_POOP, spellToPoopVariant[player:GetPoopSpell(0)], 0, pos, vel, player)
+				local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, EEVEEMOD.TearVariant.WONDERPOOP, 0, pos, vel, player)
+				:ToTear()
+				local poop = Isaac.Spawn(EntityType.ENTITY_POOP, spellToPoopVariant[player:GetPoopSpell(0)], 0, pos, vel,
+					player)
 				local data = tear:GetData()
 				local sprite = tear:GetSprite()
 				EEVEEMOD.sfx:Play(SoundEffect.SOUND_FART, 1, 0, false, 2, 0)
@@ -464,7 +459,6 @@ function wonderousLauncher:FireDisc(launcher, player)
 				sprite:Play("Idle", true)
 				sprite:ReplaceSpritesheet(0, "gfx/tears/wonderpoop_" .. player:GetPoopSpell(0) .. ".png")
 				sprite:LoadGraphics()
-
 			end
 		end
 	end
@@ -501,7 +495,7 @@ end
 
 ---@param launcher EntityEffect
 function wonderousLauncher:FireHandling(launcher)
-	if VeeHelper.EntitySpawnedByPlayer(launcher) then
+	if vee.EntitySpawnedByPlayer(launcher) then
 		local player = launcher.SpawnerEntity:ToPlayer()
 		local sprite = launcher:GetSprite()
 		local data = launcher:GetData()

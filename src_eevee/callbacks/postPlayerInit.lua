@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local postPlayerInit = {}
 
 local ccp = require("src_eevee.player.characterCostumeProtector")
@@ -8,7 +9,7 @@ local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 
 ---@param player EntityPlayer
 function postPlayerInit:main(player)
-	VeeHelper.ShaderCrashFix()
+	vee.ShaderCrashFix()
 
 	local seed = EEVEEMOD.game:GetSeeds():GetStartSeed()
 	EEVEEMOD.RunSeededRNG:SetSeed(seed, 1)

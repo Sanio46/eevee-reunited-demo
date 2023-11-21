@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local pokeStop = {}
 
 local roomToSpawnIn = {}
@@ -52,8 +53,8 @@ local pickupSpawnWeights = {
 	{ PickupVariant.PICKUP_BOMB, BombSubType.BOMB_NORMAL },
 	{ PickupVariant.PICKUP_BOMB, BombSubType.BOMB_NORMAL },
 	{ PickupVariant.PICKUP_BOMB, BombSubType.BOMB_NORMAL },
-	{ PickupVariant.PICKUP_KEY, KeySubType.KEY_NORMAL },
-	{ PickupVariant.PICKUP_KEY, KeySubType.KEY_NORMAL },
+	{ PickupVariant.PICKUP_KEY,  KeySubType.KEY_NORMAL },
+	{ PickupVariant.PICKUP_KEY,  KeySubType.KEY_NORMAL },
 }
 
 local MAX_SPINS = 6
@@ -110,7 +111,7 @@ function pokeStop:GetAllSpecialRooms(player)
 
 		for _ = 1, player:GetCollectibleNum(EEVEEMOD.CollectibleType.POKE_STOP) do
 			local pokeStopRng = player:GetCollectibleRNG(EEVEEMOD.CollectibleType.POKE_STOP)
-			local randomNum = VeeHelper.DifferentRandomNum(roomToSpawnIn, #specialRooms, pokeStopRng) + 1
+			local randomNum = vee.DifferentRandomNum(roomToSpawnIn, #specialRooms, pokeStopRng) + 1
 			local randomRoomIndex = specialRooms[randomNum]
 			roomToSpawnIn[randomRoomIndex] = true
 		end
@@ -174,24 +175,26 @@ function pokeStop:SlotUpdate()
 			end
 
 			if data.TimesSpun <= MAX_SPINS then
-				local velocity = Vector(3, 0):Rotated(VeeHelper.RandomNum(360))
+				local velocity = Vector(3, 0):Rotated(vee.RandomNum(360))
 				local randomNum = data.PokeStopRNG:RandomInt(#pickupSpawnWeights - 1) + 1
 				data.PokeStopRNG:Next()
 				local pickupSpawn = pickupSpawnWeights[randomNum]
-				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop, pickupSpawn[2],
+				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop,
+					pickupSpawn[2],
 					stop.InitSeed)
 			elseif data.TimesSpin == MAX_SPINS then
 				local roomDesc = EEVEEMOD.game:GetLevel():GetCurrentRoomDesc()
 				local roomType = roomDesc.Data.Type
 				local pickupSpawn = uniqueRoomReward[roomType]
 				if pickupSpawn == nil then pickupSpawn = { PickupVariant.PICKUP_COIN, CoinSubType.COIN_NICKEL } end
-				local velocity = Vector(3, 0):Rotated(VeeHelper.RandomNum(360))
+				local velocity = Vector(3, 0):Rotated(vee.RandomNum(360))
 
 				if roomType == RoomType.ROOM_TREASURE and roomDesc.Flags == (roomDesc.Flags | RoomDescriptor.FLAG_DEVIL_TREASURE) then
 					pickupSpawn[1] = PickupVariant.PICKUP_TAROTCARD
 					pickupSpawn[2] = Card.CARD_CRACKED_KEY
 				end
-				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop, pickupSpawn[2],
+				EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, pickupSpawn[1], stop.Position, velocity, stop,
+					pickupSpawn[2],
 					stop.InitSeed)
 			elseif data.TimesSpun >= MAX_SPINS then
 				sprite:Play("Spin_Winddown", false)
@@ -218,7 +221,6 @@ function pokeStop:DropPokeStopOnFirstPickup(player)
 		then
 			data.ShouldDropPokeStop = true
 		end
-
 	elseif player:IsItemQueueEmpty() and data.ShouldDropPokeStop then
 		SpawnPokeStop()
 		data.ShouldDropPokeStop = nil

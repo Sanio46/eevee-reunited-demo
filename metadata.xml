@@ -12,7 +12,8 @@
 Eevee: Reunited is an overhaul project of the original [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1809450880]Eevee Mod for Afterbirth+[/url]. This aims to reunite every Eeveelution back to Eevee as the original mod always meant to do, all with unique attacks, many unique Pokémon-themed items, and much more. This is a demo release that will slowly gain updates over time for the purpose of gaining support for the project, receiving feedback, and putting forward the quality you can expect for the full release. If you would like to follow development or directly contribute to the mod, join the Discord Server linked below. We're looking for spriters and artists, but coders are also welcome. Enjoy the mod!
 
 [h1][url=https://discord.gg/A8ffZkg8b8]Join the Discord![/url][/h1]
-[h1][url=https://twitter.com/EeveeMod]Follow constant updates on the Dev Twitter![/url][/h1]
+[h1][url=https://twitter.com/EeveeMod]Follow the Dev Twitter for infrequent updates![/url][/h1]
+[h1][url=https://docs.google.com/spreadsheets/d/1qHODB7jx2cFjHwapi9ZdB3wpkMAqDs4p3oQAe47_tAA/edit?usp=sharing]Full Documentation![/url][/h1]
 
 [img]https://imgur.com/4LN8j07.png[/img]
 Everything you can expect from downloading the mod.
@@ -26,6 +27,8 @@ Everything you can expect from downloading the mod.
 [*]A new challenge: 'Pokey Mans: Crystal'. Fight using only your Pokemon and defeat Mom!
 [/list]
 
+For those who are confused after getting Eevee's unlock for Mom's Heart: [spoiler]With mouse controls enabled, right-click on Eevee to pet them. You can enable mouse controls (for Windows computers) in Documents\My Games\Binding of Isaac Repentance/options.ini and change MouseControl from 0 to 1[/spoiler]
+
 [img]https://imgur.com/7WtTfi8.png[/img]
 Eevee is compatible with a handful of mods. If you want to see Eevee compatible with certain mods, feel free to suggest them!
 [list]
@@ -36,8 +39,8 @@ Eevee is compatible with a handful of mods. If you want to see Eevee compatible 
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2615720951]Mega Mush CostumeSuffix Compat[/url] -Required for custom Mega Mush costume
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2681875787]Mod Config Menu[/url] -Allows you to toggle a variety of options for your Eevee experience!
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2490515687]POG for Good Items[/url]
-[url=https://steamcommunity.com/sharedfiles/filedetails/?id=2493551842]Ugh for Bad Items[/url]
-[url=https://steamcommunity.com/sharedfiles/filedetails/?id=2612456876]Not Mad, Just Disappointed for Quality 0 Items[/url]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2493551842]Ugh for Bad Items[/url]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2612456876]Not Mad, Just Disappointed for Quality 0 Items[/url]
 [/list]
 
 [img]https://imgur.com/h0807Zb.png[/img]
@@ -75,9 +78,13 @@ Portraits of Eevee and Sylveon in the headers in the Workshop Demo: SGTX
 Eevee: Reunited Logo: CheapBones
 Workshop thumbnail for demo: TikaraTheMew
 
+[h3]EID Translations[/h3]
+Spanish translation: Kotry
+Koreon translation: kohashiwakaba
+
 [h3]Special Thanks[/h3]
 JSG, AgentCucco, wofsauge, siraxtas, Sentinel, im_tem, DeadInfinity, 4Grabs, pedroff_1, fly_6, Mr.SeemsGood</description>
-    <version>1.31</version>
+    <version>1.32</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>

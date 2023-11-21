@@ -1,11 +1,13 @@
+local vee = require("src_eevee.VeeHelper")
 local postNewLevel = {}
-
+local specialistDance = require("src_eevee.modsupport.specialistDance")
 local ccp = require("src_eevee.player.characterCostumeProtector")
 local strangeEgg = require("src_eevee.items.collectibles.strangeEgg")
 local pokeStop = require("src_eevee.items.collectibles.pokeStop")
 
 function postNewLevel:main()
-	local players = VeeHelper.GetAllPlayers()
+	local players = vee.GetAllPlayers()
+	specialistDance:AddFunnyDance()
 
 	pokeStop:ResetSpecialRooms()
 	for i = 1, #players do

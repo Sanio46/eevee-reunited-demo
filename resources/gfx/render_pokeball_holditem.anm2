@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="2/1/2022 7:48:15 PM" Version="124" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="2/1/2022 7:48:15 PM" Version="124" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="items\pickups\pickup_pokeball.png" Id="0"/>

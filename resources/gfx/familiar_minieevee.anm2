@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="trtv" CreatedOn="11/6/2021 2:13:39 PM" Version="9" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="11/6/2021 2:13:39 PM" Version="9" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="familiar\familiar_minieevee.png" Id="0"/>

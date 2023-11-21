@@ -1,10 +1,11 @@
+local vee = require("src_eevee.VeeHelper")
 local preGameExit = {}
 
 local pokeStop = require("src_eevee.items.collectibles.pokeStop")
 
 function preGameExit:main()
 	EEVEEMOD.shouldSaveData = false
-	local players = VeeHelper.GetAllPlayers()
+	local players = vee.GetAllPlayers()
 	for i = 1, #players do
 		local player = players[i]
 		pokeStop:SpawnOnGameExit(player)

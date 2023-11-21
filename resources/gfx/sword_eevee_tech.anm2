@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="trtv" CreatedOn="8/28/2022 8:05:53 PM" Version="19" Fps="45"/>
+	<Info CreatedBy="Sanio46" CreatedOn="8/28/2022 8:05:53 PM" Version="19" Fps="45"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="effects\sword_eevee_tech.png" Id="0"/>

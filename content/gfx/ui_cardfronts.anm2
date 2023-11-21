@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="Unknown" CreatedOn="7/20/2021 7:17:43 PM" Version="9" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="7/20/2021 7:17:43 PM" Version="9" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="ui_pokeballfronts.png" Id="0"/>

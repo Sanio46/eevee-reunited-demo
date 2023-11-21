@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="Unknown" CreatedOn="9/6/2022 2:29:36 PM" Version="3" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="9/6/2022 2:29:36 PM" Version="3" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="effects\shiny_trail.png" Id="0"/>

@@ -10,9 +10,9 @@
 ---@type ModReference
 local EeveeReunited = RegisterMod("Eevee: Reunited - Demo", 1)
 
---VERSION: 2.1.5
+--VERSION: 2.2
 
-local json = nil
+local json
 
 local SaveDataVer = 2.1 --This is its own separate version in the case of needing to reset save data
 
@@ -59,7 +59,7 @@ function EeveeReunited:init(j)
 		return EeveeReunited
 	end
 
-	require("src_eevee.veeHelper") --Creates VeeHelper global
+	require("src_eevee.veeHelper")
 	require("src_eevee.eeveeEnums") --Adds to existing EEVEEMOD global
 	require("src_eevee.misc.achievementDisplayApi")
 

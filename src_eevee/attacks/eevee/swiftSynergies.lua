@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local swiftSynergies = {}
 
 --This isn't for every single synergy, as to why lasers, knives, etc are in their own file. Those are for the different weapon types.
@@ -18,13 +19,13 @@ local function IsItemWeaponActive(player)
 	local weaponEnt = player:GetActiveWeaponEntity()
 
 	if weaponEnt ~= nil then
-		if (weaponEnt.Type == EntityType.ENTITY_KNIFE and weaponEnt.Variant == VeeHelper.KnifeVariant.NOTCHED_AXE)
+		if (weaponEnt.Type == EntityType.ENTITY_KNIFE and weaponEnt.Variant == vee.KnifeVariant.NOTCHED_AXE)
 			or (weaponEnt.Type == EntityType.ENTITY_EFFECT and weaponEnt.Variant == EffectVariant.URN_OF_SOULS) then
 			weaponOut = true
 		end
 	end
 	for _, launcher in pairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.WONDEROUS_LAUNCHER, 0)) do
-		if VeeHelper.EntitySpawnedByPlayer(launcher)
+		if vee.EntitySpawnedByPlayer(launcher)
 			and launcher.SpawnerEntity:GetData().Identifier == player:GetData().Identifier then
 			weaponOut = true
 		end
@@ -54,10 +55,10 @@ function swiftSynergies:ShouldWeaponTypeOverride(player)
 	if override then
 		if canShoot == false
 			and not player:GetData().WonderLauncher then
-			VeeHelper.SetCanShoot(player, true)
+			vee.SetCanShoot(player, true)
 		end
 	elseif not override and canShoot == true then
-		VeeHelper.SetCanShoot(player, false)
+		vee.SetCanShoot(player, false)
 	end
 	return override
 end
@@ -103,13 +104,13 @@ end
 
 ---@type TearFlags[]
 local TearFlagsToDelay = {
-	TearFlags.TEAR_GROW, --Lump of Coal
-	TearFlags.TEAR_SHRINK, --Proptosis
-	TearFlags.TEAR_SQUARE, --Hook Worm
-	TearFlags.TEAR_SPIRAL, --Ring Worm
-	TearFlags.TEAR_BIG_SPIRAL, --Ouroborus Worm
+	TearFlags.TEAR_GROW,        --Lump of Coal
+	TearFlags.TEAR_SHRINK,      --Proptosis
+	TearFlags.TEAR_SQUARE,      --Hook Worm
+	TearFlags.TEAR_SPIRAL,      --Ring Worm
+	TearFlags.TEAR_BIG_SPIRAL,  --Ouroborus Worm
 	TearFlags.TEAR_HYDROBOUNCE, --Flat Stone
-	TearFlags.TEAR_BOUNCE, --Rubber Cement
+	TearFlags.TEAR_BOUNCE,      --Rubber Cement
 	TearFlags.TEAR_TURN_HORIZONTAL -- Brain Worm
 }
 
@@ -151,7 +152,7 @@ end
 function swiftSynergies:ShouldUseTinyPlanet(player)
 	return player:HasCollectible(CollectibleType.COLLECTIBLE_TINY_PLANET)
 		and (
-		player:HasWeaponType(WeaponType.WEAPON_TEARS)
+			player:HasWeaponType(WeaponType.WEAPON_TEARS)
 			or player:HasWeaponType(WeaponType.WEAPON_KNIFE)
 			or player:HasWeaponType(WeaponType.WEAPON_MONSTROS_LUNGS)
 			or player:HasWeaponType(WeaponType.WEAPON_FETUS)
@@ -162,7 +163,7 @@ end
 function swiftSynergies:ShouldUseLudo(player)
 	return player:HasWeaponType(WeaponType.WEAPON_LUDOVICO_TECHNIQUE) or
 		(
-		player:HasWeaponType(WeaponType.WEAPON_KNIFE) and player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE)
+			player:HasWeaponType(WeaponType.WEAPON_KNIFE) and player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE)
 		)
 end
 

@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="Unknown" CreatedOn="5/15/2022 12:22:07 AM" Version="4" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="5/15/2022 12:22:07 AM" Version="4" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="effects\shiny_appear.png" Id="0"/>

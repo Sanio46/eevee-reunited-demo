@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local swiftAttack = {}
 
 local attackHelper = require("src_eevee.attacks.attackHelper")
@@ -59,11 +60,11 @@ function swiftAttack:StartAttack(player)
 			swiftPlayer.Cooldown = swiftPlayer.Cooldown - 0.5
 		elseif swiftPlayer.CanFire == false and
 			(
-			not player:HasCollectible(CollectibleType.COLLECTIBLE_NEPTUNUS) or
+				not player:HasCollectible(CollectibleType.COLLECTIBLE_NEPTUNUS) or
 				(
-				player:HasCollectible(CollectibleType.COLLECTIBLE_NEPTUNUS) and
+					player:HasCollectible(CollectibleType.COLLECTIBLE_NEPTUNUS) and
 					(
-					swiftPlayer.NumNeptunusInstancesUnfired < 2
+						swiftPlayer.NumNeptunusInstancesUnfired < 2
 					)
 				)
 			) then
@@ -82,7 +83,7 @@ function swiftAttack:CreateSwiftInstance(player, parent)
 	---@type SwiftInstance
 	local instance = {}
 	local swiftPlayer = swiftBase.Players[tostring(GetPtrHash(player))]
-	VeeHelper.copyOverTable(swiftBase.swiftInstanceData, instance)
+	vee.copyOverTable(swiftBase.swiftInstanceData, instance)
 	table.insert(swiftBase.Instances, instance)
 	if swiftPlayer then
 		table.insert(swiftPlayer.OwnedInstances, instance)
@@ -158,7 +159,7 @@ function swiftAttack:SpawnSwiftWeapon(swiftData)
 		elseif player:HasWeaponType(WeaponType.WEAPON_BOMBS) then
 			swiftBomb:SpawnSwiftBomb(swiftData, isMult)
 		elseif (
-			player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
+				player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
 				or player:HasWeaponType(WeaponType.WEAPON_LASER)
 				or player:HasWeaponType(WeaponType.WEAPON_TECH_X)
 			)
@@ -177,8 +178,8 @@ end
 ---@param knife EntityKnife
 function swiftAttack:SpiritSwordInit(knife)
 	local sprite = knife:GetSprite()
-	if (knife.Variant ~= VeeHelper.KnifeVariant.SPIRIT_SWORD
-		and knife.Variant ~= VeeHelper.KnifeVariant.TECH_SWORD)
+	if (knife.Variant ~= vee.KnifeVariant.SPIRIT_SWORD
+			and knife.Variant ~= vee.KnifeVariant.TECH_SWORD)
 		or knife:GetEntityFlags() ~= 67108864
 	then
 		return
@@ -194,7 +195,7 @@ function swiftAttack:SpiritSwordInit(knife)
 		"SpinUp",
 		"SpinDown",
 	}
-	if VeeHelper.IsSpritePlayingAnims(sprite, spinAnims) then
+	if vee.IsSpritePlayingAnims(sprite, spinAnims) then
 		if sprite:IsPlaying(sprite:GetAnimation()) then
 			if (sprite:GetFrame() == 0 or sprite:GetFrame() == 2) and not data.SwiftFiredOnFirstFrame then
 				swiftAttack:CreateSwiftInstance(player, player)
@@ -245,7 +246,7 @@ local function RefireRocketBomb(swiftData, swiftWeapon, bomb, direction)
 	swiftBase.Weapons[tostring(GetPtrHash(newBomb))] = {}
 	local newSwiftWeapon = swiftBase.Weapons[tostring(GetPtrHash(newBomb))]
 
-	VeeHelper.copyOverTable(swiftWeapon, newSwiftWeapon)
+	vee.copyOverTable(swiftWeapon, newSwiftWeapon)
 	newSwiftWeapon.WeaponEntity = newBomb
 	newSwiftWeapon.HasFired = true
 
@@ -306,7 +307,7 @@ end
 function swiftAttack:SwiftMainFireWeapon(swiftData, swiftWeapon, weapon)
 	local player = swiftData.Player
 	if not player then return end
-	local direction = VeeHelper.AddTearVelocity(swiftWeapon.ShootDirection, player.ShotSpeed * 10, player)
+	local direction = vee.AddTearVelocity(swiftWeapon.ShootDirection, player.ShotSpeed * 10, player)
 
 	--Loki's Horns, Mom's Eye, Eye Sore, Monstro's Lung
 	if not swiftWeapon.IsMultiShot then
@@ -375,7 +376,7 @@ function swiftAttack:FireExtraWeapon(swiftData, swiftWeapon, direction)
 	if not parent then return end
 
 	if (
-		parent.Type ~= EntityType.ENTITY_EFFECT
+			parent.Type ~= EntityType.ENTITY_EFFECT
 			or (parent.Type == EntityType.ENTITY_EFFECT and swiftBase:IsSwiftLaserEffect(parent))
 		) then
 		if player:HasWeaponType(WeaponType.WEAPON_KNIFE) then
@@ -446,7 +447,7 @@ function swiftAttack:SwiftAttackUpdate(weapon)
 		swiftTear:SwiftTearUpdate(swiftData, swiftWeapon, weapon)
 		swiftAttack:OnSwiftLudoWeaponUpdate(swiftData, weapon)
 	elseif (
-		weapon:ToEffect()
+			weapon:ToEffect()
 			and swiftBase:IsSwiftLaserEffect(weapon)
 		) then
 		---@cast weapon EntityEffect
@@ -456,7 +457,7 @@ function swiftAttack:SwiftAttackUpdate(weapon)
 		swiftBomb:SwiftBombUpdate(swiftData, swiftWeapon, weapon)
 	end
 
-	if not VeeHelper.EntitySpawnedByPlayer(weapon) then return end
+	if not vee.EntitySpawnedByPlayer(weapon) then return end
 	local player = weapon.SpawnerEntity:ToPlayer()
 
 	swiftSynergies:DelayTearFlags(swiftWeapon, weapon)
@@ -539,7 +540,7 @@ function swiftAttack:RetainSwiftInstanceOnNewRoom()
 	if EEVEEMOD.game:GetFrameCount() == 0 then return end
 	for _, swiftData in ipairs(swiftBase.Instances) do
 		if (swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_DEFAULT
-			or swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_NEPTUNUS)
+				or swiftData.InstanceType == swiftBase.InstanceType.INSTANCE_NEPTUNUS)
 			and #swiftData.ChildSwiftWeapons > 0
 		then
 			local numToSpawn = 0
@@ -634,7 +635,7 @@ end
 function swiftAttack:RemoveSwiftBombsBeforeNewRoom(swiftData)
 	local player = swiftData.Player
 	if not player then return end
-	local closestDoorSlot = VeeHelper.GetClosestDoorSlotPos(player.Position)
+	local closestDoorSlot = vee.GetClosestDoorSlotPos(player.Position)
 
 	if closestDoorSlot and player.Position:DistanceSquared(closestDoorSlot) <= 10 ^ 2 then
 		for _, swiftWeapon in ipairs(swiftData.ChildSwiftWeapons) do
@@ -692,7 +693,7 @@ end
 function swiftAttack:OnPostPlayerUpdate(player)
 	local playerType = player:GetPlayerType()
 	if EEVEEMOD.game:GetFrameCount() < 1 then return end
-	VeeHelper.GetClosestDoorSlotPos(player.Position)
+	vee.GetClosestDoorSlotPos(player.Position)
 	if playerType == EEVEEMOD.PlayerType.EEVEE then
 		swiftBase:TryInitSwiftPlayer(player)
 	end
@@ -704,7 +705,7 @@ function swiftAttack:OnPostPlayerUpdate(player)
 	end
 	if EEVEEMOD.game:GetRoom():GetFrameCount() > 1
 		and (swiftSynergies:ShouldWeaponTypeOverride(player) == false
-			and VeeHelper.IsSpritePlayingAnims(player:GetSprite(), VeeHelper.WalkAnimations)
+			and vee.IsSpritePlayingAnims(player:GetSprite(), vee.WalkAnimations)
 			or player:IsCoopGhost())
 	then
 		swiftAttack:StartAttack(player)
@@ -742,23 +743,28 @@ function swiftAttack:SwiftTrailUpdate(trail)
 
 		if not data.EeveeEntHasColorCycle then
 			local wC = weapon:GetSprite().Color
-			if VeeHelper.AreColorsDifferent(wC, trail:GetData().TrailColor)
-				and VeeHelper.AreColorsDifferent(wC, Color.Default) then
+			if vee.AreColorsDifferent(wC, trail:GetData().TrailColor)
+				and vee.AreColorsDifferent(wC, Color.Default) then
 				trail:SetColor(wC, -1, 1, true, false)
 			end
 		end
 
 		if not room:IsPositionInRoom(trail.Position, -30) then
-			trail:SetColor(VeeHelper.SetColorAlpha(tC, 0), 5, 2, true, false)
+			trail:SetColor(vee.SetColorAlpha(tC, 0), 5, 2, true, false)
 		end
 		local heightDif = 0
 		if weapon:ToTear() then
-			weapon = weapon:ToTear()
-			local tearHeightToFollow = (weapon.Height * 0.4) - 15
-			local sizeToFollow = weapon.Size * 0.5
-			trail.SpriteScale = Vector(weapon.Size * 0.2, 1)
-			trail.Position = Vector(weapon.Position.X, (weapon.Position.Y + (tearHeightToFollow + heightDif)) - sizeToFollow) +
-				weapon.PosDisplacement
+			local tear = weapon:ToTear()
+			local tearHeightToFollow = (tear.PositionOffset.Y) + 3
+			local sizeToFollow = tear.Size * 0.5
+
+			trail.SpriteScale = Vector(tear.Size * 0.2, 1)
+			trail.Position = Vector(tear.Position.X, tear.Position.Y + tearHeightToFollow - sizeToFollow) +
+				tear.PosDisplacement
+
+			if tear:HasTearFlags(TearFlags.TEAR_CONTINUUM) and not room:IsPositionInRoom(trail.Position, -30) then
+				trail:SetColor(vee.SetColorAlpha(tC, 0), 5, 2, true, false)
+			end
 		else
 			if weapon.Type == EntityType.ENTITY_EFFECT and weapon.Variant == EffectVariant.EVIL_EYE then
 				heightDif = 20

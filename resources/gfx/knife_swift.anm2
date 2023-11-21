@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="8/9/2022 8:30:42 PM" Version="109" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="8/9/2022 8:30:42 PM" Version="109" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="tears\swift_knife.png" Id="0"/>

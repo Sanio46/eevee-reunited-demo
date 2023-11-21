@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="5/13/2022 12:49:30 PM" Version="108" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="5/13/2022 12:49:30 PM" Version="108" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="tears\tear_fetus_eevee.png" Id="0"/>

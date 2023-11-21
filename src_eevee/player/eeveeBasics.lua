@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local eeveeBasics = {}
 
 local attackHelper = require("src_eevee.attacks.attackHelper")
@@ -13,7 +14,7 @@ function eeveeBasics:TryInitEevee(player)
 	if not data.IsEevee and EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] and not player:IsCoopGhost() then
 		data.IsEevee = true
 		miscMods:OnPlayerInit(player)
-		VeeHelper.SetCanShoot(player, false)
+		vee.SetCanShoot(player, false)
 		player:AddCacheFlags(CacheFlag.CACHE_ALL)
 		player:EvaluateItems()
 	end
@@ -41,7 +42,7 @@ function eeveeBasics:GiveEsauJrEeveeData(player)
 			and not data.IsEevee
 			and EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] then
 			data.IsEevee = true
-			VeeHelper.SetCanShoot(player, false)
+			vee.SetCanShoot(player, false)
 			player:AddCacheFlags(CacheFlag.CACHE_ALL)
 			player:EvaluateItems()
 			costumeProtector:InitPlayerCostume(player)
@@ -70,7 +71,7 @@ function eeveeBasics:TryDeinitEevee(player)
 		player:AddCacheFlags(CacheFlag.CACHE_ALL)
 		player:EvaluateItems()
 		swiftBase.Players[tostring(GetPtrHash(player))] = nil
-		VeeHelper.SetCanShoot(player, true)
+		vee.SetCanShoot(player, true)
 	end
 end
 

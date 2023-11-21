@@ -1,4 +1,5 @@
 local ccp = {}
+local vee = require("src_eevee.veeHelper")
 
 local baseCostumePath = "gfx/characters/"
 local baseCharacterPath = "gfx/characters/costumes/"
@@ -8,6 +9,7 @@ local Outfit = {
 	CHRISTMAS = "christmas"
 }
 local curOutfit = Outfit.NONE
+local NUM_NULL_COSTUMES = 43
 
 ---@type table<PlayerType, boolean>
 local playerToProtect = {
@@ -315,37 +317,30 @@ local costumeList = {
 	[CollectibleType.COLLECTIBLE_SHARP_STRAW] = true,
 	[CollectibleType.COLLECTIBLE_BACKSTABBER] = false,
 	[CollectibleType.COLLECTIBLE_DELIRIOUS] = true,
-
 	-- Booster Pack #1
 	[CollectibleType.COLLECTIBLE_BOZO] = true,
 	[CollectibleType.COLLECTIBLE_BROKEN_MODEM] = true,
 	[CollectibleType.COLLECTIBLE_FAST_BOMBS] = true,
-
 	-- Booster Pack #2
 	[CollectibleType.COLLECTIBLE_JUMPER_CABLES] = false,
 	[CollectibleType.COLLECTIBLE_TECHNOLOGY_ZERO] = true,
 	[CollectibleType.COLLECTIBLE_LEPROSY] = false,
-
 	-- Booster Pack #3
 	[CollectibleType.COLLECTIBLE_POP] = false,
-
 	-- Booster Pack #4
 	[CollectibleType.COLLECTIBLE_DEATHS_LIST] = true,
 	[CollectibleType.COLLECTIBLE_HAEMOLACRIA] = false,
 	[CollectibleType.COLLECTIBLE_LACHRYPHAGY] = false,
 	[CollectibleType.COLLECTIBLE_TRISAGION] = true,
 	[CollectibleType.COLLECTIBLE_SCHOOLBAG] = true,
-
 	-- Booster Pack #5
 	[CollectibleType.COLLECTIBLE_BLANKET] = true,
 	[CollectibleType.COLLECTIBLE_SACRIFICIAL_ALTAR] = false,
 	[CollectibleType.COLLECTIBLE_FLAT_STONE] = false,
-
 	[CollectibleType.COLLECTIBLE_MARROW] = true,
 	[CollectibleType.COLLECTIBLE_DADS_RING] = true,
 	[CollectibleType.COLLECTIBLE_DIVORCE_PAPERS] = false,
 	[CollectibleType.COLLECTIBLE_BRITTLE_BONES] = false,
-
 	-- Repentance
 	[CollectibleType.COLLECTIBLE_MUCORMYCOSIS] = false,
 	[CollectibleType.COLLECTIBLE_2SPOOKY] = false,
@@ -439,7 +434,7 @@ local nullEffectsList = {
 	[NullItemID.ID_CHRISTMAS] = true,
 	[NullItemID.ID_PURITY_GLOW] = true,
 	[NullItemID.ID_EMPTY_VESSEL] = true,
-	[NullItemID.ID_MUSHROOM] = true,
+	[NullItemID.ID_MUSHROOM] = false,
 	[NullItemID.ID_ANGEL] = true,
 	[NullItemID.ID_BOB] = false,
 	[NullItemID.ID_DRUGS] = false,
@@ -454,7 +449,6 @@ local nullEffectsList = {
 	[NullItemID.ID_SPIDERBABY] = false, --?
 	[NullItemID.ID_BATWING_WINGS] = true,
 	[NullItemID.ID_SACRIFICIAL_ALTAR] = false,
-
 	-- Repentance
 	[NullItemID.ID_BRIMSTONE2] = true,
 	[NullItemID.ID_HOLY_CARD] = true,
@@ -465,7 +459,6 @@ local nullEffectsList = {
 	[NullItemID.ID_REVERSE_MAGICIAN] = true,
 	[NullItemID.ID_REVERSE_EMPRESS] = true,
 	[NullItemID.ID_REVERSE_CHARIOT] = true,
-
 	[NullItemID.ID_REVERSE_HANGED_MAN] = true,
 	[NullItemID.ID_REVERSE_SUN] = true,
 	[NullItemID.ID_REVERSE_CHARIOT_ALT] = true,
@@ -565,45 +558,6 @@ local costumeTypeList = {
 	"_uranus",
 	"_neptunus"
 }
----@type string[]
-local allModCostumes = {
-	"costume_eevee",
-	"costume_eevee_azazel",
-	"costume_eevee_balloftar",
-	"costume_eevee_brimstone",
-	"costume_eevee_brimstone2",
-	"costume_eevee_delirious",
-	"costume_eevee_libra",
-	"costume_eevee_lostcurse",
-	"costume_eevee_pog",
-	"costume_eevee_whoreofbabylon",
-	"costume_eevee_berserk",
-	"costume_eevee_terra",
-	"costume_eevee_toothandnail",
-	"costume_eevee_uranus",
-	"costume_eevee_neptunus",
-	"edited_028_the belt",
-	"edited_030_moms purse",
-	"edited_046_lucky foot",
-	"edited_049_shoop da whoop",
-	"edited_139_moms purse",
-	"edited_202_midastouch",
-	"edited_210_gnawedleaf_statue",
-	"edited_216_ceremonialrobes",
-	"edited_222_antigravity",
-	"edited_231_balloftar",
-	"edited_260_blackcandle",
-	"edited_375_hosthat",
-	"edited_420_blackpowder",
-	"edited_428_pjs",
-	"edited_497_camoundies",
-	"edited_039x_terra",
-	"edited_040x_mars",
-	"edited_043x_uranus",
-	"edited_045x_pluto",
-	"edited_n030_boomerang",
-	"costume_eevee_mushroomhat",
-}
 
 --------------
 --  LOCALS  --
@@ -641,7 +595,7 @@ local function RemoveBlacklistedCostumes(player)
 	for itemID, _ in pairs(costumeList) do
 		local itemCostume = Isaac.GetItemConfig():GetCollectible(itemID)
 		if ccp:CanRemoveCollectibleCostume(player, itemID)
-			and costumeList[itemID] == false then
+			and not costumeList[itemID] then
 			player:RemoveCostume(itemCostume)
 		end
 	end
@@ -671,8 +625,8 @@ local function RemoveBlacklistedCostumes(player)
 	--Trinkets
 	for trinketID, _ in pairs(trinketCostumeList) do
 		if ((trinketID == TrinketType.TRINKET_TICK
-			and player:HasTrinket(trinketID))
-			or playerEffects:HasTrinketEffect(trinketID))
+					and player:HasTrinket(trinketID))
+				or playerEffects:HasTrinketEffect(trinketID))
 			and data.CCP.TrinketActive[trinketID]
 			and trinketCostumeList[trinketID] == false then
 			local trinketCostume = Isaac.GetItemConfig():GetTrinket(trinketID)
@@ -709,7 +663,7 @@ local function RemoveBlacklistedCostumes(player)
 	end
 end
 
-local UniqueHairCostumes = {
+local uniqueHairCostumes = {
 	[CollectibleType.COLLECTIBLE_BALL_OF_TAR] = "balloftar",
 	[CollectibleType.COLLECTIBLE_LIBRA] = "libra",
 	[CollectibleType.COLLECTIBLE_TERRA] = "terra",
@@ -718,27 +672,31 @@ local UniqueHairCostumes = {
 	[CollectibleType.COLLECTIBLE_BRIMSTONE] = "brimstone",
 }
 
-local EditedCostumes = {
+local editedCostumes = {
 	[CollectibleType.COLLECTIBLE_BOOMERANG] = false,
 	[CollectibleType.COLLECTIBLE_BELT] = true,
 	[CollectibleType.COLLECTIBLE_MOMS_HEELS] = true,
 	[CollectibleType.COLLECTIBLE_LUCKY_FOOT] = true,
+	[CollectibleType.COLLECTIBLE_BUCKET_OF_LARD] = true,
 	[CollectibleType.COLLECTIBLE_SHOOP_DA_WHOOP] = false,
 	[CollectibleType.COLLECTIBLE_MOMS_PURSE] = true,
+	[CollectibleType.COLLECTIBLE_SMB_SUPER_FAN] = true,
 	[CollectibleType.COLLECTIBLE_MIDAS_TOUCH] = true,
 	[CollectibleType.COLLECTIBLE_GNAWED_LEAF] = false,
 	[CollectibleType.COLLECTIBLE_CEREMONIAL_ROBES] = true,
 	[CollectibleType.COLLECTIBLE_ANTI_GRAVITY] = true,
 	[CollectibleType.COLLECTIBLE_BALL_OF_TAR] = true,
 	[CollectibleType.COLLECTIBLE_BLACK_CANDLE] = true,
-	[CollectibleType.COLLECTIBLE_HOST_HAT] = true,
+	[CollectibleType.COLLECTIBLE_CAFFEINE_PILL] = true,
 	[CollectibleType.COLLECTIBLE_BLACK_POWDER] = true,
 	[CollectibleType.COLLECTIBLE_PJS] = true,
 	[CollectibleType.COLLECTIBLE_CAMO_UNDIES] = true,
 	[CollectibleType.COLLECTIBLE_TERRA] = true,
-	[CollectibleType.COLLECTIBLE_MARS] = true,
+	--[CollectibleType.COLLECTIBLE_MARS] = true,
 	[CollectibleType.COLLECTIBLE_URANUS] = true,
 	--[CollectibleType.COLLECTIBLE_PLUTO] = true,
+	[CollectibleType.COLLECTIBLE_BINGE_EATER] = true,
+	[CollectibleType.COLLECTIBLE_JELLY_BELLY] = true
 }
 
 ---@param player EntityPlayer
@@ -749,23 +707,23 @@ local function AddItemSpecificCostumes(player)
 	local basePath = playerCostume[playerType] .. "_"
 
 	if data.CCP
-		and data.CCP.EditedCostumesActive
-		and data.CCP.UniqueHairCostumesActive then
-		for itemID, costumePath in pairs(UniqueHairCostumes) do
+		and data.CCP.editedCostumesActive
+		and data.CCP.uniqueHairCostumesActive then
+		for itemID, costumePath in pairs(uniqueHairCostumes) do
 			local itemCostume = Isaac.GetCostumeIdByPath(basePath .. costumePath .. ".anm2")
 
-			if player:HasCollectible(itemID) and data.CCP.UniqueHairCostumesActive[itemID] == false then
-				data.CCP.UniqueHairCostumesActive[itemID] = true
-				--if not VeeHelper.GameContinuedOnPlayerInit() then
+			if player:HasCollectible(itemID) and data.CCP.uniqueHairCostumesActive[itemID] == false then
+				data.CCP.uniqueHairCostumesActive[itemID] = true
+				--if not vee.GameContinuedOnPlayerInit() then
 				ccp:TryAddNullCostume(player, itemCostume, basePath .. costumePath .. ".anm2")
 				--end
-			elseif not player:HasCollectible(itemID) and data.CCP.UniqueHairCostumesActive[itemID] == true then
+			elseif not player:HasCollectible(itemID) and data.CCP.uniqueHairCostumesActive[itemID] == true then
 				player:TryRemoveNullCostume(itemCostume)
-				data.CCP.UniqueHairCostumesActive[itemID] = false
+				data.CCP.uniqueHairCostumesActive[itemID] = false
 			end
 		end
 
-		for itemID, bool in pairs(EditedCostumes) do
+		for itemID, bool in pairs(editedCostumes) do
 			if bool == true then
 				local itemConfig = Isaac.GetItemConfig():GetCollectible(itemID)
 				local costumePath = itemConfig.Costume.Anm2Path
@@ -773,15 +731,15 @@ local function AddItemSpecificCostumes(player)
 				costumePath = string.lower(costumePath)
 				local itemCostume = Isaac.GetCostumeIdByPath(costumePath)
 
-				if player:HasCollectible(itemID) and data.CCP.EditedCostumesActive[itemID] == false then
-					data.CCP.EditedCostumesActive[itemID] = true
-					--if not VeeHelper.GameContinuedOnPlayerInit() then
-					player:RemoveCostume(itemConfig)
+				if player:HasCollectible(itemID) and data.CCP.editedCostumesActive[itemID] == false then
+					data.CCP.editedCostumesActive[itemID] = true
+					--if not vee.GameContinuedOnPlayerInit() then
 					ccp:TryAddNullCostume(player, itemCostume, costumePath)
+					player:RemoveCostume(itemConfig)
 					--end
-				elseif not player:HasCollectible(itemID) and data.CCP.EditedCostumesActive[itemID] == true then
+				elseif not player:HasCollectible(itemID) and data.CCP.editedCostumesActive[itemID] == true then
 					player:TryRemoveNullCostume(itemCostume)
-					data.CCP.EditedCostumesActive[itemID] = false
+					data.CCP.editedCostumesActive[itemID] = false
 				end
 			end
 		end
@@ -858,7 +816,7 @@ local function AddItemSpecificCostumes(player)
 	local mushroomCustomCostume = Isaac.GetCostumeIdByPath(mushroomPath)
 	if player:HasPlayerForm(PlayerForm.PLAYERFORM_MUSHROOM) and not data.CCP.MushroomCostume then
 		data.CCP.MushroomCostume = true
-		--if not VeeHelper.GameContinuedOnPlayerInit() then
+		--if not vee.GameContinuedOnPlayerInit() then
 		ccp:TryAddNullCostume(player, mushroomCustomCostume, mushroomPath)
 		--end
 	elseif not player:HasPlayerForm(PlayerForm.PLAYERFORM_MUSHROOM) and data.CCP.MushroomCostume then
@@ -871,16 +829,14 @@ end
 local function RemoveModdedCostumes(player)
 	local ModdedNullCostumeIDStart = NullItemID.NUM_NULLITEMS + 1
 	local ModdedCollectibleCostumeIDStart = CollectibleType.NUM_COLLECTIBLES + 1
-	local MaxNullItemIDs = Isaac.GetItemConfig():GetNullItems().Size - 1
-	local MaxCollectibles = Isaac.GetItemConfig():GetCollectibles().Size - 1
+	local MaxNullItemIDs = #Isaac.GetItemConfig():GetNullItems() - 1
+	local MaxCollectibles = #Isaac.GetItemConfig():GetCollectibles() - 1
 
 	for id = ModdedNullCostumeIDStart, MaxNullItemIDs do
 		local notSupported = true
-		for i = 1, #allModCostumes do
-			local supportedID = Isaac.GetCostumeIdByPath(baseCostumePath .. allModCostumes[i] .. ".anm2")
-			if id == supportedID or id == Isaac.GetCostumeIdByPath("the/specialist_isaac.anm2") then
-				notSupported = false
-			end
+		local startingSupportedID = Isaac.GetCostumeIdByPath(baseCostumePath .. "costume_eevee.anm2")
+		if (id >= startingSupportedID and id <= startingSupportedID + NUM_NULL_COSTUMES) or id == Isaac.GetCostumeIdByPath("the/specialist_isaac.anm2") then
+			notSupported = false
 		end
 		if notSupported == true then
 			player:TryRemoveNullCostume(id)
@@ -915,7 +871,7 @@ end
 ---@param spritesheetPath string
 function ccp:UpdatePlayerSpritesheet(player, sprite, spritesheetPath)
 	local playerType = player:GetPlayerType()
-	local spritesheetPath = spritesheetPath or playerSpritesheet[playerType] .. VeeHelper.SkinColor(player) .. ".png"
+	local spritesheetPath = spritesheetPath or playerSpritesheet[playerType] .. vee.GetSkinColorName(player) .. ".png"
 
 	sprite:ReplaceSpritesheet(12, spritesheetPath)
 	sprite:ReplaceSpritesheet(4, spritesheetPath)
@@ -955,7 +911,6 @@ function ccp:ResetPlayerCostumes(player)
 	local playerEffects = player:GetEffects()
 
 	for playerType, _ in pairs(data.CCP.HasCostumeInitialized) do --Triggers once, just used to grab the playerType inside their player data
-
 		local basePath = playerCostume[playerType]
 
 		for _, costumeString in pairs(costumeTypeList) do
@@ -996,8 +951,8 @@ function ccp:ResetPlayerCostumes(player)
 		--Trinkets
 		for trinketID, _ in pairs(trinketCostumeList) do
 			if ((trinketID == TrinketType.TRINKET_TICK
-				and player:HasTrinket(trinketID))
-				or playerEffects:HasTrinketEffect(trinketID))
+						and player:HasTrinket(trinketID))
+					or playerEffects:HasTrinketEffect(trinketID))
 				and data.CCP.TrinketActive[trinketID]
 				and trinketCostumeList[trinketID] == false then
 				local trinketCostume = Isaac.GetItemConfig():GetTrinket(trinketID)
@@ -1022,8 +977,8 @@ local function OutfitAdjustments(player)
 	if curOutfit == Outfit.NONE then
 		playerSpritesheet[EEVEEMOD.PlayerType.EEVEE] = baseCharacterPath .. "character_eevee"
 	elseif curOutfit == Outfit.CHRISTMAS then
-		table.insert(allModCostumes, "costume_eevee_christmashat")
-		ccp:TryAddNullCostume(player, EEVEEMOD.NullCostume.CHRISTMAS_HAT, baseCostumePath .. "costume_eevee_christmashat.anm2")
+		ccp:TryAddNullCostume(player, EEVEEMOD.NullCostume.CHRISTMAS_HAT,
+			baseCostumePath .. "costume_eevee_christmashat.anm2")
 		playerSpritesheet[EEVEEMOD.PlayerType.EEVEE] = baseCharacterPath .. "outfits/character_eevee_christmas"
 		ccp:UpdatePlayerSpritesheet(player, player:GetSprite(), playerSpritesheet[EEVEEMOD.PlayerType.EEVEE] .. ".png")
 	end
@@ -1042,7 +997,7 @@ function ccp:InitPlayerCostume(player)
 		if not data.CCP.HasCostumeInitialized
 			or (data.CCP.HasCostumeInitialized and not data.CCP.HasCostumeInitialized[playerType]) then
 			data.CCP.NumCollectibles = player:GetCollectibleCount()
-			data.CCP.NumTemporaryEffects = player:GetEffects():GetEffectsList().Size
+			data.CCP.NumTemporaryEffects = #player:GetEffects():GetEffectsList()
 			data.CCP.QueueCostumeRemove = {}
 			data.CCP.TrinketActive = {
 				[TrinketType.TRINKET_TICK] = false,
@@ -1052,19 +1007,18 @@ function ccp:InitPlayerCostume(player)
 			data.CCP.HasCostumeInitialized = {
 				[playerType] = true
 			}
-			data.CCP.EditedCostumesActive = {}
-			for itemID, _ in pairs(EditedCostumes) do
-				data.CCP.EditedCostumesActive[itemID] = false
+			data.CCP.editedCostumesActive = {}
+			for itemID, _ in pairs(editedCostumes) do
+				data.CCP.editedCostumesActive[itemID] = false
 			end
-			data.CCP.UniqueHairCostumesActive = {}
-			for itemID, _ in pairs(UniqueHairCostumes) do
-				data.CCP.UniqueHairCostumesActive[itemID] = false
+			data.CCP.uniqueHairCostumesActive = {}
+			for itemID, _ in pairs(uniqueHairCostumes) do
+				data.CCP.uniqueHairCostumesActive[itemID] = false
 			end
 			local basePath = playerCostume[playerType]
 			local charCostume = Isaac.GetCostumeIdByPath(basePath .. ".anm2")
 			player:AddNullCostume(charCostume)
 			OutfitAdjustments(player)
-			ccp:MainResetPlayerCostumes(player)
 		end
 	end
 end
@@ -1100,17 +1054,17 @@ function ccp:MiscCostumeResets(player)
 	end
 
 	if data.CCP.NumTemporaryEffects
-		and data.CCP.NumTemporaryEffects ~= player:GetEffects():GetEffectsList().Size
+		and data.CCP.NumTemporaryEffects ~= #player:GetEffects():GetEffectsList()
 		and not player:GetEffects():HasCollectibleEffect(CollectibleType.COLLECTIBLE_HEMOPTYSIS)
 	then
-		data.CCP.NumTemporaryEffects = player:GetEffects():GetEffectsList().Size
+		data.CCP.NumTemporaryEffects = #player:GetEffects():GetEffectsList()
 		ccp:MainResetPlayerCostumes(player)
 	end
 
 	for trinketID, _ in pairs(trinketCostumeList) do
 		if ((trinketID == TrinketType.TRINKET_TICK
-			and player:HasTrinket(trinketID))
-			or playerEffects:HasTrinketEffect(trinketID))
+					and player:HasTrinket(trinketID))
+				or playerEffects:HasTrinketEffect(trinketID))
 		then
 			if not data.CCP.TrinketActive[trinketID] then
 				if not trinketCostumeList[trinketID] then
@@ -1133,7 +1087,7 @@ function ccp:MiscCostumeResets(player)
 				end
 			end
 		elseif (trinketID == TrinketType.TRINKET_TICK
-			and not player:HasTrinket(trinketID))
+				and not player:HasTrinket(trinketID))
 			or not playerEffects:HasTrinketEffect(trinketID)
 		then
 			if data.CCP.TrinketActive[trinketID] then
@@ -1149,7 +1103,6 @@ end
 
 ---@param player EntityPlayer
 function ccp:CanAstralProjectionTrigger(player)
-	local playerEffects = player:GetEffects()
 	local data = player:GetData()
 	local room = EEVEEMOD.game:GetRoom()
 
@@ -1166,7 +1119,7 @@ function ccp:AstralProjectionUpdate(player)
 
 	if data.CCP.AP_CanTrigger then
 		if hasProjectionEffect then
-			if VeeHelper.RoomCleared == true and not data.CCP.LostCurse then
+			if vee.RoomCleared == true and not data.CCP.LostCurse then
 				data.CCP.DelaySpritesheetChange = ""
 			end
 		end
@@ -1327,7 +1280,7 @@ function ccp:RestoreCostumeInMineshaft(player)
 			elseif data.CCP.MineshaftHeadCostume:IsLoaded() then
 				local screenpos = EEVEEMOD.game:GetRoom():WorldToScreenPosition(player.Position)
 
-				if VeeHelper.IsSpritePlayingAnims(player:GetSprite(), VeeHelper.WalkAnimations) then
+				if vee.IsSpritePlayingAnims(player:GetSprite(), vee.WalkAnimations) then
 					local spriteToUse = {
 						data.CCP.MineshaftBody,
 						data.CCP.MineshaftBodyCostume,
@@ -1451,9 +1404,8 @@ function ccp:GnawedLeaf(player)
 
 	if not data.CCP or not player:HasCollectible(CollectibleType.COLLECTIBLE_GNAWED_LEAF) then return end
 
-	if VeeHelper.PlayerStandingStill(player) and player:GetFireDirection() == Direction.NO_DIRECTION and
+	if vee.IsNotUsingMoveControls(player) and player:GetFireDirection() == Direction.NO_DIRECTION and
 		not data.CCP.EeveeGnawed then
-
 		if not data.CCP.GnawedTimer then
 			data.CCP.GnawedTimer = TimeTillGnawed
 		elseif data.CCP.GnawedTimer > 0 then
@@ -1463,9 +1415,7 @@ function ccp:GnawedLeaf(player)
 			player:AddNullCostume(EEVEEMOD.NullCostume.CUSTOM_GNAWED)
 			data.CCP.Gnawed = true
 		end
-
 	else
-
 		if data.CCP.Gnawed then
 			player:TryRemoveNullCostume(EEVEEMOD.NullCostume.CUSTOM_GNAWED)
 			data.CCP.Gnawed = false
@@ -1478,7 +1428,7 @@ function ccp:GnawedLeaf(player)
 end
 
 function ccp:GnawedOnLoad()
-	local players = VeeHelper.GetAllPlayers()
+	local players = vee.GetAllPlayers()
 
 	for i = 1, #players do
 		local player = players[i]
@@ -1536,9 +1486,8 @@ function ccp:ToggleBoomerang(player)
 		data.CCP.EquipBoomerangDelay = false
 	end
 	for _, boomerang in ipairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, EffectVariant.BOOMERANG)) do
-		if boomerang.SpawnerEntity
-			and boomerang.SpawnerEntity:ToPlayer()
-			and boomerang.SpawnerEntity:ToPlayer():GetData().Identifier == player:GetData().Identifier
+		if vee.IsEntitySpawnedByPlayer(boomerang)
+			and vee.DoPlayerIdentifiersMatch(boomerang.SpawnerEntity:ToPlayer(), player)
 			and not data.CCP.MyBoomerang
 		then
 			data.CCP.MyBoomerang = boomerang
@@ -1605,7 +1554,7 @@ function ccp:AntiBrimPogBaldness(player)
 
 		if not data.EeveeBrimPog and Poglite.WePoggin then
 			data.EeveeBrimPog = true
-			ccp:TryAddNullCostume(player, Isaac.GetCostumeIdByPath(costumePath), costumePath )
+			ccp:TryAddNullCostume(player, Isaac.GetCostumeIdByPath(costumePath), costumePath)
 		elseif data.EeveeBrimPog and not Poglite.WePoggin then
 			player:TryRemoveNullCostume(Isaac.GetCostumeIdByPath(costumePath))
 			data.EeveeBrimPog = false

@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="Unknown" CreatedOn="5/26/2022 6:12:30 PM" Version="8" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="5/26/2022 6:12:30 PM" Version="8" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="items\collectibles\collectibles_cookie_jar.png" Id="0"/>

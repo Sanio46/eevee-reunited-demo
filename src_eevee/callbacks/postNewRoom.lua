@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local postNewRoom = {}
 
 local ccp = require("src_eevee.player.characterCostumeProtector")
@@ -9,8 +10,8 @@ local lilEevee = require("src_eevee.items.collectibles.lilEevee")
 local pokeStop = require("src_eevee.items.collectibles.pokeStop")
 
 function postNewRoom:main()
-	local players = VeeHelper.GetAllPlayers()
-	
+	local players = vee.GetAllPlayers()
+
 	for i = 1, #players do
 		local player = players[i]
 		pokeball:ResetBallsOnNewRoom(player)

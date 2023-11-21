@@ -17,7 +17,7 @@ function postRender:main()
 	end
 	--[[ postRender:RecordPlayingSounds()
  	postRender:RenderText() ]]
-	--[[ local players = VeeHelper.GetAllPlayers()
+	--[[ local players = vee.GetAllPlayers()
   for i = 1, #players do
 	local player = players[i]
 	local screenpos = EEVEEMOD.game:GetRoom():WorldToScreenPosition(player.Position)
@@ -71,7 +71,8 @@ function postRender:ItemSwap()
 	if not player:HasCollectible(currentItem) then
 		local lastItem = currentItem + 1
 		local nextItem = currentItem - 1
-		if currentItem or lastItem <= 0 then currentItem = 1
+		if currentItem or lastItem <= 0 then
+			currentItem = 1
 			lastItem = 1
 		end
 		player:RemoveCollectible(lastItem)

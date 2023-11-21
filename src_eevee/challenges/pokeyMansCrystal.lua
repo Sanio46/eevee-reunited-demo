@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local pokeyMans = {}
 
 local startersSpawned = false
@@ -27,9 +28,9 @@ local function SpawnStarters()
 		460
 	}
 	local entsToSpawn = {
-		{ EntityType.ENTITY_DANNY, 1 },
+		{ EntityType.ENTITY_DANNY,   1 },
 		{ EntityType.ENTITY_BUBBLES, 0 },
-		{ EntityType.ENTITY_MAW, 2 }
+		{ EntityType.ENTITY_MAW,     2 }
 	}
 	local gridIndex = {
 		7,
@@ -46,7 +47,8 @@ local function SpawnStarters()
 	end
 
 	for i = 1, 3 do
-		local ent = Isaac.Spawn(entsToSpawn[i][1], entsToSpawn[i][2], 0, Vector(spawnPosX[i], 280), Vector.Zero, nil):ToNPC()
+		local ent = Isaac.Spawn(entsToSpawn[i][1], entsToSpawn[i][2], 0, Vector(spawnPosX[i], 280), Vector.Zero, nil)
+		:ToNPC()
 		ent:GetData().StarterPokemon = true
 		ent.CanShutDoors = true
 		ent:AddEntityFlags(EntityFlag.FLAG_CONFUSION)
@@ -59,7 +61,7 @@ function pokeyMans:InitChallenge()
 	local challenge = Isaac.GetChallenge()
 
 	if challenge ~= EEVEEMOD.Challenge.POKEY_MANS_CRYSTAL
-		or not VeeHelper.IsInStartingRoom()
+		or not vee.IsInStartingRoom()
 	then
 		return
 	end
@@ -70,13 +72,13 @@ function pokeyMans:InitChallenge()
 end
 
 function pokeyMans:ShouldRespawnStarters()
-	return startersCaptured < #VeeHelper.GetAllMainPlayers()
+	return startersCaptured < #vee.GetAllMainPlayers()
 end
 
 function pokeyMans:TryRespawnStarters()
 	local challenge = Isaac.GetChallenge()
 	if challenge ~= EEVEEMOD.Challenge.POKEY_MANS_CRYSTAL
-		or not VeeHelper.IsInStartingRoom() then
+		or not vee.IsInStartingRoom() then
 		return
 	end
 
@@ -126,7 +128,6 @@ function pokeyMans:StarterNPCUpdate(npc)
 	local data = npc:GetData()
 
 	if data.StarterPokemon and not npc:HasEntityFlags(EntityFlag.FLAG_FRIENDLY) then
-
 		npc.Velocity = Vector.Zero
 
 		for _, pokeball in pairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.POKEBALL)) do
@@ -137,7 +138,6 @@ function pokeyMans:StarterNPCUpdate(npc)
 					if npc.Type == EntityType.ENTITY_MAW then
 						local eternalFlies = Isaac.FindByType(EntityType.ENTITY_ETERNALFLY)
 						for _, eternalFly in ipairs(eternalFlies) do
-
 							if eternalFly:Exists() then
 								eternalFly:Remove()
 							end
@@ -199,14 +199,15 @@ function pokeyMans:OnClearReward(rng, spawnPos)
 		for _, p in ipairs(Isaac.FindByType(EntityType.ENTITY_PLAYER)) do
 			local player = p:ToPlayer()
 			if not player.Parent then
-				local healthType = VeeHelper:GetPlayerHealthType(player:GetPlayerType())
-				if healthType >= VeeHelper.PlayerHealthType.NORMAL then
+				local healthType = vee:GetPlayerHealthType(player:GetPlayerType())
+				if healthType >= vee.PlayerHealthType.NORMAL then
 					player:AnimateHappy()
 					player:AddMaxHearts(2, false)
 					player:AddHearts(2)
-					local variant = healthType == VeeHelper.PlayerHealthType.BLACK_ONLY and 5 or
-						healthType == VeeHelper.PlayerHealthType.SOUL_ONLY and 4 or 0
-					local notify = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.HEART, variant, player.Position, Vector.Zero,
+					local variant = healthType == vee.PlayerHealthType.BLACK_ONLY and 5 or
+						healthType == vee.PlayerHealthType.SOUL_ONLY and 4 or 0
+					local notify = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.HEART, variant, player.Position,
+						Vector.Zero,
 						player):ToEffect()
 					notify.Parent = player
 					notify:FollowParent(notify.Parent)
@@ -219,8 +220,9 @@ function pokeyMans:OnClearReward(rng, spawnPos)
 		for _, e in ipairs(Isaac.FindInRadius(EEVEEMOD.game:GetRoom():GetCenterPos(), 1500, EntityPartition.ENEMY)) do
 			local npc = e:ToNPC()
 			if npc and npc:HasEntityFlags(EntityFlag.FLAG_FRIENDLY) and npc:HasEntityFlags(EntityFlag.FLAG_FRIENDLY_BALL) then
-				local notify = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.HEART, 0, npc.Position, Vector.Zero, npc):
-					ToEffect()
+				local notify = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.HEART, 0, npc.Position, Vector.Zero,
+					npc):
+				ToEffect()
 				notify.Parent = npc
 				notify:FollowParent(notify.Parent)
 				notify:GetSprite().Offset = Vector(0, -24)
@@ -232,7 +234,8 @@ function pokeyMans:OnClearReward(rng, spawnPos)
 	elseif roomType == RoomType.ROOM_DEFAULT then
 		local spawnChance = 0.30
 		if rng:RandomFloat() < spawnChance then
-			Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_TAROTCARD, EEVEEMOD.PokeballType.POKEBALL, EEVEEMOD.game:GetRoom():FindFreePickupSpawnPosition(spawnPos),
+			Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_TAROTCARD, EEVEEMOD.PokeballType.POKEBALL,
+				EEVEEMOD.game:GetRoom():FindFreePickupSpawnPosition(spawnPos),
 				Vector.Zero, nil)
 			return true
 		end

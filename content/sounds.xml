@@ -65,4 +65,7 @@
 	<sound name="Shiny Appear">
 		<sample weight="1" path="shinyAppear.wav" />
 	</sound>
+	<sound name="Eevee Squeak">
+		<sample weight="1" path="eeveeSqueak.wav" />
+	</sound>
 </sounds>

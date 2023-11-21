@@ -1,68 +1,8 @@
+local vee = require("src_eevee.VeeHelper")
 local strangeEgg = {}
 
---[[ 
-local function GetActiveItemBatteryCharge(player, itemID)
-	return player:GetBatteryCharge(VeeHelper.GetActiveSlots(player, itemID))
-end
-
-local function CheckItemCanCharge(player, itemID, maxCharge)
-	local canCharge = false
-
-	if VeeHelper.GetActiveItemCharges(player, itemID) < maxCharge 	
-	or
-	(
-	player:HasCollectible(CollectibleType.COLLECTIBLE_THE_BATTERY) 
-	and GetActiveItemBatteryCharge(player, itemID) < maxCharge
-	) then
-	
-		canCharge = true
-	end
-
-	return canCharge
-end
-
-local function AAABatteryProc(player, itemID, maxCharge)
-	if player:HasCollectible(TrinketType.TRINKET_AAA_BATTERY) then
-		if VeeHelper.GetActiveItemCharges(player, itemID) == (maxCharge - 1) then
-			return true
-		end
-	end
-end
-
-local function WatchBatteryProc(player)
-	if player:HasCollectible(TrinketType.TRINKET_WATCH_BATTERY) then
-		if math.random(1, 100) <= 5 then
-			return true
-		else
-			return false
-		end
-	end
-end
-
-local function GetBaseRoomClearCharge()
-	local addCharge = 1
-	for largeRoom = RoomShape.ROOMSHAPE_2x2, RoomShape.NUM_ROOMSHAPES - 1 do
-		local CurrentRoom = EEVEEMOD.game:GetLevel():GetCurrentRoom():GetRoomShape()
-		if CurrentRoom == largeRoom then
-			addCharge = 2
-		end
-	end
-	return addCharge
-end
-
-local function DetermineActiveCharge(player, itemID, maxCharge)
-	local chargeToAdd = VeeHelper.GetActiveItemCharges(player, EEVEEMOD.CollectibleType.STRANGE_EGG) + GetBaseRoomClearCharge()
-	if AAABatteryProc(player, itemID, maxCharge) then
-		chargeToAdd = chargeToAdd + 1
-	end
-	if WatchBatteryProc(player) and chargeToAdd < maxCharge then
-		chargeToAdd = chargeToAdd + 1
-	end
-	return chargeToAdd
-end ]]
-
 local function strangeEggReward(player, charge)
-	local heartToSpawn = VeeHelper.IsJudasBirthrightActive(player) and HeartSubType.HEART_BLACK or HeartSubType.HEART_FULL
+	local heartToSpawn = vee.IsJudasBirthrightActive(player) and HeartSubType.HEART_BLACK or HeartSubType.HEART_FULL
 	if charge == 1 then
 		if player:GetHearts() ~= player:GetEffectiveMaxHearts() then
 			player:AddHearts(6)
@@ -71,7 +11,6 @@ local function strangeEggReward(player, charge)
 			Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_HEART, heartToSpawn,
 				EEVEEMOD.game:GetRoom():FindFreePickupSpawnPosition(player.Position, 2), Vector(0, 0), player)
 		end
-
 	elseif charge == 2 then
 		Isaac.Spawn(5, 100, CollectibleType.COLLECTIBLE_BREAKFAST,
 			EEVEEMOD.game:GetRoom():FindFreePickupSpawnPosition(player.Position, 2), Vector(0, 0), player)
@@ -116,7 +55,7 @@ end
 function strangeEgg:ChargeOnlyOnRoomClear(player)
 	--[[
 	if player:HasCollectible(EEVEEMOD.CollectibleType.STRANGE_EGG)
-	and VeeHelper.RoomCleared == true then
+	and vee.RoomCleared == true then
 		local itemConfig = Isaac.GetItemConfig()
 		local eggObject = itemConfig:GetCollectible(EEVEEMOD.CollectibleType.STRANGE_EGG)
 		local maxCharge = eggObject.MaxCharges
@@ -124,7 +63,7 @@ function strangeEgg:ChargeOnlyOnRoomClear(player)
 		if CheckItemCanCharge(player, EEVEEMOD.CollectibleType.STRANGE_EGG, maxCharge) then
 			local newCharge = DetermineActiveCharge(player, EEVEEMOD.CollectibleType.STRANGE_EGG, maxCharge)
 			
-			player:SetActiveCharge(newCharge, VeeHelper.GetActiveSlots(player, EEVEEMOD.CollectibleType.STRANGE_EGG))
+			player:SetActiveCharge(newCharge, vee.GetActiveSlots(player, EEVEEMOD.CollectibleType.STRANGE_EGG))
 			EEVEEMOD.sfx:Play(SoundEffect.SOUND_BEEP)
 		end
 	end]]
@@ -152,7 +91,7 @@ end
 function strangeEgg:ChargeOnlyOnNewLevel(player)
 	if not player:HasCollectible(EEVEEMOD.CollectibleType.STRANGE_EGG) then return end
 
-	local currentCharges, slot = VeeHelper.GetActiveItemCharges(player, EEVEEMOD.CollectibleType.STRANGE_EGG)
+	local currentCharges, slot = vee.GetActiveItemCharges(player, EEVEEMOD.CollectibleType.STRANGE_EGG)
 	local chargeUp = IsWarm(player) and 2 or 1
 
 	for i = 1, #currentCharges do

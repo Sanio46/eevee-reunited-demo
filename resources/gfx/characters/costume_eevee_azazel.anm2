@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="10/14/2021 5:25:34 PM" Version="138" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="10/14/2021 5:25:34 PM" Version="138" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="costumes_eevee\character_008_azazelhead_hair.png" Id="0"/>

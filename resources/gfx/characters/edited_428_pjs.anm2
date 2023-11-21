@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="4/30/2022 6:33:31 PM" Version="107" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="4/30/2022 6:33:31 PM" Version="107" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="costumes_eevee\costume_428_pjs.png" Id="0"/>

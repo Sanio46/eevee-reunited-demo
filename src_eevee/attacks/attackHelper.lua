@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local attackHelper = {}
 
 local weaponTypeToCollectible = {
@@ -43,7 +44,7 @@ function attackHelper:GetMultiShot(player)
 	--20/20 with other multi-shots removes its extra tear in trade for negating the tear delay
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_20_20) and
 		(
-		player:HasCollectible(CollectibleType.COLLECTIBLE_INNER_EYE)
+			player:HasCollectible(CollectibleType.COLLECTIBLE_INNER_EYE)
 			or player:HasCollectible(CollectibleType.COLLECTIBLE_MUTANT_SPIDER)
 			or player:GetEffects():HasNullEffect(NullItemID.ID_REVERSE_HANGED_MAN)
 		)
@@ -92,7 +93,7 @@ end
 function attackHelper:BookwormShot(player)
 	local count = 0
 	if player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then
-		if VeeHelper.RandomNum(2) == 2 then
+		if vee.RandomNum(2) == 2 then
 			count = 1
 		end
 	end
@@ -108,18 +109,18 @@ function attackHelper:ShouldFireExtraShot(player, itemID)
 		local baseChance = 50
 		local maxChance = 100
 		local luckValue = 10
-		if VeeHelper.DoesLuckChanceTrigger(baseChance, maxChance, luckValue, currentLuck, EEVEEMOD.RunSeededRNG) then
+		if vee.DoesLuckChanceTrigger(baseChance, maxChance, luckValue, currentLuck, EEVEEMOD.RunSeededRNG) then
 			shouldFire = true
 		end
 	elseif itemID == CollectibleType.COLLECTIBLE_LOKIS_HORNS then
 		local baseChance = 25
 		local maxChance = 100
 		local luckValue = 5
-		if VeeHelper.DoesLuckChanceTrigger(baseChance, maxChance, luckValue, currentLuck, EEVEEMOD.RunSeededRNG) then
+		if vee.DoesLuckChanceTrigger(baseChance, maxChance, luckValue, currentLuck, EEVEEMOD.RunSeededRNG) then
 			shouldFire = true
 		end
 	elseif itemID == CollectibleType.COLLECTIBLE_EYE_SORE then
-		if VeeHelper.RandomNum(2) == 2 then
+		if vee.RandomNum(2) == 2 then
 			shouldFire = true
 		end
 	elseif itemID == CollectibleType.COLLECTIBLE_MONSTROS_LUNG then
@@ -173,8 +174,8 @@ function attackHelper:GetExtraFireDirections(player, direction)
 		}
 		for weaponType, degrees in pairs(WeaponTypeShotDegrees) do
 			if player:HasWeaponType(weaponType) then
-				for i = 1, VeeHelper.RandomNum(3, 5) do
-					local rotationOffset = VeeHelper.RandomNum(math.floor(degrees / -2), math.floor(degrees / 2))
+				for i = 1, vee.RandomNum(3, 5) do
+					local rotationOffset = vee.RandomNum(math.floor(degrees / -2), math.floor(degrees / 2))
 					local newDirection = direction:Rotated(rotationOffset)
 					table.insert(directions, newDirection)
 				end
@@ -183,8 +184,8 @@ function attackHelper:GetExtraFireDirections(player, direction)
 	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_EYE_SORE)
 		and attackHelper:ShouldFireExtraShot(player, CollectibleType.COLLECTIBLE_EYE_SORE) == true
 	then
-		for i = 1, VeeHelper.RandomNum(3) do
-			local rotationOffset = VeeHelper.RandomNum(360)
+		for i = 1, vee.RandomNum(3) do
+			local rotationOffset = vee.RandomNum(360)
 			local newDirection = direction:Rotated(rotationOffset)
 			table.insert(directions, newDirection)
 		end
@@ -198,7 +199,7 @@ function attackHelper:EyeItemDamageChance(player, weapon)
 	local shouldBeBlood = false
 	if weapon.Type == EntityType.ENTITY_TEAR then --All other weapon types seem to handle the synergy naturally
 		if player:HasCollectible(CollectibleType.COLLECTIBLE_STYE) then
-			if VeeHelper.RandomNum(2) == 2 then
+			if vee.RandomNum(2) == 2 then
 				local c = weapon:GetSprite().Color
 				weapon.CollisionDamage = weapon.CollisionDamage / 1.24
 				weapon.Height = weapon.Height + 5
@@ -209,25 +210,25 @@ function attackHelper:EyeItemDamageChance(player, weapon)
 			end
 		end
 		if player:GetEffects():HasCollectibleEffect(CollectibleType.COLLECTIBLE_SCOOPER) then
-			if VeeHelper.RandomNum(2) == 2 then
+			if vee.RandomNum(2) == 2 then
 				weapon.CollisionDamage = weapon.CollisionDamage / 1.34
 			end
 		end
 		if player:HasCollectible(CollectibleType.COLLECTIBLE_BLOOD_CLOT) then
-			if VeeHelper.RandomNum(2) == 2 then
+			if vee.RandomNum(2) == 2 then
 				weapon.CollisionDamage = weapon.CollisionDamage + 1
 				weapon.Height = weapon.Height - 10
 				shouldBeBlood = true
 			end
 		end
 		if player:HasCollectible(CollectibleType.COLLECTIBLE_CHEMICAL_PEEL) then
-			if VeeHelper.RandomNum(2) == 2 then
+			if vee.RandomNum(2) == 2 then
 				weapon.CollisionDamage = weapon.CollisionDamage + 2
 				shouldBeBlood = true
 			end
 		end
 		if player:HasCollectible(CollectibleType.COLLECTIBLE_PEEPER) then
-			if VeeHelper.RandomNum(2) == 2 then
+			if vee.RandomNum(2) == 2 then
 				weapon.CollisionDamage = weapon.CollisionDamage * 1.34
 				shouldBeBlood = true
 			end
@@ -253,12 +254,12 @@ function attackHelper:GetIsaacShootingDirection(player, targetStartingPos)
 		and (player:HasWeaponType(WeaponType.WEAPON_BRIMSTONE)
 			or player:HasWeaponType(WeaponType.WEAPON_LASER))
 	then
-		local targetPos = VeeHelper.FindMarkedTarget(player)
+		local targetPos = vee.FindMarkedTarget(player)
 		if targetPos ~= nil and targetStartingPos ~= nil then
 			data.LastSavedShootDirection = (targetPos - targetStartingPos):Normalized()
 		end
 	elseif (
-		player:HasCollectible(CollectibleType.COLLECTIBLE_ANALOG_STICK)
+			player:HasCollectible(CollectibleType.COLLECTIBLE_ANALOG_STICK)
 			or player:HasWeaponType(WeaponType.WEAPON_KNIFE)
 		) then
 		if shootDir.X ~= 0 or shootDir.Y ~= 0 then
@@ -269,10 +270,10 @@ function attackHelper:GetIsaacShootingDirection(player, targetStartingPos)
 		end
 	elseif player:HasWeaponType(WeaponType.WEAPON_SPIRIT_SWORD) then
 		local spinAnimsToVec = {
-			["SpinLeft"] = VeeHelper.VectorDirection.Left,
-			["SpinUp"] = VeeHelper.VectorDirection.Up,
-			["SpinRight"] = VeeHelper.VectorDirection.Right,
-			["SpinDown"] = VeeHelper.VectorDirection.Down
+			["SpinLeft"] = vee.VectorDirection.Left,
+			["SpinUp"] = vee.VectorDirection.Up,
+			["SpinRight"] = vee.VectorDirection.Right,
+			["SpinDown"] = vee.VectorDirection.Down
 		}
 		local spinAnims = {
 			"SpinRight",
@@ -282,15 +283,15 @@ function attackHelper:GetIsaacShootingDirection(player, targetStartingPos)
 		}
 		local sword = player:GetActiveWeaponEntity()
 		if sword == nil or (
-			sword.Variant ~= VeeHelper.KnifeVariant.SPIRIT_SWORD
-				and sword.Variant ~= VeeHelper.KnifeVariant.TECH_SWORD
+				sword.Variant ~= vee.KnifeVariant.SPIRIT_SWORD
+				and sword.Variant ~= vee.KnifeVariant.TECH_SWORD
 			)
 		then
 			data.LastSavedShootDirection = HeadDirectionFire
 		else
 			local sprite = sword:GetSprite()
 
-			if VeeHelper.IsSpritePlayingAnims(sprite, spinAnims) then
+			if vee.IsSpritePlayingAnims(sprite, spinAnims) then
 				data.LastSavedShootDirection = spinAnimsToVec[sprite:GetAnimation()]
 			end
 		end
@@ -312,14 +313,14 @@ function attackHelper:TryFireToEnemy(player, weapon, fireDir, angleLimit)
 		and not player:HasCollectible(CollectibleType.COLLECTIBLE_EYE_OF_THE_OCCULT)
 	then
 		local radius = player.TearRange / 2
-		local closestEnemy = VeeHelper.DetectNearestEnemy(weapon, radius)
+		local closestEnemy = vee.DetectNearestEnemy(weapon, radius)
 		local dirToEnemy = nil
 
 		if closestEnemy ~= nil then
 			dirToEnemy = (closestEnemy.Position - weapon.Position):Normalized()
 
 			if math.abs(math.abs(dirToEnemy:GetAngleDegrees()) - math.abs(fireDir:GetAngleDegrees())) <= angleLimit then
-				newFireDir = VeeHelper.AddTearVelocity(dirToEnemy, player.ShotSpeed * 10, player)
+				newFireDir = vee.AddTearVelocity(dirToEnemy, player.ShotSpeed * 10, player)
 			end
 		end
 	end
@@ -331,7 +332,7 @@ end
 ---@param direction Vector
 ---@return Vector direction
 function attackHelper:TryFireToNearestEnemy(ent, range, direction)
-	local closestEnemy = VeeHelper.DetectNearestEnemy(ent, range)
+	local closestEnemy = vee.DetectNearestEnemy(ent, range)
 
 	if closestEnemy ~= nil then
 		direction = (closestEnemy.Position - ent.Position):Normalized()

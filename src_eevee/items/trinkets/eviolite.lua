@@ -1,4 +1,5 @@
 local eviolite = {}
+local vee = require("src_eevee.veeHelper")
 
 local function PlayerHasTransformation(player)
 	local hasTransformation = false
@@ -38,10 +39,10 @@ function eviolite:Stats(player, itemStats)
 		local statsToAdd = evioliteStats
 
 		if EEVEEMOD.IsPlayerEeveeOrEvolved[playerType] then
-			statsToAdd = eeveeBonusStats
+			--statsToAdd = eeveeBonusStats
 		end
 
-		VeeHelper.MultiplyTrinketStats(statsToAdd, EEVEEMOD.TrinketType.EVIOLITE, player, 1.5, 2)
+		vee.MultiplyTrinketStats(statsToAdd, EEVEEMOD.TrinketType.EVIOLITE, player, 1.5, 2)
 
 		if statsToAdd then
 			itemStats.SPEED = itemStats.SPEED + statsToAdd[CacheFlag.CACHE_SPEED]

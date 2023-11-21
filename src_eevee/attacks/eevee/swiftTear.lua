@@ -1,21 +1,22 @@
+local vee = require("src_eevee.VeeHelper")
 local swiftTear = {}
 
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
 
 ---@param tear EntityTear
 function swiftTear:AssignSwiftSprite(tear)
-
-	if VeeHelper.TearVariantBlacklist[tear.Variant]
+	if vee.TearVariantBlacklist[tear.Variant]
 		or EEVEEMOD.KeepTearVariants[tear.Variant] then
 		return
 	end
 
 	local tearSprite = tear:GetSprite()
 	local dataTear = tear:GetData()
-	local animationToPlay = VeeHelper.TearScaleToSizeAnim(tear)
-	local variantToUse = tear:HasTearFlags(TearFlags.TEAR_LUDOVICO) and "gfx/tear_swift.anm2" or EEVEEMOD.TearVariant.SWIFT
+	local animationToPlay = vee.TearScaleToSizeAnim(tear)
+	local variantToUse = tear:HasTearFlags(TearFlags.TEAR_LUDOVICO) and "gfx/tear_swift.anm2" or
+	EEVEEMOD.TearVariant.SWIFT
 
-	if dataTear.ForceBlood or VeeHelper.TearFlagsBlood[tear.Variant] then
+	if dataTear.ForceBlood or vee.TearFlagsBlood[tear.Variant] then
 		animationToPlay = "BloodTear" .. animationToPlay
 		variantToUse = tear:HasTearFlags(TearFlags.TEAR_LUDOVICO) and "gfx/tear_swift_blood.anm2" or
 			EEVEEMOD.TearVariant.SWIFT_BLOOD
@@ -44,9 +45,10 @@ function swiftTear:DecideForEvilEye(player, tear, spawnPos, velocity)
 	local tearOrEvilEye = tear
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_EVIL_EYE)
 		and
-		VeeHelper.DoesLuckChanceTrigger(3, 10, 1.5, player.Luck, player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_EVIL_EYE))
+		vee.DoesLuckChanceTrigger(3, 10, 1.5, player.Luck, player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_EVIL_EYE))
 	then
-		tearOrEvilEye = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.EVIL_EYE, 0, spawnPos, velocity, player):ToEffect()
+		tearOrEvilEye = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.EVIL_EYE, 0, spawnPos, velocity, player)
+		:ToEffect()
 		tearOrEvilEye.Parent = player
 		tear:Remove()
 	end
@@ -93,10 +95,10 @@ function swiftTear:SwiftTearUpdate(swiftData, swiftWeapon, tear)
 
 	if tear.Variant == EEVEEMOD.TearVariant.SWIFT or tear.Variant == EEVEEMOD.TearVariant.SWIFT_BLOOD then
 		local anim = tear.Variant == EEVEEMOD.TearVariant.SWIFT_BLOOD and "BloodTear" or "RegularTear"
-		local animToPlay = anim .. VeeHelper.TearScaleToSizeAnim(tear)
+		local animToPlay = anim .. vee.TearScaleToSizeAnim(tear)
 
 		if tear.FrameCount > 1 and sprite:GetAnimation() ~= animToPlay then
-			sprite:Play(anim .. VeeHelper.TearScaleToSizeAnim(tear), true)
+			sprite:Play(anim .. vee.TearScaleToSizeAnim(tear), true)
 		end
 	end
 
@@ -144,14 +146,13 @@ end
 
 ---@param tear EntityTear
 function swiftTear:MakeStarOnTearInit(tear)
-	if VeeHelper.EntitySpawnedByPlayer(tear) then
-
+	if vee.EntitySpawnedByPlayer(tear) then
 		local player = tear.SpawnerEntity:ToPlayer()
 		local playerType = player:GetPlayerType()
 
 		if playerType ~= EEVEEMOD.PlayerType.EEVEE
 			or playerType == EEVEEMOD.PlayerType.EEVEE
-			and (VeeHelper.TearVariantBlacklist[tear.Variant]
+			and (vee.TearVariantBlacklist[tear.Variant]
 				or EEVEEMOD.KeepTearVariants[tear.Variant])
 		then
 			return
@@ -164,13 +165,13 @@ end
 
 ---@param tear EntityTear
 function swiftTear:RemoveSpiritProjectile(tear)
-	if not VeeHelper.EntitySpawnedByPlayer(tear) then return end
+	if not vee.EntitySpawnedByPlayer(tear) then return end
 
 	local player = tear.SpawnerEntity:ToPlayer()
 	local playerType = player:GetPlayerType()
 	if playerType == EEVEEMOD.PlayerType.EEVEE
 		and (
-		tear.Variant == TearVariant.SWORD_BEAM
+			tear.Variant == TearVariant.SWORD_BEAM
 			or tear.Variant == TearVariant.TECH_SWORD_BEAM
 		)
 		and player:HasWeaponType(WeaponType.WEAPON_SPIRIT_SWORD)
@@ -209,14 +210,14 @@ function swiftTear:OnSwiftStarDestroy(tear, splashType)
 	if swiftWeapon
 		and swiftWeapon.Trail and swiftWeapon.Trail:Exists()
 		and (
-		swiftWeapon.Trail:GetData().EeveeEntHasColorCycle
+			swiftWeapon.Trail:GetData().EeveeEntHasColorCycle
 			or (
-			VeeHelper.EntitySpawnedByPlayer(tear)
+				vee.EntitySpawnedByPlayer(tear)
 				and tear.SpawnerEntity:ToPlayer():HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE)
 			)
 		) then
 		color = swiftWeapon.Trail.Color
-	elseif not VeeHelper.AreColorsDifferent(tear.Color, Color.Default) then
+	elseif not vee.AreColorsDifferent(tear.Color, Color.Default) then
 		color = EEVEEMOD.TrailColor[tear.Variant]
 	else
 		color = tear.Color

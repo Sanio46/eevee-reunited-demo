@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local lockOnSpecs = {}
 
 function lockOnSpecs:Stats(player, itemStats)
@@ -7,7 +8,7 @@ function lockOnSpecs:Stats(player, itemStats)
 		SHOTSPEED = 0.3
 	}
 	if player:HasTrinket(EEVEEMOD.TrinketType.LOCKON_SPECS) then
-		VeeHelper.MultiplyTrinketStats(lockOnStats, EEVEEMOD.TrinketType.LOCKON_SPECS, player)
+		vee.MultiplyTrinketStats(lockOnStats, EEVEEMOD.TrinketType.LOCKON_SPECS, player)
 		itemStats.DAMAGE_MULT = itemStats.DAMAGE_MULT + lockOnStats.DAMAGE_MULT
 		itemStats.RANGE = itemStats.RANGE + lockOnStats.RANGE
 		itemStats.SHOTSPEED = itemStats.SHOTSPEED + lockOnStats.SHOTSPEED
@@ -19,7 +20,7 @@ function lockOnSpecs:DropChanceOnHit(ent, _, flags, _, _)
 
 	if player:HasTrinket(EEVEEMOD.TrinketType.LOCKON_SPECS)
 		and (
-		flags ~= flags | DamageFlag.DAMAGE_NO_PENALTIES
+			flags ~= flags | DamageFlag.DAMAGE_NO_PENALTIES
 			or flags ~= flags | DamageFlag.DAMAGE_RED_HEARTS
 		)
 	then
@@ -42,7 +43,7 @@ function lockOnSpecs:DropTrinket(player)
 	EEVEEMOD.sfx:Play(SoundEffect.SOUND_THUMBS_DOWN)
 	player:TryRemoveTrinket(EEVEEMOD.TrinketType.LOCKON_SPECS)
 	Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.LOCKON_SPECS_DROP, 0, player.Position,
-		Vector(VeeHelper.RandomNum(velocityStrength) + 1, VeeHelper.RandomNum(velocityStrength) + 1), player)
+		Vector(vee.RandomNum(velocityStrength) + 1, vee.RandomNum(velocityStrength) + 1), player)
 
 	effects:RemoveCollectibleEffect(EEVEEMOD.TrinketType.LOCKON_SPECS, -1)
 end

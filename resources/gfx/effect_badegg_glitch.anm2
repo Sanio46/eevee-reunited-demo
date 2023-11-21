@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="Unknown" CreatedOn="5/12/2022 9:18:37 PM" Version="6" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="5/12/2022 9:18:37 PM" Version="6" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="effects\effect_badegg_relpace.png" Id="0"/>

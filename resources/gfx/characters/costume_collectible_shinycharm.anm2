@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="trtv" CreatedOn="5/14/2022 11:34:50 PM" Version="7" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="5/14/2022 11:34:50 PM" Version="7" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="costumes\costume_shinycharm.png" Id="0"/>

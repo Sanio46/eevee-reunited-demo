@@ -1,9 +1,10 @@
 local miscMods = {}
+local coopGhostPath = "gfx/characters/ghost/ghost_"
 
 function miscMods:addCoopGhostCompatibility()
 	if CustomCoopGhost then
-		CustomCoopGhost.ChangeSkin(EEVEEMOD.PlayerType.EEVEE, "eevee")
-		CustomCoopGhost.AddCostume(EEVEEMOD.PlayerType.EEVEE, "eevee")
+		CustomCoopGhost.ChangeSkin(EEVEEMOD.PlayerType.EEVEE, coopGhostPath .. "eevee.png")
+		CustomCoopGhost.AddCostume(EEVEEMOD.PlayerType.EEVEE, coopGhostPath .. "eevee_hair.png")
 	end
 end
 

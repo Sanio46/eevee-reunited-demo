@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local shinyCharm = {}
 
 local BASE_SHINY_CHANCE = 4096
@@ -47,7 +48,7 @@ function shinyCharm:TryMakeShinyOnNPCInit(npc)
 		and not npc.SpawnerEntity
 		and not npc:GetData().ShinyChecked --So it doesn't check multiple times
 	then
-		local players = VeeHelper.GetAllPlayers()
+		local players = vee.GetAllPlayers()
 		local shinyRNG = BASE_SHINY_CHANCE
 		for i = 1, #players do
 			local player = players[i]
@@ -58,7 +59,7 @@ function shinyCharm:TryMakeShinyOnNPCInit(npc)
 
 		--Go through if shinies are enabled passively, and if not, require Shiny Charm (RNG being below 4096 means it triggered)
 		if forceSpawn or ((EEVEEMOD.PERSISTENT_DATA.PassiveShiny == true or shinyRNG < BASE_SHINY_CHANCE)
-			and EEVEEMOD.RunSeededRNG:RandomInt(BASE_SHINY_CHANCE) + 1 == shinyRNG) then
+				and EEVEEMOD.RunSeededRNG:RandomInt(BASE_SHINY_CHANCE) + 1 == shinyRNG) then
 			shinyCharm:MakeNPCShiny(npc)
 		end
 		npc:GetData().ShinyChecked = true
@@ -81,9 +82,9 @@ function shinyCharm:ShinyColoredNPCUpdate(npc)
 		local sparkle = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.SHINY_SPARKLE, 0,
 			Vector(npc.Position.X, npc.Position.Y - 10), Vector.Zero, nil):ToEffect()
 		local sprite = sparkle:GetSprite()
-		sprite.Offset = Vector(VeeHelper.RandomNum(-20, 20), VeeHelper.RandomNum(10, 20) * -1)
+		sprite.Offset = Vector(vee.RandomNum(-20, 20), vee.RandomNum(10, 20) * -1)
 		sprite.PlaybackSpeed = 0.5
-		sparkle.FallingSpeed = VeeHelper.RandomNum(7, 13) * 0.1
+		sparkle.FallingSpeed = vee.RandomNum(7, 13) * 0.1
 		sparkle.DepthOffset = 20
 		sparkle:SetColor(data.ShinyColor, -1, 1, false, false)
 	end
@@ -92,7 +93,8 @@ function shinyCharm:ShinyColoredNPCUpdate(npc)
 		if data.ShinyFleeTimer > 0 then
 			data.ShinyFleeTimer = data.ShinyFleeTimer - 1
 		else
-			local poof = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, npc.Position, Vector.Zero, npc):ToEffect()
+			local poof = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, npc.Position, Vector.Zero, npc)
+			:ToEffect()
 			poof:GetSprite().PlaybackSpeed = 1.5
 			npc:Remove()
 		end

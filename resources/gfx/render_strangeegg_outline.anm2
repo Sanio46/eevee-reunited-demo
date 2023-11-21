@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="Unknown" CreatedOn="5/26/2022 5:19:24 PM" Version="7" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="5/26/2022 5:19:24 PM" Version="7" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="items\collectibles\collectibles_strange_egg_outline.png" Id="0"/>

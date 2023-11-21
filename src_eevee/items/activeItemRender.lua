@@ -1,4 +1,5 @@
 local activeItemRender = {}
+local vee = require("src_eevee.veeHelper")
 
 local function GetScreenBottomRight()
 	local hudOffset = Options.HUDOffset
@@ -28,13 +29,9 @@ local function GetScreenTopLeft()
 	return Vector.Zero + offset
 end
 
-local numHUDPlayers = 1
-local hasLoadedItems = false
-
----@type table<integer, {Player: EntityPlayer | nil, ScreenPos: function, Offset: table<ActiveSlot, Vector>}>
-local IndexedPlayers = {
+---@type table<integer, {ScreenPos: function, Offset: table<ActiveSlot, Vector>}>
+local ActivePositions = {
 	[1] = {
-		Player = nil,
 		ScreenPos = function() return GetScreenTopLeft() end,
 		Offset = {
 			[ActiveSlot.SLOT_PRIMARY] = Vector(4, 0),
@@ -42,7 +39,6 @@ local IndexedPlayers = {
 		}
 	},
 	[2] = {
-		Player = nil,
 		ScreenPos = function() return GetScreenTopRight() end,
 		Offset = {
 			[ActiveSlot.SLOT_PRIMARY] = Vector(-155, 0),
@@ -50,7 +46,6 @@ local IndexedPlayers = {
 		}
 	},
 	[3] = {
-		Player = nil,
 		ScreenPos = function() return GetScreenBottomLeft() end,
 		Offset = {
 			[ActiveSlot.SLOT_PRIMARY] = Vector(14, -39),
@@ -58,7 +53,6 @@ local IndexedPlayers = {
 		}
 	},
 	[4] = {
-		Player = nil,
 		Offset = {
 			[ActiveSlot.SLOT_PRIMARY] = Vector(-36, -39),
 			[ActiveSlot.SLOT_SECONDARY] = Vector(-10, -39),
@@ -81,7 +75,7 @@ local activesToRender = {
 		Sprite = EEVEEMOD.Sprite.EggOutline,
 		Directory = "gfx/render_strangeegg_outline.anm2",
 		StartFrame = 0,
-		UpdatedFrame = function(player) return VeeHelper.GetBookState(player) end,
+		UpdatedFrame = function(player) return vee.GetBookState(player) end,
 		Condition = function(player, activeSlot)
 			local charge = player:GetActiveCharge(activeSlot)
 			return charge > 0 and charge < 3
@@ -95,74 +89,41 @@ local activesToRender = {
 	}
 }
 
-
----@param i integer
----@param player EntityPlayer
-local function AddActivePlayers(i, player)
-
-	IndexedPlayers[i].Player = player
-
-	if i == 1
-		and player:GetOtherTwin() ~= nil
-		and player:GetOtherTwin():GetPlayerType() == PlayerType.PLAYER_ESAU
-		and IndexedPlayers[4].Player == nil then
-		IndexedPlayers[4].Player = player
-	end
-end
-
-local function LoadItemSprites()
-	for _, params in pairs(activesToRender) do
-		params.Sprite:Load(params.Directory, true)
-		params.Sprite:Play(params.Sprite:GetDefaultAnimation(), true)
-		params.Sprite:SetFrame(params.Sprite:GetDefaultAnimation(), params.StartFrame)
-	end
-end
-
-function activeItemRender:UpdatePlayers()
-	local players = VeeHelper.GetAllMainPlayers()
-
-	if #players ~= numHUDPlayers
-		or (EEVEEMOD.game:GetFrameCount() == 0 and IndexedPlayers[1].Player ~= nil)
-	then
-		numHUDPlayers = #players
-		for i = 1, 4 do
-			IndexedPlayers[i].Player = nil
-		end
-	end
-
-	for i = 1, #players do
-		if i > 4 then break end
-
-		local player = players[i]
-
-		if IndexedPlayers[i].Player == nil then
-			AddActivePlayers(i, player)
-		end
-	end
+for _, params in pairs(activesToRender) do
+	params.Sprite:Load(params.Directory, true)
+	params.Sprite:Play(params.Sprite:GetDefaultAnimation(), true)
+	params.Sprite:SetFrame(params.Sprite:GetDefaultAnimation(), params.StartFrame)
 end
 
 function activeItemRender:RenderActiveItem()
-	for i = 1, #IndexedPlayers do
-		local activeItemPlayer = IndexedPlayers[i]
-
-		if hasLoadedItems == false then
-			LoadItemSprites()
-			hasLoadedItems = true
-		elseif activeItemPlayer
-			and activeItemPlayer.Player ~= nil
-			and EEVEEMOD.game:GetHUD():IsVisible()
-		then
-			local player = activeItemPlayer.Player
-			
+	local players = vee.GetAllMainPlayers()
+	if players[1]
+	and players[1]:GetOtherTwin()
+	and players[1]:GetOtherTwin():GetPlayerType() == PlayerType.PLAYER_ESAU
+	then
+		players[4] = players[1]:GetOtherTwin()
+	end
+	players = {
+		{players[1]},
+		{players[2]},
+		{players[3]},
+		{players[4]},
+	}
+	
+	for i, almostPlayer in ipairs(players) do
+		local activeItemPos = ActivePositions[i]
+		local player = almostPlayer[1]
+		if player and player.FrameCount > 0 and EEVEEMOD.game:GetHUD():IsVisible() then
 			for itemID, params in pairs(activesToRender) do
-				if player and player:Exists() and player:HasCollectible(itemID) then --This line keeps crashing for some reason so I'll keep adding checks until it doesn't
-					local slots = VeeHelper.GetActiveSlots(player, itemID)
+				if player:HasCollectible(itemID) then
+					local slots = vee.GetActiveSlots(player, itemID)
 					for k = 1, #slots do
 						if ((params.Condition == nil) or (params.Condition ~= nil and params.Condition(player, slots[k]) == true)) then
-							local pos = activeItemPlayer.ScreenPos() +
-								(activeItemPlayer.Offset[slots[k]] or activeItemPlayer.Offset[slots[0]])
+							local pos = activeItemPos.ScreenPos() +
+								(activeItemPos.Offset[slots[k]] or activeItemPos.Offset[slots[0]])
 							local size = slots[k] == ActiveSlot.SLOT_PRIMARY and 1 or 0.5
-							local bookOffset = slots[k] == ActiveSlot.SLOT_PRIMARY and VeeHelper.GetBookState(player) > 0 and -4 or 0
+							local bookOffset = slots[k] == ActiveSlot.SLOT_PRIMARY and vee.GetBookState(player) > 0 and
+								-4 or 0
 							params.Sprite:SetFrame(params.UpdatedFrame(player))
 							params.Sprite.Scale = Vector(size, size)
 							params.Sprite:Render(Vector(pos.X, pos.Y + bookOffset), Vector.Zero, Vector.Zero)
@@ -175,12 +136,12 @@ function activeItemRender:RenderActiveItem()
 end
 
 function activeItemRender:OnRender()
-	activeItemRender:UpdatePlayers()
+	activeItemRender:RenderActiveItem()
 end
 
 function activeItemRender:ResetOnGameStart()
 	for i = 1, 4 do
-		IndexedPlayers[i].Player = nil
+		ActivePositions[i].Player = nil
 	end
 end
 

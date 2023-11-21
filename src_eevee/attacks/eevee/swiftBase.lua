@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local swiftBase = {}
 local attackHelper = require("src_eevee.attacks.attackHelper")
 local swiftSynergies = require("src_eevee.attacks.eevee.swiftSynergies")
@@ -70,7 +71,8 @@ swiftBase.swiftTearData = {
 swiftBase.swiftLaserData = {
 	RotationOffset = 0,
 	HasTech2 = false,
-	HoldTimeout = function(laser) return (VeeHelper.isBrimLaser(laser) and 5 or 2)
+	HoldTimeout = function(laser)
+		return (vee.isBrimLaser(laser) and 5 or 2)
 	end,
 	SoyBrimEarlyFire = false,
 }
@@ -162,7 +164,7 @@ function swiftBase:TryInitSwiftPlayer(player)
 	if swiftBase.Players[ptrHashPlayer] == nil then
 		swiftBase.Players[ptrHashPlayer] = {}
 		local swiftPlayer = swiftBase.Players[ptrHashPlayer]
-		VeeHelper.copyOverTable(swiftBase.swiftPlayerData, swiftPlayer)
+		vee.copyOverTable(swiftBase.swiftPlayerData, swiftPlayer)
 	end
 end
 
@@ -175,22 +177,23 @@ function swiftBase:InitSwiftWeapon(swiftData, weapon, isMult)
 		swiftBase.Weapons[ptrHashWeapon] = {}
 		local swiftWeapon = swiftBase.Weapons[ptrHashWeapon]
 
-		VeeHelper.copyOverTable(swiftBase.swiftWeaponData, swiftWeapon)
+		vee.copyOverTable(swiftBase.swiftWeaponData, swiftWeapon)
 		if swiftData.ChildSwiftWeapons == nil then
 			swiftData.ChildSwiftWeapons = {} --Otherwise all swift instances point to the one made by swiftWeaponData
 		end
 		if swiftWeapon.Special == nil then
 			swiftWeapon.Special = {}
 		end
-		VeeHelper.copyOverTable(swiftBase.swiftTearData, swiftWeapon.Special)
-		VeeHelper.copyOverTable(swiftBase.swiftLaserData, swiftWeapon.Special)
+		vee.copyOverTable(swiftBase.swiftTearData, swiftWeapon.Special)
+		vee.copyOverTable(swiftBase.swiftLaserData, swiftWeapon.Special)
 		swiftWeapon.IsMultiShot = isMult
 		swiftBase:AddSwiftTrail(weapon, swiftData.Player)
 		swiftBase:PlaySwiftFireSFX(weapon)
 		swiftBase:InitWeaponValues(swiftData, swiftWeapon, weapon)
-		local insertPoint = swiftData.NumWeaponsSpawned > #swiftData.ChildSwiftWeapons + 1 and #swiftData.ChildSwiftWeapons or swiftData.NumWeaponsSpawned
+		local insertPoint = swiftData.NumWeaponsSpawned > #swiftData.ChildSwiftWeapons + 1 and
+		#swiftData.ChildSwiftWeapons or swiftData.NumWeaponsSpawned
 		table.insert(swiftData.ChildSwiftWeapons, insertPoint, swiftWeapon)
-		weapon:SetColor(VeeHelper.SetColorAlpha(weapon:GetColor(), 0), 15, 1, true, false)
+		weapon:SetColor(vee.SetColorAlpha(weapon:GetColor(), 0), 15, 1, true, false)
 	end
 end
 
@@ -242,7 +245,7 @@ function swiftBase:SwiftStarFireSFX()
 		1.1
 	}
 	EEVEEMOD.sfx:Stop(SoundEffect.SOUND_TEARS_FIRE)
-	EEVEEMOD.sfx:Play(EEVEEMOD.SoundEffect.SWIFT_FIRE, 1, 2, false, values[VeeHelper.RandomNum(3)])
+	EEVEEMOD.sfx:Play(EEVEEMOD.SoundEffect.SWIFT_FIRE, 1, 2, false, values[vee.RandomNum(3)])
 end
 
 ---@param weapon Weapon | EntityEffect
@@ -329,7 +332,7 @@ function swiftBase:SwiftOrbitDistance(swiftData)
 		end
 	end
 	if player:HasWeaponType(WeaponType.WEAPON_MONSTROS_LUNGS) then
-		distFromPlayer = VeeHelper.RandomNum(distFromPlayer - 30, distFromPlayer + 30)
+		distFromPlayer = vee.RandomNum(distFromPlayer - 30, distFromPlayer + 30)
 	end
 
 	return distFromPlayer
@@ -359,15 +362,16 @@ end
 ---@param player EntityPlayer
 function swiftBase:AddSwiftTrail(weapon, player)
 	---@type EntityEffect
-	local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil):
-		ToEffect()
+	local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, weapon.Position, Vector.Zero, nil)
+	:
+	ToEffect()
 	local data = trail:GetData()
 	local wC = weapon:GetSprite().Color
-	local tC = VeeHelper.SetColorAlpha(wC, 1)
+	local tC = vee.SetColorAlpha(wC, 1)
 
 	if not rgbCycle:shouldApplyColorCycle(player) then
 		if weapon.Type == EntityType.ENTITY_TEAR then
-			if not VeeHelper.AreColorsDifferent(wC, Color.Default) then
+			if not vee.AreColorsDifferent(wC, Color.Default) then
 				if EEVEEMOD.TrailColor[weapon.Variant] ~= nil then
 					tC = EEVEEMOD.TrailColor[weapon.Variant]
 				end
@@ -376,13 +380,14 @@ function swiftBase:AddSwiftTrail(weapon, player)
 	else
 		if weapon.Type ~= EntityType.ENTITY_EFFECT and weapon.Type ~= EntityType.ENTITY_LASER then
 			if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
-				tC = VeeHelper.PlaydoughRandomColor()
+				tC = vee.PlaydoughRandomColor()
 			else
 				rgbCycle:applyColorCycle(trail, EEVEEMOD.ColorCycle.CONTINUUM)
 			end
 		else
-			local colorCycle = player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) and EEVEEMOD.ColorCycle.RGB
-			or player:HasCollectible(CollectibleType.COLLECTIBLE_CONTINUUM) and EEVEEMOD.ColorCycle.CONTINUUM
+			local colorCycle = player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) and
+				EEVEEMOD.ColorCycle.RGB
+				or player:HasCollectible(CollectibleType.COLLECTIBLE_CONTINUUM) and EEVEEMOD.ColorCycle.CONTINUUM
 			rgbCycle:applyColorCycle(trail, colorCycle)
 		end
 	end
@@ -392,7 +397,7 @@ function swiftBase:AddSwiftTrail(weapon, player)
 	data.SwiftTrail = true
 	data.TrailColor = tC
 	trail:SetColor(tC, -1, 1, false, false)
-	trail:SetColor(VeeHelper.SetColorAlpha(tC, 0), 15, 1, true, false)
+	trail:SetColor(vee.SetColorAlpha(tC, 0), 15, 1, true, false)
 	if swiftWeapon then
 		swiftWeapon.Trail = trail
 	end

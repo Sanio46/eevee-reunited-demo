@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local eeveeGhost = {}
 
 ---@param player EntityPlayer
@@ -9,14 +10,15 @@ function eeveeGhost:SpawnGhostEffect(player)
 	if playerType == EEVEEMOD.PlayerType.EEVEE
 		and player:IsDead()
 		and (
-		sprite:IsPlaying("Death")
+			sprite:IsPlaying("Death")
 			or sprite:IsPlaying("LostDeath")
 			or sprite:IsPlaying("HoleDeath")
 		)
 	then
 		if not data.EeveeGhostSpawned then
 			---@type EntityEffect
-			local ghostEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.EEVEE_GHOST, 0, player.Position,
+			local ghostEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.EEVEE_GHOST, 0,
+				player.Position,
 				Vector.Zero, player):ToEffect()
 			local sprite = ghostEffect:GetSprite()
 			sprite:Play(sprite:GetAnimation(), true)
@@ -31,7 +33,7 @@ end
 
 ---@param effect EntityEffect
 function eeveeGhost:eeveeGhostRenderUpdate(effect)
-	if VeeHelper.EntitySpawnedByPlayer(effect) then
+	if vee.EntitySpawnedByPlayer(effect) then
 		local player = effect.SpawnerEntity:ToPlayer()
 		local sprite = effect:GetSprite()
 		local pSprite = player:GetSprite()
@@ -45,7 +47,7 @@ function eeveeGhost:eeveeGhostRenderUpdate(effect)
 
 		if EEVEEMOD.IsPlayerEeveeOrEvolved[playerType]
 			and player:IsDead()
-			and VeeHelper.GetActiveSlots(player, CollectibleType.COLLECTIBLE_VADE_RETRO)[1] == ActiveSlot.SLOT_PRIMARY then
+			and vee.GetActiveSlots(player, CollectibleType.COLLECTIBLE_VADE_RETRO)[1] == ActiveSlot.SLOT_PRIMARY then
 			local poofs = Isaac.FindByType(1000, 15)
 			for i = 1, #poofs do
 				local poof = poofs[i]

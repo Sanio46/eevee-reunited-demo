@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="9/6/2022 4:19:32 PM" Version="136" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="9/6/2022 4:19:32 PM" Version="136" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="costumes\costume_tailwhip.png" Id="0"/>

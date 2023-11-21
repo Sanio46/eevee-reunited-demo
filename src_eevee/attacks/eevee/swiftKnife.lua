@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local swiftKnife = {}
 
 local swiftBase = require("src_eevee.attacks.eevee.swiftBase")
@@ -42,7 +43,8 @@ local function BasicSwiftKnifeData(tearKnife, knife, player)
 	--Invisible tear means invisible halo, but because of how this funcitons by making the tear do all the work and slapping a knife on it...
 	--Removing the halo isn't an option, but there's still a halo, so this is to just create one that's visible
 	if tearKnife:HasTearFlags(TearFlags.TEAR_GLOW) then
-		local godheadEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.CUSTOM_TEAR_HALO, 0, knife.Position
+		local godheadEffect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EEVEEMOD.EffectVariant.CUSTOM_TEAR_HALO, 0,
+			knife.Position
 			, Vector.Zero, tearKnife):ToEffect()
 		godheadEffect.SpriteScale = Vector(0.5, 0.5)
 		godheadEffect.SpriteOffset = Vector(0, -15)
@@ -60,12 +62,12 @@ local function AssignSwiftKnifeData(swiftData, tearKnife, knife)
 	BasicSwiftKnifeData(tearKnife, knife, player)
 
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
-		knife.Color  = VeeHelper.PlaydoughRandomColor()
-		knife:SetColor(VeeHelper.SetColorAlpha(knife.Color, 0), 15, 1, true, false)
+		knife.Color = vee.PlaydoughRandomColor()
+		knife:SetColor(vee.SetColorAlpha(knife.Color, 0), 15, 1, true, false)
 	elseif player:HasCollectible(CollectibleType.COLLECTIBLE_CONTINUUM) then
 		rgbCycle:applyColorCycle(knife, EEVEEMOD.ColorCycle.CONTINUUM)
 	else
-		knife:SetColor(VeeHelper.SetColorAlpha(fKC, 0), 15, 1, true, false)
+		knife:SetColor(vee.SetColorAlpha(fKC, 0), 15, 1, true, false)
 	end
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then
 		local data = knife:GetData()
@@ -90,13 +92,13 @@ function swiftKnife:FireSwiftKnife(swiftData, swiftWeapon, direction)
 	swiftBase:AddSwiftTrail(tearKnife, player)
 	swiftBase:PlaySwiftFireSFX(tearKnife)
 	BasicSwiftKnifeData(tearKnife, knife, player)
-	tearKnife:SetColor(VeeHelper.SetColorAlpha(tearKnife.Color, 0), -1, 1, false, false)
+	tearKnife:SetColor(vee.SetColorAlpha(tearKnife.Color, 0), -1, 1, false, false)
 
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then
-		knife.Color = VeeHelper.PlaydoughRandomColor()
+		knife.Color = vee.PlaydoughRandomColor()
 	else
 		local fKC = tearKnife:GetSprite().Color
-		knife:SetColor(VeeHelper.SetColorAlpha(fKC, 1), -1, 1, false, false)
+		knife:SetColor(vee.SetColorAlpha(fKC, 1), -1, 1, false, false)
 	end
 end
 
@@ -148,7 +150,7 @@ function swiftKnife:SwiftKnifeUpdate(knife)
 		end
 	elseif not data.EeveeEntHasColorCycle then
 		local fKC = tearKnife:GetSprite().Color
-		tearKnife:SetColor(VeeHelper.SetColorAlpha(fKC, 0), -1, 1, false, false)
+		tearKnife:SetColor(vee.SetColorAlpha(fKC, 0), -1, 1, false, false)
 	end
 
 	if swiftWeapon.HasFired and data.SwiftKnifeBrim_Delay then

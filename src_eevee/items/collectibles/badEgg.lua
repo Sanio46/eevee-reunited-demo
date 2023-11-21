@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local badEgg = {}
 
 local MAX_CRACKS = 8
@@ -27,7 +28,7 @@ end
 
 function badEgg:GetFamiliarItemsOnGameStart()
 	local itemConfig = Isaac.GetItemConfig()
-	local MaxCollectibles = Isaac.GetItemConfig():GetCollectibles().Size - 1
+	local MaxCollectibles = #Isaac.GetItemConfig():GetCollectibles() - 1
 
 	familiarItems = {}
 	for itemID = 1, MaxCollectibles do
@@ -43,7 +44,7 @@ end
 ---@param maxNum integer
 local function SpawnShells(familiar, maxNum)
 	for i = 1, maxNum do
-		local vel = Vector(3, 0):Rotated(VeeHelper.RandomNum(360))
+		local vel = Vector(3, 0):Rotated(vee.RandomNum(360))
 		local chip = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.TOOTH_PARTICLE, 0, familiar.Position, vel, nil)
 		chip:GetSprite():ReplaceSpritesheet(0, "gfx/effects/effect_egg_gibs.png")
 		chip:GetSprite():LoadGraphics()
@@ -66,19 +67,6 @@ local function ResetState(familiar)
 	badEgg:OnFamiliarInit(familiar)
 end
 
---[[ local function SpawnGlitchPoolItem(familiar, pos, rng)
-	local glitchPool = VeeHelper.GetCustomItemPool(EEVEEMOD.ItemPool.POOL_GLITCH)
-
-	if #glitchPool == 0 then
-		local treasureRoomItem = EEVEEMOD.game:GetItemPool():GetCollectible(ItemPoolType.POOL_TREASURE, true, rng:GetSeed())
-		EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, pos, Vector.Zero, familiar, treasureRoomItem, rng:GetSeed())
-	else
-		local getRandomItem = function() return rng:RandomInt(#glitchPool) + 1 end
-		local randomGlitchItem = glitchPool[getRandomItem()]
-		EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, pos, Vector.Zero, familiar, randomGlitchItem, rng:GetSeed())
-	end
-end ]]
-
 ---@param player EntityPlayer
 ---@param familiar EntityFamiliar
 local function RemoveDupedEgg(player, familiar)
@@ -96,21 +84,22 @@ end
 ---@param rng RNG
 local function BFFSSpawnItem(familiar, pos, rng)
 	local itemConfig = Isaac.GetItemConfig()
-	local MaxCollectibles = itemConfig:GetCollectibles().Size - 2
+	local MaxCollectibles = #itemConfig:GetCollectibles() - 2
 	local getRandomItem = function() return rng:RandomInt(MaxCollectibles) + 1 end
 	local randomItem = getRandomItem()
 	while itemConfig:GetCollectible(randomItem) == nil or itemConfig:GetCollectible(randomItem).Quality >= 3 do
 		randomItem = getRandomItem()
 	end
-	local players = VeeHelper.GetAllPlayers()
-	if VeeHelper.IsTrinketOwned(TrinketType.TRINKET_NO) then
+	local players = vee.GetAllPlayers()
+	if vee.IsTrinketOwned(TrinketType.TRINKET_NO) then
 		local itemConfig = Isaac.GetItemConfig()
 
 		while itemConfig:GetCollectible(randomItem).Type == ItemType.ITEM_ACTIVE do
 			randomItem = getRandomItem()
 		end
 	end
-	EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, pos, Vector.Zero, familiar, randomItem,
+	EEVEEMOD.game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, pos, Vector.Zero, familiar,
+		randomItem,
 		rng:GetSeed())
 end
 
@@ -137,11 +126,11 @@ local function BreakEgg(familiar)
 	local alreadyReset = false
 
 	if #ownedFamiliars > 0 then
-
 		local randomNum = rng:RandomInt(#ownedFamiliars) + 1
 		local selectedFamiliar = ownedFamiliars[randomNum]
 		if selectedFamiliar == CollectibleType.COLLECTIBLE_GB_BUG then
-			local bug = Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, CollectibleType.COLLECTIBLE_GB_BUG
+			local bug = Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE,
+				CollectibleType.COLLECTIBLE_GB_BUG
 				, pos, Vector.Zero, player):ToPickup()
 			bug:AddEntityFlags(EntityFlag.FLAG_GLITCH)
 			bug:Morph(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, CollectibleType.COLLECTIBLE_GB_BUG)

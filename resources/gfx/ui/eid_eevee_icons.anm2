@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="trtv" CreatedOn="2/24/2022 8:56:23 PM" Version="15" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="2/24/2022 8:56:23 PM" Version="15" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="eid_eevee_icons.png" Id="0"/>

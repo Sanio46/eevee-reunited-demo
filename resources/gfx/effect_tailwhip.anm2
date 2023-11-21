@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="trtv" CreatedOn="10/31/2021 2:10:06 PM" Version="16" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="10/31/2021 2:10:06 PM" Version="16" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="effects\tail_whip.png" Id="0"/>

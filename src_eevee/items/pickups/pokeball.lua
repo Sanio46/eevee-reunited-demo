@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local pokeball = {}
 
 local pokeyMans = require("src_eevee.challenges.pokeyMansCrystal")
@@ -10,7 +11,7 @@ local pokeballSprite = Sprite()
 ---------------------------
 
 ---@param player EntityPlayer
----@param id PokeballType | CollectibleType
+---@param id Card | CollectibleType
 local function HidePokeball(player, id)
 	local data = player:GetData()
 	if id and id == EEVEEMOD.CollectibleType.MASTER_BALL then
@@ -27,7 +28,7 @@ local function LoadPokeballSprite()
 	pokeballSprite:Play("Main", true)
 end
 
----@param ballType PokeballType
+---@param ballType Card
 ---@param player EntityPlayer
 function pokeball:OnPokeballUse(ballType, player)
 	local data = player:GetData()
@@ -45,7 +46,8 @@ function pokeball:OnPokeballUse(ballType, player)
 				data.CanThrowPokeball = true
 				data.PokeballTypeUsed = ballType
 				pokeballSprite:ReplaceSpritesheet(0,
-					"gfx/items/pickups/render_pokeball_" .. EEVEEMOD.PokeballTypeToString[data.PokeballTypeUsed] .. ".png")
+					"gfx/items/pickups/render_pokeball_" ..
+					EEVEEMOD.PokeballTypeToString[data.PokeballTypeUsed] .. ".png")
 				pokeballSprite:LoadGraphics()
 				player:AnimatePickup(pokeballSprite, false, "LiftItem")
 			elseif data.PokeballTypeUsed == ballType then
@@ -158,7 +160,7 @@ function pokeball:PlayerThrowMasterBall(player)
 				and data.PokeballTypeUsed == EEVEEMOD.CollectibleType.MASTER_BALL
 			then
 				ThrowBall(player, data.PokeballTypeUsed)
-				local masterBallSlot = VeeHelper.GetActiveSlots(player, EEVEEMOD.CollectibleType.MASTER_BALL)[1]
+				local masterBallSlot = vee.GetActiveSlots(player, EEVEEMOD.CollectibleType.MASTER_BALL)[1]
 				player:SetActiveCharge(0, masterBallSlot)
 				HidePokeball(player, data.PokeballTypeUsed)
 			end
@@ -177,7 +179,7 @@ function pokeball:PlayerThrowMasterBall(player)
 			"PickupWalkUp",
 			"PickupWalkLeft",
 		}
-		if not VeeHelper.IsSpritePlayingAnims(player:GetSprite(), allWalkAnims) then
+		if not vee.IsSpritePlayingAnims(player:GetSprite(), allWalkAnims) then
 			data.CanThrowPokeball = false
 		end
 	end
@@ -237,7 +239,7 @@ local function TryCaptureBoss(npc, ball, player)
 	if shouldCapture then
 		data.NumShouldShake = 3
 	else
-		data.NumShouldShake = VeeHelper.RandomNum(0, 3) --troll
+		data.NumShouldShake = vee.RandomNum(0, 3) --troll
 	end
 	data.ShouldCapture = shouldCapture
 	if data.NumShouldShake > 0 then
@@ -257,11 +259,11 @@ local function ShouldCaptureEnemy(npc)
 		and npc.Type ~= EntityType.ENTITY_SHOPKEEPER
 		and not
 		(
-		npc:HasEntityFlags(EntityFlag.FLAG_FRIENDLY)
+			npc:HasEntityFlags(EntityFlag.FLAG_FRIENDLY)
 			or npc:HasEntityFlags(EntityFlag.FLAG_HELD)
 			or npc:HasEntityFlags(EntityFlag.FLAG_THROWN)
 		)
-		and not VeeHelper.MajorBosses[npc.Type]
+		and not vee.MajorBosses[npc.Type]
 	then
 		canCapture = true
 	end
@@ -280,10 +282,12 @@ end
 local function SpawnPokeballParticles(ball)
 	local data = ball:GetData()
 	for _ = 1, 5 do
-		local randomVec = Vector(2, 0):Rotated(VeeHelper.RandomNum(360))
-		local gibs = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.TOOTH_PARTICLE, 0, ball.Position, randomVec, ball)
+		local randomVec = Vector(2, 0):Rotated(vee.RandomNum(360))
+		local gibs = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.TOOTH_PARTICLE, 0, ball.Position, randomVec,
+			ball)
 		local sprite = gibs:GetSprite()
-		sprite:ReplaceSpritesheet(0, "gfx/effects/pokeball_gibs_" .. EEVEEMOD.PokeballTypeToString[data.PokeballType] .. ".png")
+		sprite:ReplaceSpritesheet(0,
+			"gfx/effects/pokeball_gibs_" .. EEVEEMOD.PokeballTypeToString[data.PokeballType] .. ".png")
 		sprite:LoadGraphics()
 	end
 end
@@ -345,7 +349,8 @@ local function CloneNPC(old)
 	-- Game:Spawn doesn't work if a SpawnerEntity isn't given, so this function
 	-- is ever-so-slightly inaccurate
 	if old.InitSeed and old.SpawnerEntity then
-		new = EEVEEMOD.game:Spawn(old.Type, old.Variant, old.Position, old.Velocity, old.SpawnerEntity, old.SubType, old.InitSeed):ToNPC()
+		new = EEVEEMOD.game:Spawn(old.Type, old.Variant, old.Position, old.Velocity, old.SpawnerEntity, old.SubType,
+			old.InitSeed):ToNPC()
 	else
 		new = Isaac.Spawn(old.Type, old.Variant, old.SubType, old.Position, old.Velocity, old.SpawnerEntity):ToNPC()
 	end
@@ -470,7 +475,7 @@ local function ShouldDestroyBall(ball, player)
 	if data.CapturedEnemy.IsBoss == true
 		or data.PokeballType == EEVEEMOD.CollectibleType.MASTER_BALL
 		or challenge == EEVEEMOD.Challenge.POKEY_MANS_CRYSTAL
-		or VeeHelper.DoesLuckChanceTrigger(50, 80, 10, player.Luck, player:GetCardRNG(data.PokeballType))
+		or vee.DoesLuckChanceTrigger(50, 80, 10, player.Luck, player:GetCardRNG(data.PokeballType))
 	then
 		shouldDestroy = true
 	end
@@ -494,7 +499,7 @@ function pokeball:OnAnimationFinishOrEvent(ball)
 				local challenge = Isaac.GetChallenge()
 
 				if challenge == EEVEEMOD.Challenge.POKEY_MANS_CRYSTAL
-					and VeeHelper.IsInStartingRoom()
+					and vee.IsInStartingRoom()
 					and pokeyMans:ShouldRespawnStarters() then
 					sprite:SetFrame("Idle", 1)
 					return
@@ -550,7 +555,7 @@ local function RechargeMasterBallOnTouch(ball)
 		and ball.SpawnerEntity:ToPlayer()
 	then
 		local player = ball.SpawnerEntity:ToPlayer()
-		local masterBallSlot = VeeHelper.GetActiveSlots(player, EEVEEMOD.CollectibleType.MASTER_BALL)
+		local masterBallSlot = vee.GetActiveSlots(player, EEVEEMOD.CollectibleType.MASTER_BALL)
 		for i = 1, #masterBallSlot do
 			if player.Position:DistanceSquared(ball.Position) <= 30
 				and player:HasCollectible(EEVEEMOD.CollectibleType.MASTER_BALL)
@@ -606,7 +611,7 @@ function pokeball:ResetBallsOnNewRoom(player)
 	if data.CanThrowPokeball then
 		data.CanThrowPokeball = false
 		if player:HasCollectible(EEVEEMOD.CollectibleType.MASTER_BALL) then
-			local masterBallSlots = VeeHelper.GetActiveSlots(player, EEVEEMOD.CollectibleType.MASTER_BALL)
+			local masterBallSlots = vee.GetActiveSlots(player, EEVEEMOD.CollectibleType.MASTER_BALL)
 
 			for i = 1, #masterBallSlots do
 				if player:GetActiveCharge(masterBallSlots[i]) == 0 then
@@ -628,7 +633,7 @@ function pokeball:ForceKeysForPokeball(player, inputHook, buttonAction)
 		and inputHook == InputHook.IS_ACTION_TRIGGERED
 		and Input.IsActionTriggered(ButtonAction.ACTION_PILLCARD, player.ControllerIndex)
 		and (
-		player:GetCard(0) == EEVEEMOD.PokeballType.POKEBALL
+			player:GetCard(0) == EEVEEMOD.PokeballType.POKEBALL
 			or player:GetCard(0) == EEVEEMOD.PokeballType.GREATBALL
 			or player:GetCard(0) == EEVEEMOD.PokeballType.ULTRABALL
 		)

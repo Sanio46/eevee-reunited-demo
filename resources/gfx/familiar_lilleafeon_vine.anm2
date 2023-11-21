@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="4/17/2022 10:43:01 PM" Version="113" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="4/17/2022 10:43:01 PM" Version="113" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="familiar\familiar_lilleafeon_vine.png" Id="0"/>

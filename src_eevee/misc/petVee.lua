@@ -1,4 +1,5 @@
 local pet = {}
+local vee = require("src_eevee.veeHelper")
 
 local petTimer = 9
 
@@ -14,11 +15,11 @@ function pet:IsMouseNearPlayer(player)
 	local playerType = player:GetPlayerType()
 
 	if EEVEEMOD.PERSISTENT_DATA.UnlockData.Eevee.MomsHeart.Unlock == true
-	and EEVEEMOD.IsPlayerEeveeOrEvolved[playerType]
-	and VeeHelper.IsInStartingRoom()
-	and Options.MouseControl
+		and EEVEEMOD.IsPlayerEeveeOrEvolved[playerType]
+		and EEVEEMOD.game:GetRoom():IsClear()
+		and Options.MouseControl
 		and Input.GetMousePosition(true):DistanceSquared(player.Position) <= (25 * player.Size) ^ 2
-		and Input.IsMouseBtnPressed(1) --Right-click
+		and Input.IsMouseBtnPressed(Mouse.MOUSE_BUTTON_RIGHT)
 		and not data.EeveeBeingPet
 	then
 		data.EeveeBeingPet = true
@@ -29,6 +30,7 @@ function pet:IsMouseNearPlayer(player)
 		if not data.EeveePetSprite then
 			LoadPets(data)
 		end
+		EEVEEMOD.sfx:Play(EEVEEMOD.SoundEffect.SQUEAK)
 	end
 end
 
@@ -49,7 +51,7 @@ function pet:ChangeSpriteScale(player)
 	local data = player:GetData()
 	if not data.EeveeBeingPet then return end
 
-	if not VeeHelper.IsSpritePlayingAnims(player:GetSprite(), VeeHelper.WalkAnimations) then
+	if not vee.IsSpritePlayingAnims(player:GetSprite(), vee.WalkAnimations) then
 		StopBeingPet(player)
 	end
 
@@ -67,6 +69,9 @@ function pet:ChangeSpriteScale(player)
 			else
 				data.EeveeBeingPetTotalCount = data.EeveeBeingPetTotalCount + 1
 				data.EeveeBeingPetTimer = petTimer
+				if data.TotalCount < 12 and data.TotalCount % 2 == 0 then
+					EEVEEMOD.sfx:Play(EEVEEMOD.SoundEffect.SQUEAK)
+				end
 			end
 		else
 			StopBeingPet(player)

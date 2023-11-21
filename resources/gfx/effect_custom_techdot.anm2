@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="trtv" CreatedOn="9/16/2021 3:27:22 PM" Version="3" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="9/16/2021 3:27:22 PM" Version="3" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="effects\effect_custom_tech_dot.png" Id="0"/>

@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="trtv" CreatedOn="4/18/2022 11:25:59 AM" Version="5" Fps="30"/>
+	<Info CreatedBy="Sanio46" CreatedOn="4/18/2022 11:25:59 AM" Version="5" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="costumes_eevee\costume_043x_uranus.png" Id="0"/>

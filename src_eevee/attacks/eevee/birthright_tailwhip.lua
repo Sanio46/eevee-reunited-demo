@@ -1,3 +1,4 @@
+local vee = require("src_eevee.VeeHelper")
 local tailWhip = {}
 
 ---@param player EntityPlayer
@@ -35,7 +36,7 @@ function tailWhip:OnUse(itemID, _, player, _, _, _)
 			tailWhipSpinPath = string.gsub(tailWhipSpinPath, ".png", "_" .. characterSpecial[playerType] .. ".png")
 		end
 		if characterSpecial[playerType] == nil or characterSpecial[playerType] == "apollyon" then
-			tailWhipSpinPath = string.gsub(tailWhipSpinPath, ".png", VeeHelper.SkinColor(player, true) .. ".png")
+			tailWhipSpinPath = string.gsub(tailWhipSpinPath, ".png", vee.SkinColor(player, true) .. ".png")
 		end
 		data.HitBoxRotation = 0
 		tailWhipSpin.Parent = player
@@ -51,7 +52,8 @@ function tailWhip:OnUse(itemID, _, player, _, _, _)
 			data.TailWhipWisps = {}
 			for i = 1, 5 do
 				local posInLine = i * -20
-				local wisp = Isaac.Spawn(EntityType.ENTITY_FAMILIAR, FamiliarVariant.WISP, CollectibleType.COLLECTIBLE_HOW_TO_JUMP,
+				local wisp = Isaac.Spawn(EntityType.ENTITY_FAMILIAR, FamiliarVariant.WISP,
+					CollectibleType.COLLECTIBLE_HOW_TO_JUMP,
 					player.Position, Vector.Zero, player):ToFamiliar()
 				wisp:GetData().TailWhipPosition = Vector(0, posInLine)
 				table.insert(data.TailWhipWisps, wisp)
@@ -79,7 +81,7 @@ function tailWhip:onEffectRender(effect)
 				local wispData = wisp:GetData()
 				local wispVelExtension = wispData.TailWhipPosition
 				if not sprite:WasEventTriggered("SwingStart") then
-					wispVelExtension = VeeHelper.Lerp(Vector.Zero, wispData.TailWhipPosition, 0.3 * effect.FrameCount)
+					wispVelExtension = vee.Lerp(Vector.Zero, wispData.TailWhipPosition, 0.3 * effect.FrameCount)
 				elseif sprite:WasEventTriggered("SwingEnd") then
 					wispVelExtension:Lerp(Vector.Zero, 0.3)
 				end
@@ -103,8 +105,6 @@ function tailWhip:onEffectRender(effect)
 	end
 
 	if data.HitBoxRotation and sprite:WasEventTriggered("SwingStart") and not sprite:WasEventTriggered("SwingEnd") then
-
-
 		for _, ent in pairs(Isaac.FindInRadius(effect.Position + tailWhipPos:Rotated(data.HitBoxRotation), tailWhipRadius,
 			EntityPartition.ENEMY)) do
 			if not ent:GetData().TailWhipCooldown then
@@ -171,7 +171,7 @@ function tailWhip:CostumePlayerUpdate(player)
 		player:AddNullCostume(EEVEEMOD.NullCostume.TAIL_WHIP)
 	end
 	if (not player:HasCollectible(EEVEEMOD.CollectibleType.TAIL_WHIP)
-		or effects:HasCollectibleEffect(EEVEEMOD.CollectibleType.TAIL_WHIP)
+			or effects:HasCollectibleEffect(EEVEEMOD.CollectibleType.TAIL_WHIP)
 		)
 		and data.HasTailWhipCostume then
 		data.HasTailWhipCostume = false
