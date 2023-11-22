@@ -701,25 +701,21 @@ local function getDescription(table)
 	return table[EID:getLanguage()] or table["en_us"]
 end
 
-for itemID, languages in pairs(CollectibleDescriptions) do
-	for language, desc in pairs(languages) do
-		EID:addCollectible(itemID, desc[2], desc[1], language)
-	end
+for itemID, table in pairs(CollectibleDescriptions) do
+	local desc = getDescription(table)[1]
+	EID:addCollectible(itemID, desc[2], desc[1], EID:getLanguage())
 end
-for trinketID, languages in pairs(TrinketDescriptions) do
-	for language, desc in pairs(languages) do
-		EID:addTrinket(trinketID, desc[2], desc[1], language)
-	end
+for trinketID, table in pairs(TrinketDescriptions) do
+	local desc = getDescription(table)[1]
+	EID:addTrinket(trinketID, desc[2], desc[1], EID:getLanguage())
 end
-for cardID, languages in pairs(CardDescriptions) do
-	for language, desc in pairs(languages) do
-		EID:addCard(cardID, desc[2], desc[1], language)
-	end
+for cardID, table in pairs(CardDescriptions) do
+	local desc = getDescription(table)[1]
+	EID:addCard(cardID, desc[2], desc[1], EID:getLanguage())
 end
-for playerType, languages in pairs(BirthrightDescriptions) do
-	for language, desc in pairs(languages) do
-		EID:addBirthright(playerType, desc[2], desc[1], language)
-	end
+for playerType, table in pairs(BirthrightDescriptions) do
+	local desc = getDescription(table)[1]
+	EID:addBirthright(playerType, desc[2], desc[1], EID:getLanguage())
 end
 
 --Unique descriptions for Eevee
@@ -730,8 +726,10 @@ local function AddEeveeText(descObj)
 	elseif descObj.ObjVariant == PickupVariant.PICKUP_TRINKET then
 		itemDesc = getDescription(TrinketDescriptions_Modified[EEVEEMOD.PlayerType.EEVEE][descObj.ObjSubType])
 	end
+	local name = getDescription(SynergyDisplayName).Eevee
+
 	if itemDesc ~= nil then
-		local iconStr = "#{{" .. Player.Eevee .. "}} {{ColorGray}}" .. getDescription(SynergyDisplayName).Eevee .. "#"
+		local iconStr = "#{{" .. Player.Eevee .. "}} {{ColorGray}}" .. name .. "#"
 		EID:appendToDescription(descObj, iconStr .. itemDesc)
 	end
 	return descObj
@@ -741,8 +739,7 @@ local function IfEeveeActive(descObj)
 	local players = vee.GetAllPlayers()
 	local eeveeIsHere = false
 
-	for i = 1, #players do
-		local player = players[i]
+	for _, player in ipairs(players) do
 		local playerType = player:GetPlayerType()
 
 		if playerType == EEVEEMOD.PlayerType.EEVEE then

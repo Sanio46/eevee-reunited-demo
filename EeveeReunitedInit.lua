@@ -10,7 +10,7 @@
 ---@type ModReference
 local EeveeReunited = RegisterMod("Eevee: Reunited - Demo", 1)
 
---VERSION: 2.2
+--VERSION: 2.2.1
 
 local json
 

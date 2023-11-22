@@ -41,6 +41,7 @@ Eevee is compatible with a handful of mods. If you want to see Eevee compatible 
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2490515687]POG for Good Items[/url]
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2493551842]Ugh for Bad Items[/url]
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2612456876]Not Mad, Just Disappointed for Quality 0 Items[/url]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2575911103]Specialist Dance for Good Items[/url]
 [/list]
 
 [img]https://imgur.com/h0807Zb.png[/img]
@@ -79,12 +80,13 @@ Eevee: Reunited Logo: CheapBones
 Workshop thumbnail for demo: TikaraTheMew
 
 [h3]EID Translations[/h3]
-Spanish translation: Kotry
-Koreon translation: kohashiwakaba
+Spanish: Kotry
+Koreon: kohashiwakaba
+Chinese: Delamange
 
 [h3]Special Thanks[/h3]
 JSG, AgentCucco, wofsauge, siraxtas, Sentinel, im_tem, DeadInfinity, 4Grabs, pedroff_1, fly_6, Mr.SeemsGood</description>
-    <version>1.32</version>
+    <version>1.33</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>
